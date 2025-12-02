@@ -21,6 +21,8 @@ nightly:
     - cargo test
     - COMMIT_SHORT=$(git rev-parse --short HEAD)
     - sed -i "s/version = \"0.1.1\"/version = \"0.1.1-nightly-$COMMIT_SHORT\"/" Cargo.toml
+    - cat Cargo.toml | grep version
+    - cargo clean
     - cargo build --release
   artifacts:
     paths:
@@ -37,6 +39,8 @@ stable:
     - cargo test
     - TAG_VERSION=${CI_COMMIT_TAG#v}  # Remove 'v' prefix if present
     - sed -i "s/version = \"0.1.1\"/version = \"$TAG_VERSION\"/" Cargo.toml
+    - cat Cargo.toml | grep version
+    - cargo clean
     - cargo build --release
   artifacts:
     paths:

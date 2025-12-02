@@ -12,7 +12,7 @@ use std::io;
 
 #[derive(Parser)]
 #[command(name = "grease")]
-#[command(version = "0.1.1")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "A modern scripting language written in Rust")]
 #[command(long_about = "Grease is a scripting language written in pure Rust. It compiles to bytecode and runs on a custom VM.\n\nThe high-performance oil for your Rust engine.")]
 struct Args {
