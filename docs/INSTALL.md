@@ -91,7 +91,7 @@ which grease  # Should show ~/.local/bin/grease
 ```bash
 git clone https://gitlab.com/grease-lang/grease.git
 cd grease
-./build_tools/Linux/install.sh
+./build_tools/any-linux/install.sh
 ```
 
 ## Verification
