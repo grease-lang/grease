@@ -6,7 +6,7 @@ pub enum Expression {
     String(String),
     Boolean(bool),
     Null,
-    Identifier(String),
+    Identifier(Token),
     Binary {
         left: Box<Expression>,
         operator: Token,

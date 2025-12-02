@@ -312,3 +312,78 @@ impl Lexer {
         self.position >= self.input.len()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tokenize_numbers() {
+        let mut lexer = Lexer::new("42 3.14".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 3); // two numbers + EOF
+        assert_eq!(tokens[0].token_type, TokenType::Number(42.0));
+        assert_eq!(tokens[1].token_type, TokenType::Number(3.14));
+    }
+
+    #[test]
+    fn test_tokenize_strings() {
+        let mut lexer = Lexer::new("\"hello\" 'world'".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::String("hello".to_string()));
+        assert_eq!(tokens[1].token_type, TokenType::String("world".to_string()));
+    }
+
+    #[test]
+    fn test_tokenize_identifiers() {
+        let mut lexer = Lexer::new("let x y_z".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 4);
+        assert_eq!(tokens[0].token_type, TokenType::Let);
+        assert_eq!(tokens[1].token_type, TokenType::Identifier("x".to_string()));
+        assert_eq!(tokens[2].token_type, TokenType::Identifier("y_z".to_string()));
+    }
+
+    #[test]
+    fn test_tokenize_operators() {
+        let mut lexer = Lexer::new("+ - * / == != < > <= >=".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 11); // 10 operators + EOF
+        assert_eq!(tokens[0].token_type, TokenType::Plus);
+        assert_eq!(tokens[1].token_type, TokenType::Minus);
+        assert_eq!(tokens[2].token_type, TokenType::Multiply);
+        assert_eq!(tokens[3].token_type, TokenType::Divide);
+        assert_eq!(tokens[4].token_type, TokenType::Equal);
+        assert_eq!(tokens[5].token_type, TokenType::NotEqual);
+        assert_eq!(tokens[6].token_type, TokenType::Less);
+        assert_eq!(tokens[7].token_type, TokenType::Greater);
+        assert_eq!(tokens[8].token_type, TokenType::LessEqual);
+        assert_eq!(tokens[9].token_type, TokenType::GreaterEqual);
+        assert_eq!(tokens[10].token_type, TokenType::EOF);
+    }
+
+    #[test]
+    fn test_tokenize_keywords() {
+        let mut lexer = Lexer::new("let if else while for fn return true false null".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens.len(), 11); // 10 keywords + EOF
+        assert_eq!(tokens[0].token_type, TokenType::Let);
+        assert_eq!(tokens[1].token_type, TokenType::If);
+        assert_eq!(tokens[2].token_type, TokenType::Else);
+        assert_eq!(tokens[3].token_type, TokenType::While);
+        assert_eq!(tokens[4].token_type, TokenType::For);
+        assert_eq!(tokens[5].token_type, TokenType::Fn);
+        assert_eq!(tokens[6].token_type, TokenType::Return);
+        assert_eq!(tokens[7].token_type, TokenType::True);
+        assert_eq!(tokens[8].token_type, TokenType::False);
+        assert_eq!(tokens[9].token_type, TokenType::Null);
+        assert_eq!(tokens[10].token_type, TokenType::EOF);
+    }
+
+    #[test]
+    fn test_unterminated_string() {
+        let mut lexer = Lexer::new("\"hello".to_string());
+        assert!(lexer.tokenize().is_err());
+    }
+}

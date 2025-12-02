@@ -148,12 +148,17 @@ impl Compiler {
             Expression::Null => {
                 self.emit_byte(OpCode::Null);
             }
-            Expression::Identifier(name) => {
-                if let Some(local) = self.resolve_local(name) {
-                    self.emit_bytes(OpCode::GetLocal, local as u8);
+            Expression::Identifier(ref token) => {
+                if let TokenType::Identifier(ref name) = token.token_type {
+                    if let Some(local) = self.resolve_local(name) {
+                        self.emit_bytes(OpCode::GetLocal, local as u8);
+                    } else {
+                        let constant = self.chunk.add_constant(Value::String(name.clone()));
+                        self.emit_bytes(OpCode::GetGlobal, constant as u8);
+                    }
                 } else {
-                    let constant = self.chunk.add_constant(Value::String(name.clone()));
-                    self.emit_bytes(OpCode::GetGlobal, constant as u8);
+                    // Should not happen
+                    panic!("Identifier token is not Identifier type");
                 }
             }
             Expression::Binary { left, operator, right } => {
@@ -377,5 +382,70 @@ impl Compiler {
         self.emit_byte(OpCode::Loop);
         self.chunk.write(((offset >> 8) & 0xff) as u8, 0);
         self.chunk.write((offset & 0xff) as u8, 0);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parser::Parser;
+    use crate::lexer::Lexer;
+
+    fn compile_code(code: &str) -> Result<Chunk, String> {
+        let mut lexer = Lexer::new(code.to_string());
+        let tokens = lexer.tokenize()?;
+        let mut parser = Parser::new(tokens);
+        let program = parser.parse()?;
+        let mut compiler = Compiler::new();
+        compiler.compile(&program).map(|chunk| chunk.clone())
+    }
+
+    #[test]
+    fn test_compile_expression() {
+        let chunk = compile_code("42").unwrap();
+        // Check that bytecode was generated
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_variable_declaration() {
+        let chunk = compile_code("let x = 42").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_assignment() {
+        let chunk = compile_code("let x = 1\nx = 2").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_binary_expression() {
+        let chunk = compile_code("1 + 2").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_if_statement() {
+        let chunk = compile_code("if true { 1 }").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_while_statement() {
+        let chunk = compile_code("while true { 1 }").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_function() {
+        let chunk = compile_code("fn test() { return 1 }").unwrap();
+        assert!(!chunk.code.is_empty());
+    }
+
+    #[test]
+    fn test_compile_call() {
+        let chunk = compile_code("print(42)").unwrap();
+        assert!(!chunk.code.is_empty());
     }
 }

@@ -37,4 +37,84 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), InterpretResult::Ok);
     }
+
+    #[test]
+    fn test_arithmetic() {
+        let mut grease = Grease::new();
+        let result = grease.run("print(1 + 2 * 3)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_variables() {
+        let mut grease = Grease::new();
+        let result = grease.run("let x = 42\nlet y = x + 1\nprint(y)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_strings() {
+        let mut grease = Grease::new();
+        let result = grease.run("let name = \"Grease\"\nprint(\"Hello \" + name)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_booleans() {
+        let mut grease = Grease::new();
+        let result = grease.run("print(true and false)\nprint(true or false)\nprint(not true)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_comparisons() {
+        let mut grease = Grease::new();
+        let result = grease.run("print(1 < 2)\nprint(2 == 2)\nprint(3 != 4)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_if_statement() {
+        let mut grease = Grease::new();
+        let result = grease.run("if 1 < 2 { print(\"yes\") } else { print(\"no\") }");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_while_loop() {
+        let mut grease = Grease::new();
+        let result = grease.run("while false { print(1) }");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_function_definition() {
+        let mut grease = Grease::new();
+        let result = grease.run("fn add(a, b) { return a + b }");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_recursion() {
+        let mut grease = Grease::new();
+        let result = grease.run("fn factorial(n) { if n <= 1 { return 1 } else { return n * factorial(n - 1) } }");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_type_annotations() {
+        let mut grease = Grease::new();
+        let result = grease.run("let x: Number = 42\nlet name: String = \"test\"\nprint(x)\nprint(name)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
 }

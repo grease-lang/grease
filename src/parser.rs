@@ -17,15 +17,27 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Program, String> {
-        let mut statements = Vec::new();
-        
+        let mut program = Program { statements: Vec::new() };
+
         while !self.is_at_end() {
-            if let Some(statement) = self.declaration()? {
-                statements.push(statement);
+            self.skip_newlines();
+            if self.is_at_end() {
+                break;
+            }
+            if let Some(stmt) = self.declaration()? {
+                program.statements.push(stmt);
+            } else {
+                return Err(format!("Unexpected token at line {}", self.tokens.peek().map(|t| t.line).unwrap_or(0)));
             }
         }
-        
-        Ok(Program { statements })
+
+        Ok(program)
+    }
+
+    fn skip_newlines(&mut self) {
+        while self.match_token(&TokenType::Newline) {
+            // Skip
+        }
     }
 
     fn declaration(&mut self) -> Result<Option<Statement>, String> {
@@ -217,9 +229,9 @@ impl Parser {
             let value = self.assignment()?;
             
             match expr {
-                Expression::Identifier(_) => {
+                Expression::Identifier(ref token) => {
                     Ok(Expression::Assignment {
-                        name: self.previous().unwrap(),
+                        name: token.clone(),
                         value: Box::new(value),
                     })
                 }
@@ -398,9 +410,9 @@ impl Parser {
                     self.advance();
                     return Ok(Expression::Null);
                 }
-                TokenType::Identifier(value) => {
-                    self.advance();
-                    return Ok(Expression::Identifier(value));
+                TokenType::Identifier(_) => {
+                    let token = self.advance().unwrap().clone();
+                    return Ok(Expression::Identifier(token));
                 }
                 TokenType::LeftParen => {
                     self.advance();
@@ -477,6 +489,171 @@ impl Parser {
                 }
             }
             None => Err(format!("{} at end of input", message))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lexer::Lexer;
+
+    fn parse_expr(input: &str) -> Result<Expression, String> {
+        let mut lexer = Lexer::new(input.to_string());
+        let tokens = lexer.tokenize()?;
+        let mut parser = Parser::new(tokens);
+        parser.expression()
+    }
+
+    fn parse_program(input: &str) -> Result<Program, String> {
+        let mut lexer = Lexer::new(input.to_string());
+        let tokens = lexer.tokenize()?;
+        let mut parser = Parser::new(tokens);
+        parser.parse()
+    }
+
+    #[test]
+    fn test_parse_number() {
+        let expr = parse_expr("42").unwrap();
+        assert!(matches!(expr, Expression::Number(42.0)));
+    }
+
+    #[test]
+    fn test_parse_string() {
+        let expr = parse_expr("\"hello\"").unwrap();
+        assert!(matches!(expr, Expression::String(s) if s == "hello"));
+    }
+
+    #[test]
+    fn test_parse_boolean() {
+        let expr = parse_expr("true").unwrap();
+        assert!(matches!(expr, Expression::Boolean(true)));
+    }
+
+    #[test]
+    fn test_parse_null() {
+        let expr = parse_expr("null").unwrap();
+        assert!(matches!(expr, Expression::Null));
+    }
+
+    #[test]
+    fn test_parse_identifier() {
+        let expr = parse_expr("x").unwrap();
+        match expr {
+            Expression::Identifier(token) => {
+                assert_eq!(token.token_type, TokenType::Identifier("x".to_string()));
+            }
+            _ => panic!("Expected identifier"),
+        }
+    }
+
+    #[test]
+    fn test_parse_binary_expression() {
+        let expr = parse_expr("1 + 2").unwrap();
+        match expr {
+            Expression::Binary { left, operator, right } => {
+                assert!(matches!(*left, Expression::Number(1.0)));
+                assert_eq!(operator.token_type, TokenType::Plus);
+                assert!(matches!(*right, Expression::Number(2.0)));
+            }
+            _ => panic!("Expected binary expression"),
+        }
+    }
+
+    #[test]
+    fn test_parse_unary_expression() {
+        let expr = parse_expr("-5").unwrap();
+        match expr {
+            Expression::Unary { operator, right } => {
+                assert_eq!(operator.token_type, TokenType::Minus);
+                assert!(matches!(*right, Expression::Number(5.0)));
+            }
+            _ => panic!("Expected unary expression"),
+        }
+    }
+
+    #[test]
+    fn test_parse_assignment() {
+        let expr = parse_expr("x = 42").unwrap();
+        match expr {
+            Expression::Assignment { name, value } => {
+                assert!(matches!(name.token_type, TokenType::Identifier(_)));
+                assert!(matches!(*value, Expression::Number(42.0)));
+            }
+            _ => panic!("Expected assignment"),
+        }
+    }
+
+    #[test]
+    fn test_parse_call() {
+        let expr = parse_expr("print(42)").unwrap();
+        match expr {
+            Expression::Call { callee, arguments } => {
+                match *callee {
+                    Expression::Identifier(ref token) => {
+                        assert_eq!(token.token_type, TokenType::Identifier("print".to_string()));
+                    }
+                    _ => panic!("Expected identifier callee"),
+                }
+                assert_eq!(arguments.len(), 1);
+                assert!(matches!(arguments[0], Expression::Number(42.0)));
+            }
+            _ => panic!("Expected call expression"),
+        }
+    }
+
+    #[test]
+    fn test_parse_variable_declaration() {
+        let program = parse_program("let x = 42").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::VariableDeclaration { name, type_annotation, initializer } => {
+                assert_eq!(name.token_type, TokenType::Identifier("x".to_string()));
+                assert!(type_annotation.is_none());
+                assert!(matches!(initializer.as_ref().unwrap(), Expression::Number(42.0)));
+            }
+            _ => panic!("Expected variable declaration"),
+        }
+    }
+
+    #[test]
+    fn test_parse_variable_declaration_with_type() {
+        let program = parse_program("let x: Number = 42").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::VariableDeclaration { name, type_annotation, initializer } => {
+                assert_eq!(name.token_type, TokenType::Identifier("x".to_string()));
+                assert_eq!(type_annotation.as_ref().unwrap(), "Number");
+                assert!(matches!(initializer.as_ref().unwrap(), Expression::Number(42.0)));
+            }
+            _ => panic!("Expected variable declaration"),
+        }
+    }
+
+    #[test]
+    fn test_parse_if_statement() {
+        let program = parse_program("if true { print(1) }").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::If { condition, then_branch, else_branch } => {
+                assert!(matches!(condition, Expression::Boolean(true)));
+                assert_eq!(then_branch.len(), 1);
+                assert!(else_branch.is_none());
+            }
+            _ => panic!("Expected if statement"),
+        }
+    }
+
+    #[test]
+    fn test_parse_while_statement() {
+        let program = parse_program("while true { print(1) }").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::While { condition, body } => {
+                assert!(matches!(condition, Expression::Boolean(true)));
+                assert_eq!(body.len(), 1);
+            }
+            _ => panic!("Expected while statement"),
         }
     }
 }

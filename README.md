@@ -8,11 +8,13 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 
 ### ✅ Currently Implemented
 - **Variables**: `let name = "Grease"` (with optional type annotations: `let age: Number = 25`)
-- **Data Types**: Numbers, Strings, Booleans, Null
+- **Data Types**: Numbers, Strings, Booleans, Null, Arrays
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%`
 - **Comparisons**: `==`, `!=`, `<`, `<=`, `>`, `>=`
 - **Boolean Logic**: `and`, `or`, `not`
 - **String Concatenation**: Automatic type coercion between strings and numbers
+- **Control Flow**: `if`/`else`, `while` loops, `for` loops
+- **Functions**: Function definitions with parameters and return types
 - **Built-in Functions**: `print()` function
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
@@ -127,12 +129,11 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 ## Future Roadmap
 
 ### 🎯 Next Features
-- [ ] Control flow (if/else, while, for loops)
-- [ ] Function definitions and calls
-- [ ] Arrays and dictionaries
+- [ ] Dictionaries/objects
 - [ ] Error handling
 - [ ] Module system
-- [ ] Standard library
+- [ ] Classes and object-oriented features
+- [ ] Standard library expansion
 
 ### 🚀 Long-term Goals
 - [ ] Package manager
