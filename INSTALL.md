@@ -15,7 +15,7 @@ cargo build --release
 sudo cp target/release/grease /usr/local/bin/
 
 # Verify installation
-grease --version 2>/dev/null || echo "Grease v0.1.0"
+grease --version 2>/dev/null || echo "Grease is installed"
 ```
 
 ## Installation Methods
@@ -70,7 +70,7 @@ cd Grease
 ./build_deb.sh
 
 # Install package
-sudo dpkg -i grease_0.1.1_amd64.deb
+sudo dpkg -i grease_*.deb
 
 # Remove package (if needed)
 sudo dpkg -r grease

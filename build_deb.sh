@@ -8,7 +8,7 @@
 set -e
 
 PACKAGE_NAME="grease"
-VERSION="0.1.1"
+VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 ARCHITECTURE="amd64"
 MAINTAINER="Grease Developers <dev@grease-lang.org>"
 
@@ -44,8 +44,8 @@ Maintainer: $MAINTAINER
 EOF
 
 # Create man page
-cat > "$PKG_DIR/usr/share/man/man1/grease.1" << 'MANEOF'
-.TH GREASE 1 "December 2024" "Grease v0.1.1" "User Commands"
+cat > "$PKG_DIR/usr/share/man/man1/grease.1" << MANEOF
+.TH GREASE 1 "December 2024" "Grease v$VERSION" "User Commands"
 
 .SH NAME
 Grease \- A modern scripting language written in Rust

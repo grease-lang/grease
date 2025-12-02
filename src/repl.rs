@@ -18,7 +18,7 @@ impl REPL {
     }
 
     pub fn run(&mut self) {
-        println!("Grease Scripting Language v0.1.0");
+        println!("Grease Scripting Language v{}", env!("CARGO_PKG_VERSION"));
         println!("Type 'exit()' to quit.");
         println!();
 

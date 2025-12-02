@@ -36,7 +36,7 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ### 📦 Method 4: Debian Package
 ```bash
 make deb
-sudo dpkg -i grease_0.1.1_amd64.deb
+sudo dpkg -i grease_*.deb
 ```
 
 ### 🎯 Method 5: Installation Script

@@ -18,8 +18,9 @@ sudo cp target/release/grease /usr/local/bin/
 sudo chmod +x /usr/local/bin/grease
 
 # 4. Create man page
-cat > grease.1 << 'EOF'
-.TH GREASE 1 "December 2024" "Grease v0.1.0" "User Commands"
+VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+cat > grease.1 << EOF
+.TH GREASE 1 "December 2024" "Grease v$VERSION" "User Commands"
 
 .SH NAME
 Grease \- A modern scripting language written in Rust
