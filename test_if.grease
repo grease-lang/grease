@@ -1,0 +1,5 @@
+# Test variable assignment in if statement
+i = 0
+if true:
+    i = i + 1
+print("i: " + i)

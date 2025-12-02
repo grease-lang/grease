@@ -462,6 +462,22 @@ impl Parser {
                     self.consume(TokenType::RightParen, "Expected ')' after expression")?;
                     return Ok(Expression::Grouping(Box::new(expr)));
                 }
+                TokenType::LeftBracket => {
+                    self.advance();
+                    let mut elements = Vec::new();
+                    
+                    if !self.check(&TokenType::RightBracket) {
+                        loop {
+                            elements.push(self.expression()?);
+                            if !self.match_token(&TokenType::Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    
+                    self.consume(TokenType::RightBracket, "Expected ']' after array elements")?;
+                    return Ok(Expression::Array(elements));
+                }
                 _ => {}
             }
         }

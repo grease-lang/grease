@@ -182,6 +182,7 @@ impl Lexer {
             "and" => TokenType::And,
             "or" => TokenType::Or,
             "not" => TokenType::Not,
+            "str" => TokenType::Identifier(text),
             _ => TokenType::Identifier(text),
         };
         

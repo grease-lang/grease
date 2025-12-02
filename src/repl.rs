@@ -84,6 +84,18 @@ impl REPL {
             crate::bytecode::Value::Null => "null".to_string(),
             crate::bytecode::Value::Function(f) => format!("<fn {}>", f.name),
             crate::bytecode::Value::NativeFunction(f) => format!("<native fn {}>", f.name),
+            crate::bytecode::Value::Array(arr) => {
+                let elements: Vec<String> = arr.iter().map(|v| match v {
+                    crate::bytecode::Value::Number(n) => n.to_string(),
+                    crate::bytecode::Value::String(s) => format!("\"{}\"", s),
+                    crate::bytecode::Value::Boolean(b) => b.to_string(),
+                    crate::bytecode::Value::Null => "null".to_string(),
+                    crate::bytecode::Value::Function(f) => format!("<fn {}>", f.name),
+                    crate::bytecode::Value::NativeFunction(f) => format!("<native fn {}>", f.name),
+                    crate::bytecode::Value::Array(_) => "[...]".to_string(),
+                }).collect();
+                format!("[{}]", elements.join(", "))
+            },
         }
     }
 }

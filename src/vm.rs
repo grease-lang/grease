@@ -225,7 +225,38 @@ impl VM {
                             (Value::Number(a), Value::String(b)) => {
                                 self.stack.push(Value::String(a.to_string() + &b));
                             }
-                            _ => return InterpretResult::RuntimeError("Operands must be numbers or strings".to_string()),
+                            (Value::Boolean(a), Value::String(b)) => {
+                                self.stack.push(Value::String(a.to_string() + &b));
+                            }
+                            (Value::String(a), Value::Boolean(b)) => {
+                                self.stack.push(Value::String(a + &b.to_string()));
+                            }
+                            (Value::Boolean(a), Value::Null) => {
+                                self.stack.push(Value::String(a.to_string() + "null"));
+                            }
+                            (Value::Null, Value::Boolean(b)) => {
+                                self.stack.push(Value::String("null".to_string() + &b.to_string()));
+                            }
+                            (Value::String(a), Value::Null) => {
+                                self.stack.push(Value::String(a + "null"));
+                            }
+                            (Value::Null, Value::String(b)) => {
+                                self.stack.push(Value::String("null".to_string() + &b));
+                            }
+                            (Value::Null, Value::Number(b)) => {
+                                self.stack.push(Value::String("null".to_string() + &b.to_string()));
+                            }
+                            (Value::Number(a), Value::Null) => {
+                                self.stack.push(Value::String(a.to_string() + "null"));
+                            }
+                            (Value::Null, Value::Null) => {
+                                self.stack.push(Value::String("nullnull".to_string()));
+                            }
+                            (Value::Array(mut a), Value::Array(b)) => {
+                                a.extend(b);
+                                self.stack.push(Value::Array(a));
+                            }
+                            _ => return InterpretResult::RuntimeError("Operands must be numbers, strings, booleans, null, or arrays".to_string()),
                         }
                     } else {
                         return InterpretResult::RuntimeError("Stack underflow".to_string());
@@ -293,6 +324,21 @@ impl VM {
                         }
                     } else {
                         return InterpretResult::RuntimeError("Stack underflow".to_string());
+                    }
+                }
+                Some(OpCode::Array) => {
+                    if let Some(count) = self.read_byte() {
+                        let mut elements = Vec::new();
+                        for _ in 0..count {
+                            if let Some(element) = self.stack.pop() {
+                                elements.insert(0, element); // Insert at beginning to maintain order
+                            } else {
+                                return InterpretResult::RuntimeError("Stack underflow".to_string());
+                            }
+                        }
+                        self.stack.push(Value::Array(elements));
+                    } else {
+                        return InterpretResult::RuntimeError("Expected array count".to_string());
                     }
                 }
                 Some(OpCode::Equal) => {
@@ -507,6 +553,10 @@ impl VM {
             Value::Null => "null".to_string(),
             Value::Function(f) => format!("<fn {}>", f.name),
             Value::NativeFunction(f) => format!("<native fn {}>", f.name),
+            Value::Array(arr) => {
+                let elements: Vec<String> = arr.iter().map(|v| self.format_value(v)).collect();
+                format!("[{}]", elements.join(", "))
+            },
         }
     }
 
@@ -556,6 +606,7 @@ impl VM {
             Value::String(s) => !s.is_empty(),
             Value::Function(_) => true,
             Value::NativeFunction(_) => true,
+            Value::Array(arr) => !arr.is_empty(),
         }
     }
 
@@ -565,6 +616,9 @@ impl VM {
             (Value::String(a), Value::String(b)) => a == b,
             (Value::Boolean(a), Value::Boolean(b)) => a == b,
             (Value::Null, Value::Null) => true,
+            (Value::Array(a), Value::Array(b)) => {
+                a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| self.values_equal(x, y))
+            }
             _ => false,
         }
     }

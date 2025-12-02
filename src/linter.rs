@@ -214,7 +214,7 @@ impl Linter {
             Expression::Grouping(expr) => {
                 self.lint_expression(expr);
             }
-            Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null => {
+            Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null | Expression::Array(_) => {
                 // Literals don't need linting
             }
         }

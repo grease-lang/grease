@@ -32,6 +32,7 @@ pub enum Expression {
         member: Token,
     },
     Grouping(Box<Expression>),
+    Array(Vec<Expression>),
 }
 
 #[derive(Debug, Clone)]

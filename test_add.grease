@@ -1,0 +1,4 @@
+use math
+print("Testing add")
+result = math.add(2, 3)
+print("Result: " + result)
