@@ -1,5 +1,0 @@
-# Test variable increment
-i = 0
-print("Initial i: " + i)
-i = i + 1
-print("After increment: " + i)

@@ -91,7 +91,7 @@ which grease  # Should show ~/.local/bin/grease
 ```bash
 git clone https://gitlab.com/grease-lang/grease.git
 cd grease
-./install.sh
+./build_tools/Linux/install.sh
 ```
 
 ## Verification
@@ -139,8 +139,9 @@ grease completions bash > grease.bash
 grease completions zsh > grease.zsh
 grease completions fish > grease.fish
 
-# Source them in your shell config
-source grease.bash  # Add to ~/.bashrc
+# Or use the provided completions
+source completions/grease.bash  # Add to ~/.bashrc
+source completions/grease.zsh   # Add to ~/.zshrc
 ```
 
 ### File Associations

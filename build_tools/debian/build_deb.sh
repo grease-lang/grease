@@ -19,7 +19,7 @@ fi
 
 PACKAGE_NAME="grease"
 ARCHITECTURE="amd64"
-MAINTAINER="Grease Developers <dev@grease-lang.org>"
+MAINTAINER="Nick Girga <nickgirga@gmail.com>"
 
 # Check if this is a nightly build
 if [ "$1" = "--nightly" ]; then

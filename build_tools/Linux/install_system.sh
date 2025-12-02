@@ -60,6 +60,7 @@ sudo gzip -c grease.1 > /usr/local/share/man/man1/grease.1.gz
 
 # 5. Install documentation
 cp README.md /usr/local/share/doc/grease/
+cp docs/*.md /usr/local/share/doc/grease/ 2>/dev/null || true
 cp examples/*.grease /usr/local/share/doc/grease/ 2>/dev/null || true
 
 echo "✅ Grease installed successfully!"

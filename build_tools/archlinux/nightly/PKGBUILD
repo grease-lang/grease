@@ -1,4 +1,4 @@
-# Maintainer: Your Name <your.email@example.com>
+# Maintainer: Nick Girga <nickgirga@gmail.com>
 pkgname=grease-git
 pkgver=r15.3f520af
 pkgrel=1
@@ -32,9 +32,9 @@ build() {
   echo "Updated Cargo.toml version to: $NIGHTLY_VERSION"
   
   # Update man page version
-  sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" grease.1
-  sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" grease.1
-  echo "Updated grease.1 version to: $NIGHTLY_VERSION"
+  sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" docs/grease.1
+  sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" docs/grease.1
+  echo "Updated docs/grease.1 version to: $NIGHTLY_VERSION"
   
 
   
@@ -48,9 +48,9 @@ build() {
 package() {
   cd "$srcdir/$pkgname"
   install -Dm755 target/release/grease "$pkgdir/usr/bin/grease"
-  install -Dm644 grease.1 "$pkgdir/usr/share/man/man1/grease.1"
-  install -Dm644 grease.bash "$pkgdir/usr/share/bash-completion/completions/grease"
-  install -Dm644 grease.zsh "$pkgdir/usr/share/zsh/site-functions/_grease"
+  install -Dm644 docs/grease.1 "$pkgdir/usr/share/man/man1/grease.1"
+  install -Dm644 completions/grease.bash "$pkgdir/usr/share/bash-completion/completions/grease"
+  install -Dm644 completions/grease.zsh "$pkgdir/usr/share/zsh/site-functions/_grease"
   install -Dm644 README.md "$pkgdir/usr/share/doc/grease/README.md"
-  install -Dm644 LSP_README.md "$pkgdir/usr/share/doc/grease/LSP_README.md"
+  install -Dm644 docs/LSP_README.md "$pkgdir/usr/share/doc/grease/LSP_README.md"
 }

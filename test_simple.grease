@@ -1,4 +1,0 @@
-i = 0
-print("Step 1: " + i)
-i = 1
-print("Step 2: " + i)

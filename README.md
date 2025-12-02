@@ -191,18 +191,18 @@ grease lsp
 - **Neovim**: Configuration provided in `editors/neovim/grease-lsp.lua`
 - **Other LSP-compatible editors**: Use command `grease lsp` with language `grease`
 
-See [LSP_README.md](LSP_README.md) for detailed setup instructions.
+See [docs/LSP_README.md](docs/LSP_README.md) for detailed setup instructions.
 
 ### Manpage
 A manpage is available for detailed documentation:
 ```bash
-man ./grease.1
+man ./docs/grease.1
 ```
 
 ### Shell Completions
 Shell completions are provided for bash and zsh:
-- Source `grease.bash` for bash
-- Source `grease.zsh` for zsh
+- Source `completions/grease.bash` for bash
+- Source `completions/grease.zsh` for zsh
 
 To generate completions for other shells:
 ```bash
@@ -284,7 +284,7 @@ cargo run examples/hello.grease
 
 ## License
 
-Apache 2.0 License - see LICENSE file for details.
+Apache 2.0 License - see [LICENSE](LICENSE) file for details.
 
 ---
 

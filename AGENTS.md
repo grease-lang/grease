@@ -182,13 +182,23 @@ grease/
 ├── README.md                     # Project documentation
 ├── AGENTS.md                     # This file - AI agent instructions
 ├── LICENSE                       # Apache 2.0 license
-├── TODO.md                       # Development roadmap
-├── grease.1                      # Man page documentation
-├── grease.bash                   # Bash shell completions
-├── grease.zsh                    # Zsh shell completions
-├── install.sh                    # Installation script
-├── install_system.sh             # System-wide installation
-├── build_tools/debian/build_deb.sh # Debian package builder
+├── docs/                         # Documentation directory
+│   ├── TODO.md                   # Development roadmap
+│   ├── grease.1                  # Man page documentation
+│   ├── INSTALL.md                # Installation guide
+│   └── LSP_README.md             # LSP setup documentation
+├── completions/                   # Shell completions directory
+│   ├── grease.bash               # Bash shell completions
+│   └── grease.zsh                # Zsh shell completions
+├── build_tools/
+│   ├── Linux/                    # Linux installation scripts
+│   │   ├── install.sh            # Installation script
+│   │   └── install_system.sh     # System-wide installation
+│   ├── debian/
+│   │   └── build_deb.sh          # Debian package builder
+│   └── archlinux/
+│       └── nightly/
+│           └── PKGBUILD          # Arch Linux package build
 └── test_lsp_server.py            # LSP server test script
 ```
 

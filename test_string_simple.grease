@@ -1,2 +1,0 @@
-use string as str
-print(str.uppercase("hello"))
