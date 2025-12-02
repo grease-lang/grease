@@ -1,0 +1,165 @@
+# Grease - A Rust-based Scripting Language
+
+Grease is a modern scripting language written in pure Rust. It compiles to platform-agnostic bytecode and runs on a custom virtual machine.
+
+*The high-performance oil for your Rust engine.*
+
+## Features
+
+### ✅ Currently Implemented
+- **Variables**: `let name = "Grease"` (with optional type annotations: `let age: Number = 25`)
+- **Data Types**: Numbers, Strings, Booleans, Null
+- **Arithmetic**: `+`, `-`, `*`, `/`, `%`
+- **Comparisons**: `==`, `!=`, `<`, `<=`, `>`, `>=`
+- **Boolean Logic**: `and`, `or`, `not`
+- **String Concatenation**: Automatic type coercion between strings and numbers
+- **Built-in Functions**: `print()` function
+- **REPL**: Interactive mode for testing
+- **File Execution**: Run scripts from files
+
+### 🚧 Syntax Examples
+
+```grease
+// Variable declarations
+let name = "Grease"
+let version: Number = 0.1
+let is_awesome = true
+
+// Basic arithmetic
+let x = 10
+let y = 20
+print(x + y)  // 30
+
+// Boolean operations
+print(true and false)  // false
+print(true or false)   // true
+print(not true)        // false
+
+// String operations
+print("Hello" + " " + "World")  // Hello World
+print("Value: " + 42)             // Value: 42
+
+// Comparisons
+print(10 > 5)    // true
+print(10 == 10)  // true
+print(10 != 5)    // true
+```
+
+## Installation & Usage
+
+### Building from Source
+```bash
+git clone <repository>
+cd Grease
+cargo build --release
+```
+
+### Running Grease
+
+#### Interactive REPL
+```bash
+cargo run
+```
+
+#### Execute Script Files
+```bash
+cargo run script.grease
+```
+
+#### Pipe Input
+```bash
+echo 'print("Hello, World!")' | cargo run
+```
+
+### Command Line Options
+Grease supports standard command line options:
+- `--version`: Display version information
+- `--help`: Display help information
+- `--eval <CODE>`: Execute inline code
+- `--verbose`: Enable verbose output during execution
+- `FILE`: Execute a script file
+
+### Manpage
+A manpage is available for detailed documentation:
+```bash
+man ./grease.1
+```
+
+### Shell Completions
+Shell completions are provided for bash and zsh:
+- Source `grease.bash` for bash
+- Source `grease.zsh` for zsh
+
+To generate completions for other shells:
+```bash
+./target/release/grease completions <shell> > grease.<shell>
+```
+
+## Language Design
+
+Grease features:
+- Simple and readable syntax
+- Clear variable declarations
+- Optional type safety
+
+### Type System
+- **Dynamic typing** by default
+- **Optional static typing** with type annotations
+- **Type coercion** for intuitive operations
+
+### Memory Safety
+Written entirely in safe Rust with:
+- No undefined behavior
+- Memory safety guarantees
+- Platform-agnostic bytecode
+
+## Architecture
+
+```
+Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode → VM → Execution
+```
+
+- **Lexer**: Tokenizes source code
+- **Parser**: Builds Abstract Syntax Tree
+- **Compiler**: Generates bytecode instructions
+- **VM**: Executes bytecode on stack machine
+
+## Future Roadmap
+
+### 🎯 Next Features
+- [ ] Control flow (if/else, while, for loops)
+- [ ] Function definitions and calls
+- [ ] Arrays and dictionaries
+- [ ] Error handling
+- [ ] Module system
+- [ ] Standard library
+
+### 🚀 Long-term Goals
+- [ ] Package manager
+- [ ] Cross-language interop
+- [ ] JIT compilation
+- [ ] WebAssembly target
+- [ ] IDE support
+
+## Testing
+
+Run the test suite:
+```bash
+cargo run examples/simple_final.grease
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Implement your changes
+4. Add tests
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
+
+---
+
+**Grease**: The high-performance oil for your Rust engine! 🦀

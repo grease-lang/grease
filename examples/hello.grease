@@ -1,0 +1,20 @@
+// Hello World test
+print("Hello, World!")
+
+// Variable assignment
+let name = "Grease"
+let version = 0.1
+print("Language: " + name + " v" + version)
+
+// Basic arithmetic
+let x = 10
+let y = 20
+let result = x + y * 2
+print("10 + 20 * 2 = " + result)
+
+// Boolean operations
+let is_true = true
+let is_false = false
+print("true and false = " + (is_true and is_false))
+print("true or false = " + (is_true or is_false))
+print("not true = " + (not is_true))

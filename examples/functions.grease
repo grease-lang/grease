@@ -1,0 +1,21 @@
+// Function definition test
+fn greet(name: String): String {
+    return "Hello, " + name + "!"
+}
+
+fn add(a: Number, b: Number): Number {
+    return a + b
+}
+
+fn factorial(n: Number): Number {
+    if n <= 1 {
+        return 1
+    } else {
+        return n * factorial(n - 1)
+    }
+}
+
+// Test functions
+print(greet("World"))
+print("5 + 3 = " + add(5, 3))
+print("5! = " + factorial(5))

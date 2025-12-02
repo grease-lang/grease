@@ -1,0 +1,22 @@
+// Control flow test
+let x = 10
+
+// If statement
+if x > 5 {
+    print("x is greater than 5")
+} else {
+    print("x is not greater than 5")
+}
+
+// While loop
+let i = 0
+while i < 5 {
+    print("Loop iteration: " + i)
+    i = i + 1
+}
+
+// For loop (simplified)
+let numbers = [1, 2, 3, 4, 5]
+for num in numbers {
+    print("Number: " + num)
+}

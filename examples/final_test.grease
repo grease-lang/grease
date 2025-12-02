@@ -1,0 +1,22 @@
+let x = 10
+let y = 20
+let name = "Grease"
+
+print("Basic arithmetic:")
+print("  " + x + " + " + y + " = " + (x + y))
+print("  " + x + " * " + y + " = " + (x * y))
+print("  " + y + " / " + x + " = " + (y / x))
+
+print("Boolean logic:")
+print("  true and false = " + (true and false))
+print("  true or false = " + (true or false))
+print("  not true = " + (not true))
+
+print("Comparisons:")
+print("  " + x + " < " + y + " = " + (x < y))
+print("  " + x + " == " + x + " = " + (x == x))
+print("  " + x + " != " + y + " = " + (x != y))
+
+print("String operations:")
+print("  Hello + World = " + ("Hello" + " World"))
+print("  Name: " + name + " v0.1")

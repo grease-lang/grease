@@ -1,0 +1,30 @@
+// Test all basic features
+let x = 42
+let y = 3.14
+let name = "Grease"
+let is_cool = true
+
+print("Number: " + x)
+print("Float: " + y)
+print("Name: " + name)
+print("Boolean: " + is_cool)
+
+// Arithmetic
+print("Addition: " + (x + 10))
+print("Multiplication: " + (x * 2))
+print("Division: " + (x / 2))
+
+// Boolean logic
+print("true and false: " + (true and false))
+print("true or false: " + (true or false))
+print("not true: " + (not true))
+
+// Comparisons
+print("42 > 30: " + (42 > 30))
+print("42 == 42: " + (42 == 42))
+print("42 != 30: " + (42 != 30))
+
+// String operations
+let greeting = "Hello"
+let target = "World"
+print(greeting + ", " + target + "!")

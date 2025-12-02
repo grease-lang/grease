@@ -1,0 +1,38 @@
+// Grease Language Demo
+// Grease scripting language demo
+
+// Variable declarations with optional type annotations
+let name = "Grease"
+let version: Number = 0.1
+let is_awesome = true
+
+print("Welcome to " + name + " v" + version)
+print("Is it awesome? " + is_awesome)
+
+// Basic arithmetic
+let a = 10
+let b = 20
+print("Arithmetic: " + a + " + " + b + " = " + (a + b))
+print("Modulo: " + b + " % " + a + " = " + (b % a))
+
+// Boolean logic
+let x = true
+let y = false
+print("Logic: " + x + " and " + y + " = " + (x and y))
+print("Logic: " + x + " or " + y + " = " + (x or y))
+print("Logic: not " + x + " = " + (not x))
+
+// Comparisons
+print("Comparisons:")
+print("  " + a + " < " + b + " = " + (a < b))
+print("  " + a + " >= " + b + " = " + (a >= b))
+print("  " + a + " == " + a + " = " + (a == a))
+
+// String operations
+let greeting = "Hello"
+let target = "World"
+print("String concat: " + greeting + ", " + target + "!")
+
+// Null handling
+let nothing = null
+print("Null value: " + nothing)

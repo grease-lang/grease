@@ -1,0 +1,39 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH grease 1  "grease 0.1.1" 
+.SH NAME
+grease \- A modern scripting language written in Rust
+.SH SYNOPSIS
+\fBgrease\fR [\fB\-e\fR|\fB\-\-eval\fR] [\fB\-v\fR|\fB\-\-verbose\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fIFILE\fR] [\fIsubcommands\fR]
+.SH DESCRIPTION
+Grease is a scripting language written in pure Rust. It compiles to bytecode and runs on a custom VM.
+.PP
+The high\-performance oil for your Rust engine.
+.SH OPTIONS
+.TP
+\fB\-e\fR, \fB\-\-eval\fR \fI<EVAL>\fR
+Execute inline code
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Enable verbose output
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+[\fIFILE\fR]
+File to execute
+.SH SUBCOMMANDS
+.TP
+grease\-completions(1)
+Generate shell completions
+.TP
+grease\-manpage(1)
+Generate manpage
+.TP
+grease\-help(1)
+Print this message or the help of the given subcommand(s)
+.SH VERSION
+v0.1.1

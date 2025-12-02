@@ -1,0 +1,12 @@
+let x = 10
+let y = 20
+print(x + y)
+print(x * y)
+print(y / x)
+print(true and false)
+print(true or false)
+print(not true)
+print(x < y)
+print(x == x)
+print(x != y)
+print("Hello" + " World")

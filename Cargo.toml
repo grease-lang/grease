@@ -1,0 +1,9 @@
+[package]
+name = "grease"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+clap_mangen = "0.2"
+clap_complete = "4.0"

@@ -1,0 +1,3 @@
+let x = 42
+print("Number: " + x)
+print("Double: " + (x * 2))
