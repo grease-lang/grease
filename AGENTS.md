@@ -26,26 +26,26 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 ### Core Components (Detailed Breakdown)
 
 #### Main Entry Points
-- **`src/main.rs`** (156 lines): CLI interface using clap, supports file execution, REPL, eval mode, linting, and LSP server
-- **`src/lib.rs`** (158 lines): Module exports and comprehensive test suite (57 tests covering all components)
+- **`src/main.rs`**: CLI interface using clap, supports file execution, REPL, eval mode, linting, and LSP server
+- **`src/lib.rs`**: Module exports and comprehensive test suite (57 tests covering all components)
 
 #### Language Processing Pipeline
-- **`src/token.rs`** (82 lines): Token definitions with 65+ token types including literals, keywords, operators, delimiters
-- **`src/lexer.rs`** (396 lines): Tokenizes source code, handles indentation-sensitive parsing, comprehensive test coverage
-- **`src/ast.rs`** (78 lines): Abstract Syntax Tree definitions with Expression and Statement enums
-- **`src/parser.rs`** (719 lines): Recursive descent parser, handles all language constructs, extensive test coverage
+- **`src/token.rs`**: Token definitions with 65+ token types including literals, keywords, operators, delimiters
+- **`src/lexer.rs`**: Tokenizes source code, handles indentation-sensitive parsing, comprehensive test coverage
+- **`src/ast.rs`**: Abstract Syntax Tree definitions with Expression and Statement enums
+- **`src/parser.rs`**: Recursive descent parser, handles all language constructs, extensive test coverage
 
 #### Compilation & Execution Engine
-- **`src/bytecode.rs`** (268 lines): OpCode definitions (32 opcodes), Value types, Chunk structure, disassembler
-- **`src/compiler.rs`** (498 lines): AST to bytecode compiler, local variable management, control flow compilation
-- **`src/vm.rs`** (662 lines): Stack-based virtual machine, function calls, native function support, error handling
+- **`src/bytecode.rs`**: OpCode definitions (32 opcodes), Value types, Chunk structure, disassembler
+- **`src/compiler.rs`**: AST to bytecode compiler, local variable management, control flow compilation
+- **`src/vm.rs`**: Stack-based virtual machine, function calls, native function support, error handling
 
 #### Tooling & Language Services
-- **`src/repl.rs`** (89 lines): Interactive Read-Eval-Print Loop with value display
-- **`src/linter.rs`** (222 lines): Static analysis, unused variable detection, scope tracking
-- **`src/lsp_server.rs`** (498 lines): Full Language Server Protocol implementation
-- **`src/lsp_workspace.rs`** (342 lines): Document management, symbol extraction, LSP workspace handling
-- **`src/grease.rs`** (169 lines): Main interpreter interface, module loading, verbose execution
+- **`src/repl.rs`**: Interactive Read-Eval-Print Loop with value display
+- **`src/linter.rs`**: Static analysis, unused variable detection, scope tracking
+- **`src/lsp_server.rs`**: Full Language Server Protocol implementation
+- **`src/lsp_workspace.rs`**: Document management, symbol extraction, LSP workspace handling
+- **`src/grease.rs`**: Main interpreter interface, module loading, verbose execution
 
 ## Language Features (Current Implementation Status)
 
@@ -121,15 +121,15 @@ make build             # Release build
   - `lib.rs` - Module exports and comprehensive test suite (57 tests)
   - `grease.rs` - Main interpreter interface with module loading and verbose execution
   - `token.rs` - Token definitions with 65+ token types (literals, keywords, operators)
-  - `lexer.rs` - Lexical analysis with indentation-sensitive parsing (396 lines)
+  - `lexer.rs` - Lexical analysis with indentation-sensitive parsing
   - `ast.rs` - Abstract Syntax Tree definitions with Expression and Statement enums
-  - `parser.rs` - Recursive descent parser handling all language constructs (719 lines)
+  - `parser.rs` - Recursive descent parser handling all language constructs
   - `bytecode.rs` - OpCode definitions (32 opcodes), Value types, Chunk structure, disassembler
-  - `compiler.rs` - AST to bytecode compiler with local variable management (498 lines)
-  - `vm.rs` - Stack-based virtual machine with function calls and native functions (662 lines)
+  - `compiler.rs` - AST to bytecode compiler with local variable management
+  - `vm.rs` - Stack-based virtual machine with function calls and native functions
   - `repl.rs` - Interactive Read-Eval-Print Loop with value display
   - `linter.rs` - Static analysis for unused variables and scope tracking
-  - `lsp_server.rs` - Full Language Server Protocol implementation (498 lines)
+  - `lsp_server.rs` - Full Language Server Protocol implementation
   - `lsp_workspace.rs` - Document management and symbol extraction for LSP
 - `examples/` - Example Grease scripts demonstrating language features (must remain functional)
 - `std/` - Standard library modules with math and string functions (needs syntax fixes)
@@ -194,6 +194,17 @@ grease/
 
 ## Testing Philosophy & Requirements
 
+### 🛡️ Non-Negotiable Testing Mandate
+
+**Testing is the foundation of this project's quality and reliability.** Under NO circumstances may any code agent:
+
+- **DISABLE tests** - Tests are permanent safeguards that must never be circumvented
+- **REMOVE tests** - Tests are sacred and may only be removed if the entire feature is being removed
+- **WORK AROUND tests** - Never modify code to avoid failing tests; fix the tests instead
+- **IGNORE failing tests** - All tests must pass before any feature is considered complete
+
+**VIOLATION of these testing principles is grounds for immediate rejection of any work.**
+
 ### Comprehensive Test Coverage
 - **57 unit tests** covering all major components
 - **Lexer tests**: Tokenization of numbers, strings, keywords, operators
@@ -203,20 +214,59 @@ grease/
 - **Integration tests**: End-to-end language execution
 - **Linter tests**: Static analysis validation
 
-### Testing Workflow for Code Agents
-1. **Write Code**: Implement the feature or fix using Rust development tools
-2. **Write Tests**: Create comprehensive tests that actually verify the intended functionality
-3. **Run Tests**: Execute `cargo test` to verify all tests pass
-4. **Evaluate Results**: Analyze test output and ensure functionality works correctly
-5. **Test Examples**: Verify `examples/` files still work with `cargo run examples/hello.grease`
-6. **Iterate**: Continue programming and testing until achieving the task with functional tests
+### 🔄 Mandatory Testing Workflow for Code Agents
 
-### Critical Testing Rules
-- **NEVER circumvent tests** - All tests must remain functional and meaningful
-- **NEVER disable or remove tests** - Tests are permanent safeguards
-- **Tests must be functional** - Each test should actually verify what it claims to test
-- **ALWAYS run `cargo test`** after any changes to ensure no regressions
-- **Verify examples work** - Use `cargo run examples/hello.grease` to test end-to-end functionality
+#### For NEW Features:
+1. **Implement Feature**: Write code following established patterns
+2. **Create Comprehensive Tests**: Write tests that ACTUALLY verify the feature works correctly
+   - Test happy path scenarios
+   - Test edge cases and error conditions
+   - Test integration with existing features
+   - Ensure tests provide meaningful assertions
+3. **Run Full Test Suite**: Execute `cargo test` to verify ALL tests pass
+4. **Verify No Regressions**: Ensure existing functionality remains intact
+5. **Test Examples**: Confirm `examples/` files still work with `cargo run examples/hello.grease`
+6. **Iterate**: Continue until the feature is complete AND all tests pass
+
+#### For EXISTING Feature Modifications:
+1. **Understand Existing Tests**: Analyze what current tests verify
+2. **Update Tests Appropriately**: Modify tests to reflect intended behavior changes
+3. **Ensure Tests Remain Meaningful**: Updated tests must still actually verify functionality
+4. **Run Full Test Suite**: Execute `cargo test` to verify ALL tests pass
+5. **Verify Integration**: Test with examples and real-world usage scenarios
+6. **Document Changes**: Update any documentation affected by feature changes
+
+### 📋 Critical Testing Rules (ABSOLUTE)
+
+1. **NEVER circumvent tests** - All tests must remain functional and meaningful
+2. **NEVER disable or remove tests** - Tests are permanent safeguards
+3. **Tests must be functional** - Each test should actually verify what it claims to test
+4. **ALWAYS run `cargo test`** after any changes to ensure no regressions
+5. **Verify examples work** - Use `cargo run examples/hello.grease` to test end-to-end functionality
+6. **Create meaningful tests** - Tests must verify actual behavior, not just compile
+7. **Test edge cases** - Consider error conditions and boundary cases
+8. **Test integration** - Ensure new features work with existing functionality
+
+### 🚫 Forbidden Testing Practices
+
+- **NEVER** use `#[ignore]` to skip failing tests
+- **NEVER** comment out tests to make them pass
+- **NEVER** modify test expectations to match broken behavior
+- **NEVER** write placeholder tests that don't actually verify anything
+- **NEVER** assume tests pass without running them
+- **NEVER** commit code with failing tests
+
+### ✅ Required Testing Verification Checklist
+
+Before considering ANY task complete, verify:
+- [ ] `cargo test` passes with ALL tests (100% pass rate required)
+- [ ] New feature has comprehensive test coverage
+- [ ] Tests actually verify intended functionality
+- [ ] No existing tests were broken or disabled
+- [ ] Examples in `examples/` still work correctly
+- [ ] Edge cases and error conditions are tested
+- [ ] Integration with existing features is tested
+- [ ] Tests provide clear, meaningful failure messages when they fail
 
 ## Autonomous Development Loop
 
@@ -232,6 +282,35 @@ This writing, testing, and evaluation cycle is designed to enable code agents to
 
 ### Autonomous Development Mandate
 A code agent must continue iterating through this development loop independently, making programming decisions, writing tests, and evaluating results until the feature is fully implemented and production-ready. This self-sufficient approach ensures robust, reliable features that maintain Grease's quality standards without requiring human guidance during the development process.
+
+## CI/CD Integration Requirements
+
+### Continuous Testing Philosophy
+Every code change must pass through rigorous automated testing before being considered complete:
+
+1. **Pre-commit Testing**: All tests must pass locally before any commit
+2. **Comprehensive Coverage**: New features require thorough test coverage including edge cases
+3. **Regression Prevention**: Existing functionality must remain intact - no breaking changes without explicit requirement
+4. **Integration Testing**: Features must work together seamlessly
+5. **Performance Validation**: Changes must not degrade performance significantly
+
+### Test Quality Standards
+- **Meaningful Assertions**: Tests must verify actual behavior, not just compile
+- **Clear Failure Messages**: Test failures should clearly indicate what went wrong
+- **Isolated Tests**: Each test should be independent and not rely on other tests
+- **Comprehensive Scenarios**: Cover happy path, error cases, and boundary conditions
+- **Maintainable Tests**: Tests should be readable and easy to understand
+
+### Regression Prevention Protocol
+When modifying existing code:
+1. **Run full test suite** before making changes to establish baseline
+2. **Make minimal, focused changes** to address the specific requirement
+3. **Update tests** that need to reflect new behavior (never disable them)
+4. **Verify all tests pass** after changes
+5. **Test integration** with examples and real-world scenarios
+6. **Document any behavior changes** in relevant documentation
+
+This testing-first approach ensures Grease maintains high quality standards and prevents regressions as the language evolves.
 
 ## Code Standards
 

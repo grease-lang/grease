@@ -40,6 +40,19 @@ _arguments "${_arguments_options[@]}" : \
 ':shell -- Shell to generate completions for:(bash elvish fish powershell zsh)' \
 && ret=0
 ;;
+(lint)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':file -- File to lint:_files' \
+&& ret=0
+;;
+(lsp)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (manpage)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -84,6 +97,8 @@ _grease_commands() {
     local commands; commands=(
 'completions:Generate shell completions' \
 'manpage:Generate manpage' \
+'lint:Lint Grease source code' \
+'lsp:Start Language Server Protocol server' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'grease commands' commands "$@"
@@ -98,6 +113,8 @@ _grease__help_commands() {
     local commands; commands=(
 'completions:Generate shell completions' \
 'manpage:Generate manpage' \
+'lint:Lint Grease source code' \
+'lsp:Start Language Server Protocol server' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'grease help commands' commands "$@"

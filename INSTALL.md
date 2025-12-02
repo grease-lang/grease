@@ -107,6 +107,13 @@ grease test.grease
 
 # Pipe input
 echo 'print(42)' | grease
+
+# Test LSP server
+grease lsp --help
+
+# Test linter
+echo 'x = 5' > test.grease
+grease --lint test.grease
 ```
 
 ## System Integration
@@ -118,13 +125,15 @@ apropos grease     # Find in manual database
 ```
 
 ### Shell Completion
-Add to `~/.bashrc` for tab completion:
+Grease provides automatic shell completions:
 ```bash
-_grease_completion() {
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=($(compgen -W "help version" -- $cur))
-}
-complete -F _grease_completion grease
+# Generate completions for your shell
+grease completions bash > grease.bash
+grease completions zsh > grease.zsh
+grease completions fish > grease.fish
+
+# Source them in your shell config
+source grease.bash  # Add to ~/.bashrc
 ```
 
 ### File Associations
@@ -137,6 +146,27 @@ alias grease='grease'
 # Make scripts executable
 chmod +x script.grease
 ./script.grease
+```
+
+### IDE Integration
+Set up Language Server Protocol support:
+
+#### VSCode
+```bash
+# Install extension
+cd /path/to/grease/editors/vscode
+npm install
+npm run compile
+code --install-extension .
+```
+
+#### Neovim
+```bash
+# Add to Neovim config
+require('lspconfig').grease.setup {
+  cmd = { 'grease', 'lsp' },
+  filetypes = { 'grease' }
+}
 ```
 
 ## Uninstallation

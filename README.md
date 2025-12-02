@@ -15,13 +15,15 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 - **Boolean Logic**: `and`, `or`, `not`
 - **String Concatenation**: Automatic type coercion between strings and numbers
 - **Control Flow**: `if`/`else`, `while` loops, `for` loops
-- **Functions**: Function definitions with parameters
+- **Functions**: Function definitions with parameters and return values
 - **Built-in Functions**: `print()` function
 - **Module System**: Import standard library modules with `use`
 - **Standard Library**: `math` (add, multiply, sqrt, abs, pow, pi) and `string` (length, uppercase, lowercase, contains) modules
 - **Native Functions**: Call Rust functions from Grease scripts
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
+- **Linter**: Static analysis for unused variables and code quality
+- **Language Server Protocol (LSP)**: Full IDE support with auto-completion, diagnostics, go-to-definition, and more
 
 ### 🚧 Syntax Examples
 
@@ -97,7 +99,37 @@ Grease supports standard command line options:
 - `--help`: Display help information
 - `--eval <CODE>`: Execute inline code
 - `--verbose`: Enable verbose output during execution
+- `--lint <FILE>`: Lint Grease source code for issues
+- `--lsp`: Start Language Server Protocol server
 - `FILE`: Execute a script file
+
+### Language Server Protocol (LSP)
+
+Grease includes a complete LSP implementation for professional IDE support:
+
+#### Features
+- **Auto-completion**: Intelligent code completion for keywords, functions, and variables
+- **Diagnostics**: Real-time syntax and semantic error checking
+- **Go to Definition**: Navigate to symbol definitions across files
+- **Hover Information**: Documentation and type information on hover
+- **Document Symbols**: Outline view of file structure
+- **Semantic Tokens**: Enhanced syntax highlighting
+
+#### Quick Start
+```bash
+# Start LSP server
+grease lsp
+
+# VSCode: Install extension from editors/vscode/
+# Neovim: Use configuration from editors/neovim/grease-lsp.lua
+```
+
+#### Editor Setup
+- **VSCode**: Extension available in `editors/vscode/` directory
+- **Neovim**: Configuration provided in `editors/neovim/grease-lsp.lua`
+- **Other LSP-compatible editors**: Use command `grease lsp` with language `grease`
+
+See [LSP_README.md](LSP_README.md) for detailed setup instructions.
 
 ### Manpage
 A manpage is available for detailed documentation:
@@ -148,16 +180,25 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 
 ### 🎯 Next Features
 - [ ] Dictionaries/objects
-- [ ] Error handling
+- [ ] Error handling with try/catch
 - [ ] Classes and object-oriented features
-- [x] Standard library expansion
+- [ ] Enhanced array operations
+- [ ] Improved for loop functionality
 
 ### 🚀 Long-term Goals
 - [ ] Package manager
-- [ ] Cross-language interop
 - [ ] JIT compilation
 - [ ] WebAssembly target
-- [ ] IDE support
+- [ ] Enhanced standard library
+- [ ] Performance optimizations
+
+### ✅ Recently Completed
+- [x] Language Server Protocol (LSP) implementation
+- [x] Static analysis and linting
+- [x] Cross-language function interop
+- [x] Module system with imports
+- [x] Comprehensive standard library
+- [x] IDE support for major editors
 
 ## Testing
 

@@ -17,6 +17,12 @@ Execute inline code
 \fB\-v\fR, \fB\-\-verbose\fR
 Enable verbose output
 .TP
+\fB\-\-lint\fR \fI<FILE>\fR
+Lint Grease source code for issues
+.TP
+\fB\-\-lsp\fR
+Start Language Server Protocol server for IDE support
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Print help (see a summary with \*(Aq\-h\*(Aq)
 .TP
@@ -36,7 +42,18 @@ Generate manpage
 grease\-lint(1)
 Lint Grease source code
 .TP
+grease\-lsp(1)
+Start Language Server Protocol server
+.TP
 grease\-help(1)
 Print this message or the help of the given subcommand(s)
+.SH LANGUAGE SERVER PROTOCOL
+Grease includes a complete LSP implementation for IDE support. Start the server with:
+.PP
+.nf
+grease lsp
+.fi
+.PP
+The server provides auto-completion, diagnostics, go-to-definition, and other IDE features for VSCode, Neovim, and other LSP-compatible editors. See LSP_README.md for detailed setup instructions.
 .SH VERSION
 v0.1.1

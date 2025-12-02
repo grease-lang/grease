@@ -22,6 +22,12 @@ _grease() {
             grease,help)
                 cmd="grease__help"
                 ;;
+            grease,lint)
+                cmd="grease__lint"
+                ;;
+            grease,lsp)
+                cmd="grease__lsp"
+                ;;
             grease,manpage)
                 cmd="grease__manpage"
                 ;;
@@ -34,6 +40,12 @@ _grease() {
             grease__help,manpage)
                 cmd="grease__help__manpage"
                 ;;
+            grease__help,lint)
+                cmd="grease__help__lint"
+                ;;
+            grease__help,lsp)
+                cmd="grease__help__lsp"
+                ;;
             *)
                 ;;
         esac
@@ -41,7 +53,7 @@ _grease() {
 
     case "${cmd}" in
         grease)
-            opts="-e -v -h -V --eval --verbose --help --version [FILE] completions manpage help"
+            opts="-e -v -h -V --eval --verbose --help --version [FILE] completions manpage lint lsp help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -77,7 +89,7 @@ _grease() {
             return 0
             ;;
         grease__help)
-            opts="completions manpage help"
+            opts="completions manpage lint lsp help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -121,6 +133,62 @@ _grease() {
         grease__help__manpage)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        grease__help__lint)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        grease__help__lsp)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        grease__lint)
+            opts="-h --help <FILE>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        grease__lsp)
+            opts="-h --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi

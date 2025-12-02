@@ -63,6 +63,7 @@ echo 'print("🦀 Grease works!")' | grease
 - **Type**: ELF 64-bit executable
 - **Dependencies**: libc6 only
 - **Installation**: `/usr/local/bin/grease` (system) or `~/.local/bin/grease` (user)
+- **Features**: REPL, LSP server, linter, module system, standard library
 
 ## Usage Examples
 
@@ -80,6 +81,15 @@ echo 'print(42 + 8)' | grease
 echo 'print("Hello")' > hello.grease
 chmod +x hello.grease
 ./hello.grease
+
+# Lint code
+grease --lint script.grease
+
+# Start LSP server for IDE support
+grease lsp
+
+# Execute inline code
+grease --eval 'print("Quick test")'
 ```
 
 ## Uninstallation
