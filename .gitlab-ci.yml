@@ -56,16 +56,17 @@ nightly-arch:
   only:
     - main
   script:
-    - pacman -Syu --noconfirm
-    - pacman -S --noconfirm base-devel rust sudo
-    - rustc --version
-    - cargo --version
-    - cargo test
-    - useradd -m -G wheel builder
-    - echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-    - cp build_tools/arch/nightly/PKGBUILD .
-    - chown -R builder:builder .
-    - sudo -u builder makepkg -s --noconfirm
+    - |
+      pacman -Syu --noconfirm
+      pacman -S --noconfirm base-devel rust sudo
+      rustc --version
+      cargo --version
+      cargo test
+      useradd -m -G wheel builder
+      echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      cp build_tools/arch/nightly/PKGBUILD .
+      chown -R builder:builder .
+      sudo -u builder makepkg -s --noconfirm
   artifacts:
     paths:
       - "*.pkg.tar.zst"
