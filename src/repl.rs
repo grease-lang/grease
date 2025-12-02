@@ -1,3 +1,6 @@
+// Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 use std::io::{self, Write};
 use crate::grease::Grease;
 

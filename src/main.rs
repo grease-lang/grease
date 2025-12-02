@@ -1,3 +1,4 @@
+// Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
 // SPDX-License-Identifier: Apache-2.0
 
 use clap::{CommandFactory, Parser, Subcommand};

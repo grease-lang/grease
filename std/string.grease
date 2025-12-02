@@ -1,3 +1,6 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
 def length(s):
     # Simple length function - in a real implementation this would be built-in
     count = 0

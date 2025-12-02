@@ -1,3 +1,4 @@
+
 # Grease - A Rust-based Scripting Language
 
 Grease is a modern scripting language written in pure Rust. It compiles to platform-agnostic bytecode and runs on a custom virtual machine.

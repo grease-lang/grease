@@ -1,3 +1,4 @@
+
 # Installing Grease System-Wide
 
 This guide shows you how to install the Grease interpreter as a system binary (like `/usr/bin/python`).
