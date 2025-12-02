@@ -188,7 +188,7 @@ grease/
 ├── grease.zsh                    # Zsh shell completions
 ├── install.sh                    # Installation script
 ├── install_system.sh             # System-wide installation
-├── build_deb.sh                  # Debian package builder
+├── build_tools/debian/build_deb.sh # Debian package builder
 └── test_lsp_server.py            # LSP server test script
 ```
 

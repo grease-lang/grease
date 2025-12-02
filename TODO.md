@@ -12,6 +12,10 @@
   - [x] create editor integrations (VSCode, Neovim)
   - [x] implement shell completions
   - [x] create comprehensive documentation
+  - [x] implement automated CI/CD nightly builds for Debian and Arch Linux
+  - [x] create proper package build scripts with version management
+  - [x] fix version display in nightly packages (includes commit hash)
+  - [x] remove redundant installation files and streamline documentation
 
 ## 🚧 Current Development Priorities
   - [ ] fix standard library syntax errors in std/math.grease and std/string.grease

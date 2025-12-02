@@ -1,0 +1,56 @@
+# Maintainer: Your Name <your.email@example.com>
+pkgname=grease-git
+pkgver=r15.3f520af
+pkgrel=1
+pkgdesc="A modern scripting language written in pure Rust"
+arch=('x86_64')
+url="https://gitlab.com/grease-lang/grease"
+license=('Apache-2.0')
+depends=()
+makedepends=('rust' 'cargo' 'git')
+provides=('grease')
+conflicts=('grease')
+source=("$pkgname::git+https://gitlab.com/grease-lang/grease.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/$pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "$srcdir/$pkgname"
+  export RUSTUP_AUTO_SELF_UPDATE=never
+  
+  # Get version info for nightly build
+  COMMIT_SHORT=$(git rev-parse --short HEAD)
+  BASE_VERSION="0.1.1"
+  NIGHTLY_VERSION="${BASE_VERSION}-nightly-${COMMIT_SHORT}"
+  
+  # Update Cargo.toml with nightly version
+  sed -i "s/version = \"$BASE_VERSION\"/version = \"$NIGHTLY_VERSION\"/" Cargo.toml
+  echo "Updated Cargo.toml version to: $NIGHTLY_VERSION"
+  
+  # Update man page version
+  sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" grease.1
+  sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" grease.1
+  echo "Updated grease.1 version to: $NIGHTLY_VERSION"
+  
+
+  
+  # Clean build cache to ensure version is picked up
+  cargo clean
+  
+  # Build the binary
+  cargo build --release
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+  install -Dm755 target/release/grease "$pkgdir/usr/bin/grease"
+  install -Dm644 grease.1 "$pkgdir/usr/share/man/man1/grease.1"
+  install -Dm644 grease.bash "$pkgdir/usr/share/bash-completion/completions/grease"
+  install -Dm644 grease.zsh "$pkgdir/usr/share/zsh/site-functions/_grease"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/grease/README.md"
+  install -Dm644 LSP_README.md "$pkgdir/usr/share/doc/grease/LSP_README.md"
+}

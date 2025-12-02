@@ -20,7 +20,11 @@ nightly:
     - cargo --version
     - cargo test
     - COMMIT_SHORT=$(git rev-parse --short HEAD)
-    - sed -i "s/version = \"0.1.1\"/version = \"0.1.1-nightly-$COMMIT_SHORT\"/" Cargo.toml
+    - BASE_VERSION="0.1.1"
+    - NIGHTLY_VERSION="0.1.1-nightly-$COMMIT_SHORT"
+    - sed -i "s/version = \"$BASE_VERSION\"/version = \"$NIGHTLY_VERSION\"/" Cargo.toml
+    - sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" grease.1
+    - sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" grease.1
     - cat Cargo.toml | grep version
     - cargo clean
     - cargo build --release
@@ -28,6 +32,40 @@ nightly:
     paths:
       - target/release/grease
     name: "grease-nightly-$CI_COMMIT_SHORT_SHA"
+
+nightly-deb:
+  stage: build
+  only:
+    - main
+  script:
+    - apt-get update -y
+    - apt-get install -y dpkg-dev
+    - rustc --version
+    - cargo --version
+    - cargo test
+    - chmod +x build_tools/debian/build_deb.sh
+    - ./build_tools/debian/build_deb.sh --nightly
+  artifacts:
+    paths:
+      - "*.deb"
+    name: "grease-nightly-deb-$CI_COMMIT_SHORT_SHA"
+
+nightly-arch:
+  stage: build
+  only:
+    - main
+  script:
+    - pacman -Syu --noconfirm
+    - pacman -S --noconfirm base-devel
+    - rustc --version
+    - cargo --version
+    - cargo test
+    - cp build_tools/archlinux/nightly/PKGBUILD .
+    - makepkg -s --noconfirm
+  artifacts:
+    paths:
+      - "*.pkg.tar.zst"
+    name: "grease-nightly-arch-$CI_COMMIT_SHORT_SHA"
 
 stable:
   stage: build

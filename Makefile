@@ -47,7 +47,7 @@ uninstall-user:
 # Create Debian package
 deb: build
 	@echo "📦 Building Debian package..."
-	./build_deb.sh
+	./build_tools/debian/build_deb.sh
 
 # Clean build artifacts
 clean:

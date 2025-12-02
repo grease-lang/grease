@@ -67,29 +67,91 @@ print(str.length("hello")) # 5
 print(str.contains("hello", "ell")) # true
 ```
 
-## Installation & Usage
+## Installation
 
-### Building from Source
+### 🚀 Quick Install (Recommended)
+
+#### Option 1: Install from CI/CD Artifacts (Nightly Builds)
+Download the latest nightly packages from GitLab CI/CD:
+
+**Debian/Ubuntu (.deb packages):**
 ```bash
-git clone <repository>
-cd Grease
-cargo build --release
+# Download from GitLab CI/CD artifacts
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/grease_*.deb?job=nightly-deb
+sudo dpkg -i grease_*.deb
 ```
+
+**Arch Linux (.pkg.tar.zst packages):**
+```bash
+# Download from GitLab CI/CD artifacts
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/*.pkg.tar.zst?job=nightly-arch
+sudo pacman -U *.pkg.tar.zst
+```
+
+**Or browse all artifacts:** https://gitlab.com/grease-lang/grease/-/artifacts
+
+#### Option 2: Build Packages Locally
+```bash
+# Debian package
+./build_tools/debian/build_deb.sh --nightly
+sudo dpkg -i grease_*.deb
+
+# Arch Linux package
+cd build_tools/archlinux/nightly
+makepkg -s --noconfirm
+sudo pacman -U *.pkg.tar.zst
+```
+
+#### Option 3: Stable Releases
+For stable releases, visit: https://gitlab.com/grease-lang/grease/-/releases
+
+#### Option 3: Build from Source
+```bash
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease
+cargo build --release
+sudo cp target/release/grease /usr/local/bin/
+```
+
+### 🛠️ Building Packages
+
+#### Debian Package
+```bash
+# Nightly build (with commit hash in version)
+./build_tools/debian/build_deb.sh --nightly
+
+# Stable build
+./build_tools/debian/build_deb.sh
+```
+
+#### Arch Linux Package
+```bash
+cd build_tools/archlinux/nightly
+makepkg -s --noconfirm
+```
+
+## Usage
 
 ### Running Grease
 
 #### Interactive REPL
 ```bash
+grease
+# Or if built from source:
 cargo run
 ```
 
 #### Execute Script Files
 ```bash
+grease script.grease
+# Or if built from source:
 cargo run script.grease
 ```
 
 #### Pipe Input
 ```bash
+echo 'print("Hello, World!")' | grease
+# Or if built from source:
 echo 'print("Hello, World!")' | cargo run
 ```
 

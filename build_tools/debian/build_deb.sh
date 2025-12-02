@@ -4,17 +4,62 @@
 #!/bin/bash
 
 # Create Debian package for Grease
+# Usage: ./build_deb.sh [--nightly]
+#   --nightly  Build a nightly package with commit hash in version
 
 set -e
 
+# Show usage if requested
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: $0 [--nightly]"
+    echo "  --nightly  Build a nightly package with commit hash in version"
+    echo "  --help     Show this help message"
+    exit 0
+fi
+
 PACKAGE_NAME="grease"
-VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 ARCHITECTURE="amd64"
 MAINTAINER="Grease Developers <dev@grease-lang.org>"
 
-# Build the binary
-echo "🔨 Building Grease..."
-cargo build --release
+# Check if this is a nightly build
+if [ "$1" = "--nightly" ]; then
+    COMMIT_SHORT=$(git rev-parse --short HEAD)
+    BASE_VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    VERSION="${BASE_VERSION}-nightly-${COMMIT_SHORT}"
+    echo "🌙 Building nightly package: $VERSION"
+    
+    # Update Cargo.toml with nightly version
+    sed -i "s/version = \"$BASE_VERSION\"/version = \"$VERSION\"/" Cargo.toml
+    echo "📝 Updated Cargo.toml version to: $(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')"
+    
+    # Update man page version
+    sed -i "s/\"grease $BASE_VERSION\"/\"grease $VERSION\"/" grease.1
+    sed -i "s/v$BASE_VERSION/v$VERSION/" grease.1
+    echo "📝 Updated grease.1 version to: $VERSION"
+    
+
+    
+    # Clean build cache to ensure version is picked up
+    echo "🧹 Cleaning build cache..."
+    cargo clean
+    
+    # Build the binary
+    echo "🔨 Building Grease..."
+    cargo build --release
+    
+    # Restore original versions
+    sed -i "s/version = \"$VERSION\"/version = \"$BASE_VERSION\"/" Cargo.toml
+    sed -i "s/\"grease $VERSION\"/\"grease $BASE_VERSION\"/" grease.1
+    sed -i "s/v$VERSION/v$BASE_VERSION/" grease.1
+    echo "🔄 Restored original versions"
+else
+    VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    echo "📦 Building stable package: $VERSION"
+    
+    # Build the binary
+    echo "🔨 Building Grease..."
+    cargo build --release
+fi
 
 # Create package structure
 PKG_DIR="$PACKAGE_NAME-$VERSION"
@@ -38,9 +83,9 @@ Priority: optional
 Architecture: $ARCHITECTURE
 Depends: libc6
 Maintainer: $MAINTAINER
- Description: Grease Scripting Language
-  A modern scripting language written in pure Rust. Compiles to platform-agnostic bytecode.
-  The high-performance oil for your Rust engine.
+Description: Grease Scripting Language
+ A modern scripting language written in pure Rust. Compiles to platform-agnostic bytecode.
+ The high-performance oil for your Rust engine.
 EOF
 
 # Create man page

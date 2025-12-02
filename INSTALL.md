@@ -1,31 +1,62 @@
 
-# Installing Grease System-Wide
+# Installing Grease
 
-This guide shows you how to install the Grease interpreter as a system binary (like `/usr/bin/python`).
+This guide shows you how to install the Grease interpreter using various methods.
 
-## Quick Install (Recommended)
+## 🚀 Quick Install (Recommended)
 
+### Option 1: Install from CI/CD Nightly Artifacts
+
+**For Debian/Ubuntu (.deb packages):**
 ```bash
-# Clone and build
-git clone <your-repo>
-cd Grease
-cargo build --release
-
-# Install to system
-sudo cp target/release/grease /usr/local/bin/
-
-# Verify installation
-grease --version 2>/dev/null || echo "Grease is installed"
+# Download latest nightly from GitLab CI/CD
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/grease_*.deb?job=nightly-deb
+sudo dpkg -i grease_*.deb
 ```
+
+**For Arch Linux (.pkg.tar.zst packages):**
+```bash
+# Download latest nightly from GitLab CI/CD
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/*.pkg.tar.zst?job=nightly-arch
+sudo pacman -U *.pkg.tar.zst
+```
+
+**Browse all artifacts:** https://gitlab.com/grease-lang/grease/-/artifacts
+
+### Option 2: Build Packages Locally
+
+**Debian Package:**
+```bash
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease
+./build_tools/debian/build_deb.sh --nightly
+sudo dpkg -i grease_*.deb
+```
+
+**Arch Linux Package:**
+```bash
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease/build_tools/archlinux/nightly
+makepkg -s --noconfirm
+sudo pacman -U *.pkg.tar.zst
+```
+
+### Option 3: Stable Releases
+For stable releases, visit: https://gitlab.com/grease-lang/grease/-/releases
 
 ## Installation Methods
 
-### Method 1: Direct Copy (Simplest)
+### Method 1: Package Manager (Recommended)
+Use the pre-built packages from CI/CD or build locally using the scripts above.
+
+### Method 2: Direct Binary Install
 ```bash
-# Build
+# Build from source
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease
 cargo build --release
 
-# Install
+# Install to system
 sudo cp target/release/grease /usr/local/bin/
 sudo chmod +x /usr/local/bin/grease
 
@@ -34,9 +65,11 @@ which grease  # Should show /usr/local/bin/grease
 grease        # Should start REPL
 ```
 
-### Method 2: User-Local Install (No sudo)
+### Method 3: User-Local Install (No sudo)
 ```bash
-# Build
+# Build from source
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease
 cargo build --release
 
 # Create user bin directory
@@ -54,37 +87,11 @@ source ~/.bashrc
 which grease  # Should show ~/.local/bin/grease
 ```
 
-### Method 3: Using Installation Script
+### Method 4: Using Installation Script
 ```bash
-# Clone repo
-git clone <your-repo>
-cd Grease
-
-# Run installer
+git clone https://gitlab.com/grease-lang/grease.git
+cd grease
 ./install.sh
-```
-
-### Method 4: Create Debian Package
-```bash
-# Build package
-./build_deb.sh
-
-# Install package
-sudo dpkg -i grease_*.deb
-
-# Remove package (if needed)
-sudo dpkg -r grease
-```
-
-### Method 5: System Package Structure
-```bash
-# Run full system installer
-sudo ./install_system.sh
-
-# This installs:
-# - Binary: /usr/local/bin/grease
-# - Man page: /usr/local/share/man/man1/grease.1.gz
-# - Documentation: /usr/local/share/doc/grease/
 ```
 
 ## Verification
@@ -184,6 +191,55 @@ sudo dpkg -r grease
 sudo dpkg -P grease  # Purge configuration files
 ```
 
+## Building Packages
+
+### Debian Package Build Script
+The `build_tools/debian/build_deb.sh` script creates Debian packages:
+
+```bash
+# Nightly build (with commit hash)
+./build_tools/debian/build_deb.sh --nightly
+
+# Stable build
+./build_tools/debian/build_deb.sh
+```
+
+**Features:**
+- Automatic versioning with commit hash for nightly builds
+- Includes man page and documentation
+- Proper Debian package metadata
+- Dependency management (libc6 only)
+
+### Arch Linux PKGBUILD
+The `build_tools/archlinux/nightly/PKGBUILD` creates Arch Linux packages:
+
+```bash
+cd build_tools/archlinux/nightly
+makepkg -s --noconfirm
+```
+
+**Features:**
+- Nightly versioning with commit hash
+- Installs to `/usr/bin/grease`
+- Includes man page, shell completions, and documentation
+- Follows Arch Linux packaging standards
+
+## CI/CD Integration
+
+### Automated Nightly Builds
+GitLab CI/CD automatically builds packages on every commit to `main`:
+
+- **`nightly-deb` job**: Creates `.deb` packages for Debian/Ubuntu
+- **`nightly-arch` job**: Creates `.pkg.tar.zst` packages for Arch Linux
+- **Artifacts**: Available for download from https://gitlab.com/grease-lang/grease/-/artifacts
+- **Stable releases**: Available at https://gitlab.com/grease-lang/grease/-/releases
+
+### Version Information
+Nightly packages include commit hash in version:
+- Format: `0.1.1-nightly-{commit_short}`
+- Example: `0.1.1-nightly-3f520af`
+- Displayed in REPL: `Grease Scripting Language v0.1.1-nightly-3f520af`
+
 ## Binary Information
 
 The compiled binary has these properties:
@@ -192,6 +248,7 @@ The compiled binary has these properties:
 - **Dependencies**: Only libc6 (standard C library)
 - **Static**: Most dependencies are statically linked
 - **Portable**: Works on any x86-64 Linux system
+- **Version**: Includes commit hash for nightly builds
 
 ## Development Installation
 
