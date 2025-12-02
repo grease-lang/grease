@@ -3,7 +3,7 @@ print("Hello, World!")
 
 # Variable assignment
 name = "Grease"
-version = 0.1
+version: Number = 0.1
 print("Language: " + name + " v" + version)
 
 # Basic arithmetic

@@ -164,17 +164,25 @@ impl Parser {
     }
 
     fn is_assignment_statement(&mut self) -> bool {
-        // Check if this looks like an assignment: identifier = ...
+        // Check if this looks like an assignment: identifier [: Type] = ...
         if let Some(token) = self.tokens.peek() {
             if let TokenType::Identifier(_) = &token.token_type {
-                // Look ahead to see if next token is =
                 let mut temp_tokens = self.tokens.clone();
                 temp_tokens.next(); // consume identifier
                 if let Some(next_token) = temp_tokens.next() {
-                    matches!(next_token.token_type, TokenType::Assign)
-                } else {
-                    false
+                    if matches!(next_token.token_type, TokenType::Assign) {
+                        return true;
+                    } else if matches!(next_token.token_type, TokenType::Colon) {
+                        if let Some(type_token) = temp_tokens.next() {
+                            if let TokenType::Identifier(_) = &type_token.token_type {
+                                if let Some(assign_token) = temp_tokens.next() {
+                                    return matches!(assign_token.token_type, TokenType::Assign);
+                                }
+                            }
+                        }
+                    }
                 }
+                false
             } else {
                 false
             }
@@ -185,13 +193,23 @@ impl Parser {
 
     fn assignment_statement(&mut self) -> Result<Statement, String> {
         let name = self.consume_identifier("Expected variable name")?;
+
+        let mut type_annotation = None;
+        if self.match_token(&TokenType::Colon) {
+            let type_token = self.consume_identifier("Expected type name")?;
+            type_annotation = Some(match &type_token.token_type {
+                TokenType::Identifier(name) => name.clone(),
+                _ => return Err("Expected type name".to_string()),
+            });
+        }
+
         self.consume(TokenType::Assign, "Expected '=' after variable name")?;
         let initializer = self.expression()?;
         self.match_token(&TokenType::Newline);
 
         Ok(Statement::VariableDeclaration {
             name,
-            type_annotation: None,
+            type_annotation,
             initializer: Some(initializer),
         })
     }
@@ -489,12 +507,12 @@ mod tests {
         parser.expression()
     }
 
-    fn parse_program(input: &str) -> Result<Program, String> {
-        let mut lexer = Lexer::new(input.to_string());
-        let tokens = lexer.tokenize()?;
-        let mut parser = Parser::new(tokens);
-        parser.parse()
-    }
+fn parse_program(input: &str) -> Result<Program, String> {
+    let mut lexer = Lexer::new(input.to_string());
+    let tokens = lexer.tokenize()?;
+    let mut parser = Parser::new(tokens);
+    parser.parse()
+}
 
     #[test]
     fn test_parse_number() {
@@ -584,6 +602,20 @@ mod tests {
             Statement::VariableDeclaration { name, type_annotation, initializer } => {
                 assert_eq!(name.token_type, TokenType::Identifier("x".to_string()));
                 assert!(type_annotation.is_none());
+                assert!(matches!(initializer.as_ref().unwrap(), Expression::Number(42.0)));
+            }
+            _ => panic!("Expected variable declaration"),
+        }
+    }
+
+    #[test]
+    fn test_parse_variable_declaration_with_type() {
+        let program = parse_program("x: Number = 42").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::VariableDeclaration { name, type_annotation, initializer } => {
+                assert_eq!(name.token_type, TokenType::Identifier("x".to_string()));
+                assert_eq!(type_annotation.as_ref().unwrap(), "Number");
                 assert!(matches!(initializer.as_ref().unwrap(), Expression::Number(42.0)));
             }
             _ => panic!("Expected variable declaration"),

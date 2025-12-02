@@ -3,7 +3,7 @@
 
 # Variable declarations
 name = "Grease"
-version = 0.1
+version: Number = 0.1
 is_awesome = true
 
 print("Welcome to " + name + " v" + version)

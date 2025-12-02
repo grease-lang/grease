@@ -6,5 +6,5 @@
  - [ ] create package system
  - [ ] create package manager
  - [ ] create and package a fairly complex program
- - [ ] update documentation
+ - [x] update documentation
  - [ ] update licensing

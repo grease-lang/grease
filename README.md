@@ -7,14 +7,14 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 ## Features
 
 ### ✅ Currently Implemented
-- **Variables**: `let name = "Grease"` (with optional type annotations: `let age: Number = 25`)
+- **Variables**: `name = "Grease"` (with optional type annotations: `name: String = "Grease"`)
 - **Data Types**: Numbers, Strings, Booleans, Null, Arrays
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%`
 - **Comparisons**: `==`, `!=`, `<`, `<=`, `>`, `>=`
 - **Boolean Logic**: `and`, `or`, `not`
 - **String Concatenation**: Automatic type coercion between strings and numbers
 - **Control Flow**: `if`/`else`, `while` loops, `for` loops
-- **Functions**: Function definitions with parameters and return types
+- **Functions**: Function definitions with parameters
 - **Built-in Functions**: `print()` function
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
@@ -22,29 +22,29 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 ### 🚧 Syntax Examples
 
 ```grease
-// Variable declarations
-let name = "Grease"
-let version: Number = 0.1
-let is_awesome = true
+# Variable declarations
+name = "Grease"
+version: Number = 0.1
+is_awesome = true
 
-// Basic arithmetic
-let x = 10
-let y = 20
-print(x + y)  // 30
+# Basic arithmetic
+x = 10
+y = 20
+print(x + y)  # 30
 
-// Boolean operations
-print(true and false)  // false
-print(true or false)   // true
-print(not true)        // false
+# Boolean operations
+print(true and false)  # false
+print(true or false)   # true
+print(not true)        # false
 
-// String operations
-print("Hello" + " " + "World")  // Hello World
-print("Value: " + 42)             // Value: 42
+# String operations
+print("Hello" + " " + "World")  # Hello World
+print("Value: " + 42)           # Value: 42
 
-// Comparisons
-print(10 > 5)    // true
-print(10 == 10)  // true
-print(10 != 5)    // true
+# Comparisons
+print(10 > 5)   # true
+print(10 == 10) # true
+print(10 != 5)  # true
 ```
 
 ## Installation & Usage
@@ -105,9 +105,9 @@ Grease features:
 - Optional type safety
 
 ### Type System
-- **Dynamic typing** by default
-- **Optional static typing** with type annotations
-- **Type coercion** for intuitive operations
+- **Dynamic typing** by default with automatic type coercion
+- **Optional type annotations** for clarity and documentation
+- **Simple and intuitive** operations between types
 
 ### Memory Safety
 Written entirely in safe Rust with:
@@ -145,6 +145,11 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 ## Testing
 
 Run the test suite:
+```bash
+cargo test
+```
+
+Run examples:
 ```bash
 cargo run examples/simple_final.grease
 ```
