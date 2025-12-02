@@ -11,6 +11,8 @@ pub mod vm;
 pub mod repl;
 pub mod grease;
 pub mod linter;
+pub mod lsp_workspace;
+pub mod lsp_server;
 
 pub use token::*;
 pub use lexer::*;
@@ -22,6 +24,8 @@ pub use vm::*;
 pub use repl::*;
 pub use grease::*;
 pub use linter::*;
+pub use lsp_workspace::*;
+pub use lsp_server::*;
 
 #[cfg(test)]
 mod tests {

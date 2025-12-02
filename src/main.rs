@@ -7,6 +7,7 @@ use clap_mangen::Man;
 use grease::Grease;
 use grease::repl::REPL;
 use grease::vm::InterpretResult;
+use grease::lsp_server::run_server;
 use std::fs;
 use std::io;
 
@@ -46,6 +47,8 @@ enum Commands {
         /// File to lint
         file: String,
     },
+    /// Start Language Server Protocol server
+    Lsp,
 }
 
 fn main() {
@@ -84,6 +87,13 @@ fn main() {
                     eprintln!("Error reading file '{}': {}", file, err);
                     std::process::exit(1);
                 }
+            }
+        }
+        Some(Commands::Lsp) => {
+            // Start LSP server
+            if let Err(e) = tokio::runtime::Runtime::new().unwrap().block_on(run_server()) {
+                eprintln!("LSP server error: {}", e);
+                std::process::exit(1);
             }
         }
         None => {

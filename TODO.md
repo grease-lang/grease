@@ -3,7 +3,9 @@
   - [x] create linter
   - [x] create library/import system
   - [x] create cross-language interop
-  - [ ] create language server with LSP
+  - [x] create language server with LSP
+  - [ ] create support for inline Rust
+  - [ ] create support for inline assembly
   - [ ] create UI kit (future enhancement)
   - [ ] create package system (future enhancement)
   - [ ] create package manager (future enhancement)

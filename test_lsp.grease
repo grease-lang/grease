@@ -1,0 +1,22 @@
+# Test file for Grease LSP
+def greet(name):
+    return "Hello, " + name
+
+result = greet("Grease")
+print(result)
+
+# Test variables
+x: Number = 42
+y = x + 1
+print(y)
+
+# Test control flow
+if x > 0:
+    print("Positive")
+else:
+    print("Non-positive")
+
+# Test loop
+while x < 50:
+    x = x + 1
+    print(x)

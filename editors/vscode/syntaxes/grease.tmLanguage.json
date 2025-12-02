@@ -1,0 +1,126 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Grease",
+  "scopeName": "source.grease",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.grease",
+          "begin": "#",
+          "end": "$"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.grease",
+          "match": "\\b(def|if|elif|else|while|for|in|return|use|as)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.grease",
+          "match": "\\b(and|or|not)\\b"
+        },
+        {
+          "name": "constant.language.boolean.grease",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "constant.language.null.grease",
+          "match": "\\bnull\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.grease",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.grease",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.grease",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.grease",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.grease",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.grease",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.comparison.grease",
+          "match": "==|!=|<=?|>=?"
+        },
+        {
+          "name": "keyword.operator.arithmetic.grease",
+          "match": "\\+|\\-|\\*|\\/|%"
+        },
+        {
+          "name": "keyword.operator.dot.grease",
+          "match": "\\."
+        },
+        {
+          "name": "punctuation.separator.comma.grease",
+          "match": ","
+        },
+        {
+          "name": "punctuation.terminator.grease",
+          "match": ":"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.grease",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

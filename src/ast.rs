@@ -72,7 +72,7 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program {
     pub statements: Vec<Statement>,
 }
