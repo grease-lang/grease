@@ -41,85 +41,42 @@ impl Parser {
     }
 
     fn declaration(&mut self) -> Result<Option<Statement>, String> {
-        if self.match_token(&TokenType::Let) {
-            Ok(Some(self.variable_declaration()?))
-        } else if self.match_token(&TokenType::Fn) {
+        if self.match_token(&TokenType::Fn) {
             Ok(Some(self.function_declaration()?))
         } else {
             self.statement()
         }
     }
 
-    fn variable_declaration(&mut self) -> Result<Statement, String> {
-        let name = self.consume_identifier("Expected variable name")?;
-        
-        let mut type_annotation = None;
-        if self.match_token(&TokenType::Colon) {
-            let type_token = self.consume_identifier("Expected type name")?;
-            type_annotation = Some(match &type_token.token_type {
-                TokenType::Identifier(name) => name.clone(),
-                _ => return Err("Expected type name".to_string()),
-            });
-        }
-        
-        let mut initializer = None;
-        if self.match_token(&TokenType::Assign) {
-            initializer = Some(self.expression()?);
-        }
-        
-        self.match_token(&TokenType::Newline);
-        
-        Ok(Statement::VariableDeclaration {
-            name,
-            type_annotation,
-            initializer,
-        })
-    }
+
 
     fn function_declaration(&mut self) -> Result<Statement, String> {
         let name = self.consume_identifier("Expected function name")?;
-        
+
         self.consume(TokenType::LeftParen, "Expected '(' after function name")?;
-        
+
         let mut parameters = Vec::new();
         if !self.check(&TokenType::RightParen) {
             loop {
                 let param_name = self.consume_identifier("Expected parameter name")?;
-                
-                let mut param_type = None;
-                if self.match_token(&TokenType::Colon) {
-                    let type_token = self.consume_identifier("Expected type name")?;
-                    param_type = Some(match &type_token.token_type {
-                        TokenType::Identifier(name) => name.clone(),
-                        _ => return Err("Expected type name".to_string()),
-                    });
-                }
-                
-                parameters.push((param_name, param_type));
-                
+                parameters.push((param_name, None)); // No type annotations
+
                 if !self.match_token(&TokenType::Comma) {
                     break;
                 }
             }
         }
-        
+
         self.consume(TokenType::RightParen, "Expected ')' after parameters")?;
-        
-        let mut return_type = None;
-        if self.match_token(&TokenType::Colon) {
-            let type_token = self.consume_identifier("Expected return type")?;
-            return_type = Some(match &type_token.token_type {
-                TokenType::Identifier(name) => name.clone(),
-                _ => return Err("Expected type name".to_string()),
-            });
-        }
-        
+
+        self.consume(TokenType::Colon, "Expected ':' after function signature")?;
+
         let body = self.block()?;
-        
+
         Ok(Statement::FunctionDeclaration {
             name,
             parameters,
-            return_type,
+            return_type: None, // No return type annotations
             body,
         })
     }
@@ -135,6 +92,8 @@ impl Parser {
             Ok(Some(self.return_statement()?))
         } else if self.check(&TokenType::LeftBrace) {
             Ok(Some(self.block_statement()?))
+        } else if self.is_assignment_statement() {
+            Ok(Some(self.assignment_statement()?))
         } else {
             let expr = self.expression()?;
             // Only consume newline if it exists (for REPL compatibility)
@@ -145,17 +104,17 @@ impl Parser {
 
     fn if_statement(&mut self) -> Result<Statement, String> {
         let condition = self.expression()?;
+        self.consume(TokenType::Colon, "Expected ':' after if condition")?;
         let then_branch = self.block()?;
-        
+
         let mut else_branch = None;
-        if self.match_token(&TokenType::Else) {
-            if self.check(&TokenType::If) {
-                else_branch = Some(vec![self.if_statement()?]);
-            } else {
-                else_branch = Some(self.block()?);
-            }
+        if self.match_token(&TokenType::Elif) {
+            else_branch = Some(vec![self.if_statement()?]);
+        } else if self.match_token(&TokenType::Else) {
+            self.consume(TokenType::Colon, "Expected ':' after else")?;
+            else_branch = Some(self.block()?);
         }
-        
+
         Ok(Statement::If {
             condition,
             then_branch,
@@ -165,8 +124,9 @@ impl Parser {
 
     fn while_statement(&mut self) -> Result<Statement, String> {
         let condition = self.expression()?;
+        self.consume(TokenType::Colon, "Expected ':' after while condition")?;
         let body = self.block()?;
-        
+
         Ok(Statement::While {
             condition,
             body,
@@ -177,8 +137,9 @@ impl Parser {
         let variable = self.consume_identifier("Expected variable name")?;
         self.consume(TokenType::In, "Expected 'in' after for variable")?;
         let iterable = self.expression()?;
+        self.consume(TokenType::Colon, "Expected ':' after for clause")?;
         let body = self.block()?;
-        
+
         Ok(Statement::For {
             variable,
             iterable,
@@ -202,45 +163,68 @@ impl Parser {
         Ok(Statement::Block(self.block()?))
     }
 
+    fn is_assignment_statement(&mut self) -> bool {
+        // Check if this looks like an assignment: identifier = ...
+        if let Some(token) = self.tokens.peek() {
+            if let TokenType::Identifier(_) = &token.token_type {
+                // Look ahead to see if next token is =
+                let mut temp_tokens = self.tokens.clone();
+                temp_tokens.next(); // consume identifier
+                if let Some(next_token) = temp_tokens.next() {
+                    matches!(next_token.token_type, TokenType::Assign)
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    fn assignment_statement(&mut self) -> Result<Statement, String> {
+        let name = self.consume_identifier("Expected variable name")?;
+        self.consume(TokenType::Assign, "Expected '=' after variable name")?;
+        let initializer = self.expression()?;
+        self.match_token(&TokenType::Newline);
+
+        Ok(Statement::VariableDeclaration {
+            name,
+            type_annotation: None,
+            initializer: Some(initializer),
+        })
+    }
+
     fn block(&mut self) -> Result<Vec<Statement>, String> {
-        self.consume(TokenType::LeftBrace, "Expected '{'")?;
-        
         let mut statements = Vec::new();
-        
-        while !self.check(&TokenType::RightBrace) && !self.is_at_end() {
+
+        // Skip the newline after the colon
+        self.match_token(&TokenType::Newline);
+
+        // Expect an indent
+        self.consume(TokenType::Indent, "Expected indented block")?;
+
+        while !self.check(&TokenType::Dedent) && !self.is_at_end() {
+            self.skip_newlines();
+            if self.check(&TokenType::Dedent) {
+                break;
+            }
             if let Some(statement) = self.declaration()? {
                 statements.push(statement);
             }
         }
-        
-        self.consume(TokenType::RightBrace, "Expected '}' after block")?;
-        
+
+        self.consume(TokenType::Dedent, "Expected end of indented block")?;
+
         Ok(statements)
     }
 
     fn expression(&mut self) -> Result<Expression, String> {
-        self.assignment()
+        self.logical_or()
     }
 
-    fn assignment(&mut self) -> Result<Expression, String> {
-        let expr = self.logical_or()?;
-        
-        if self.match_token(&TokenType::Assign) {
-            let value = self.assignment()?;
-            
-            match expr {
-                Expression::Identifier(ref token) => {
-                    Ok(Expression::Assignment {
-                        name: token.clone(),
-                        value: Box::new(value),
-                    })
-                }
-                _ => Err("Invalid assignment target".to_string()),
-            }
-        } else {
-            Ok(expr)
-        }
-    }
+
 
     fn logical_or(&mut self) -> Result<Expression, String> {
         let mut expr = self.logical_and()?;
@@ -572,17 +556,7 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_parse_assignment() {
-        let expr = parse_expr("x = 42").unwrap();
-        match expr {
-            Expression::Assignment { name, value } => {
-                assert!(matches!(name.token_type, TokenType::Identifier(_)));
-                assert!(matches!(*value, Expression::Number(42.0)));
-            }
-            _ => panic!("Expected assignment"),
-        }
-    }
+
 
     #[test]
     fn test_parse_call() {
@@ -604,7 +578,7 @@ mod tests {
 
     #[test]
     fn test_parse_variable_declaration() {
-        let program = parse_program("let x = 42").unwrap();
+        let program = parse_program("x = 42").unwrap();
         assert_eq!(program.statements.len(), 1);
         match &program.statements[0] {
             Statement::VariableDeclaration { name, type_annotation, initializer } => {
@@ -617,22 +591,8 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_variable_declaration_with_type() {
-        let program = parse_program("let x: Number = 42").unwrap();
-        assert_eq!(program.statements.len(), 1);
-        match &program.statements[0] {
-            Statement::VariableDeclaration { name, type_annotation, initializer } => {
-                assert_eq!(name.token_type, TokenType::Identifier("x".to_string()));
-                assert_eq!(type_annotation.as_ref().unwrap(), "Number");
-                assert!(matches!(initializer.as_ref().unwrap(), Expression::Number(42.0)));
-            }
-            _ => panic!("Expected variable declaration"),
-        }
-    }
-
-    #[test]
     fn test_parse_if_statement() {
-        let program = parse_program("if true { print(1) }").unwrap();
+        let program = parse_program("if true:\n    print(1)").unwrap();
         assert_eq!(program.statements.len(), 1);
         match &program.statements[0] {
             Statement::If { condition, then_branch, else_branch } => {
@@ -646,7 +606,7 @@ mod tests {
 
     #[test]
     fn test_parse_while_statement() {
-        let program = parse_program("while true { print(1) }").unwrap();
+        let program = parse_program("while true:\n    print(1)").unwrap();
         assert_eq!(program.statements.len(), 1);
         match &program.statements[0] {
             Statement::While { condition, body } => {

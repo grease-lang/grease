@@ -427,19 +427,19 @@ mod tests {
 
     #[test]
     fn test_compile_if_statement() {
-        let chunk = compile_code("if true { 1 }").unwrap();
+        let chunk = compile_code("if true:\n    1").unwrap();
         assert!(!chunk.code.is_empty());
     }
 
     #[test]
     fn test_compile_while_statement() {
-        let chunk = compile_code("while true { 1 }").unwrap();
+        let chunk = compile_code("while true:\n    1").unwrap();
         assert!(!chunk.code.is_empty());
     }
 
     #[test]
     fn test_compile_function() {
-        let chunk = compile_code("fn test() { return 1 }").unwrap();
+        let chunk = compile_code("def test():\n    return 1").unwrap();
         assert!(!chunk.code.is_empty());
     }
 

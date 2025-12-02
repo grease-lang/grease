@@ -478,37 +478,37 @@ mod tests {
 
     #[test]
     fn test_vm_variable() {
-        let result = run_code("let x = 42\nx").unwrap();
+        let result = run_code("x = 42\nx").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 
     #[test]
     fn test_vm_assignment() {
-        let result = run_code("let x = 1\nx = 2").unwrap();
+        let result = run_code("x = 1\nx = 2").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 
     #[test]
     fn test_vm_if_statement() {
-        let result = run_code("if true { 1 }").unwrap();
+        let result = run_code("if true:\n    1").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 
     #[test]
     fn test_vm_while_statement() {
-        let result = run_code("while false { }").unwrap();
+        let result = run_code("while false:\n    1").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 
     #[test]
     fn test_vm_function_definition() {
-        let result = run_code("fn test() { return 42 }").unwrap();
+        let result = run_code("def test():\n    return 42").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 
     #[test]
     fn test_vm_function_call() {
-        let result = run_code("fn test() { return 42 }").unwrap();
+        let result = run_code("def test():\n    return 42").unwrap();
         assert_eq!(result, InterpretResult::Ok);
     }
 

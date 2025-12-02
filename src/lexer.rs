@@ -102,14 +102,13 @@ impl Lexer {
                 self.advance();
                 Ok(Some(Token::new(TokenType::Multiply, self.line, self.column)))
             }
+            '#' => {
+                self.skip_comment();
+                Ok(None)
+            }
             '/' => {
                 self.advance();
-                if self.match_char('/') {
-                    self.skip_comment();
-                    Ok(None)
-                } else {
-                    Ok(Some(Token::new(TokenType::Divide, self.line, self.column)))
-                }
+                Ok(Some(Token::new(TokenType::Divide, self.line, self.column)))
             }
             '%' => {
                 self.advance();
@@ -164,9 +163,9 @@ impl Lexer {
         
         let text: String = self.input[start..self.position].iter().collect();
         let token_type = match text.as_str() {
-            "let" => TokenType::Let,
-            "fn" => TokenType::Fn,
+            "def" => TokenType::Fn,
             "if" => TokenType::If,
+            "elif" => TokenType::Elif,
             "else" => TokenType::Else,
             "while" => TokenType::While,
             "for" => TokenType::For,
@@ -337,10 +336,10 @@ mod tests {
 
     #[test]
     fn test_tokenize_identifiers() {
-        let mut lexer = Lexer::new("let x y_z".to_string());
+        let mut lexer = Lexer::new("def x y_z".to_string());
         let tokens = lexer.tokenize().unwrap();
         assert_eq!(tokens.len(), 4);
-        assert_eq!(tokens[0].token_type, TokenType::Let);
+        assert_eq!(tokens[0].token_type, TokenType::Fn);
         assert_eq!(tokens[1].token_type, TokenType::Identifier("x".to_string()));
         assert_eq!(tokens[2].token_type, TokenType::Identifier("y_z".to_string()));
     }
@@ -365,20 +364,21 @@ mod tests {
 
     #[test]
     fn test_tokenize_keywords() {
-        let mut lexer = Lexer::new("let if else while for fn return true false null".to_string());
+        let mut lexer = Lexer::new("def if elif else while for in return true false null".to_string());
         let tokens = lexer.tokenize().unwrap();
-        assert_eq!(tokens.len(), 11); // 10 keywords + EOF
-        assert_eq!(tokens[0].token_type, TokenType::Let);
+        assert_eq!(tokens.len(), 12); // 11 keywords + EOF
+        assert_eq!(tokens[0].token_type, TokenType::Fn);
         assert_eq!(tokens[1].token_type, TokenType::If);
-        assert_eq!(tokens[2].token_type, TokenType::Else);
-        assert_eq!(tokens[3].token_type, TokenType::While);
-        assert_eq!(tokens[4].token_type, TokenType::For);
-        assert_eq!(tokens[5].token_type, TokenType::Fn);
-        assert_eq!(tokens[6].token_type, TokenType::Return);
-        assert_eq!(tokens[7].token_type, TokenType::True);
-        assert_eq!(tokens[8].token_type, TokenType::False);
-        assert_eq!(tokens[9].token_type, TokenType::Null);
-        assert_eq!(tokens[10].token_type, TokenType::EOF);
+        assert_eq!(tokens[2].token_type, TokenType::Elif);
+        assert_eq!(tokens[3].token_type, TokenType::Else);
+        assert_eq!(tokens[4].token_type, TokenType::While);
+        assert_eq!(tokens[5].token_type, TokenType::For);
+        assert_eq!(tokens[6].token_type, TokenType::In);
+        assert_eq!(tokens[7].token_type, TokenType::Return);
+        assert_eq!(tokens[8].token_type, TokenType::True);
+        assert_eq!(tokens[9].token_type, TokenType::False);
+        assert_eq!(tokens[10].token_type, TokenType::Null);
+        assert_eq!(tokens[11].token_type, TokenType::EOF);
     }
 
     #[test]

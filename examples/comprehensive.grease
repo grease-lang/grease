@@ -1,6 +1,6 @@
-let x = 10
-let y = 20
-let name = "Grease"
+x = 10
+y = 20
+name = "Grease"
 
 print("Basic arithmetic:")
 print("  " + x + " + " + y + " = " + (x + y))

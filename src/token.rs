@@ -7,9 +7,9 @@ pub enum TokenType {
     Identifier(String),
     
     // Keywords
-    Let,
     Fn,
     If,
+    Elif,
     Else,
     While,
     For,
