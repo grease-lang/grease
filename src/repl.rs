@@ -80,6 +80,7 @@ impl REPL {
             crate::bytecode::Value::Boolean(b) => b.to_string(),
             crate::bytecode::Value::Null => "null".to_string(),
             crate::bytecode::Value::Function(f) => format!("<fn {}>", f.name),
+            crate::bytecode::Value::NativeFunction(f) => format!("<native fn {}>", f.name),
         }
     }
 }

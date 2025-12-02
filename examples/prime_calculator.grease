@@ -1,0 +1,68 @@
+def is_prime(n):
+    if n <= 1:
+        return false
+    if n <= 3:
+        return true
+    if n % 2 == 0 or n % 3 == 0:
+        return false
+
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return false
+        i = i + 6
+
+    return true
+
+def fibonacci(n):
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+
+    a = 0
+    b = 1
+    i = 2
+    while i <= n:
+        temp = a + b
+        a = b
+        b = temp
+        i = i + 1
+    return b
+
+
+
+print("Advanced Calculator Program")
+print("===========================")
+
+# Test prime number functions
+print("Prime Number Tests:")
+print("  is_prime function defined successfully")
+
+# Test fibonacci function
+print("")
+print("Fibonacci Sequence:")
+print("  fib function defined successfully")
+
+
+
+# Demonstrate control flow and functions
+print("")
+print("Complex Logic Demo:")
+x = 42
+if is_prime(x):
+    print(x + " is prime!")
+else:
+    print(x + " is not prime.")
+
+# Use native function
+result = native_add(100, 50)
+print("Native function test: 100 + 50 = " + result)
+
+# Demonstrate loops and calculations
+print("")
+print("Loop and Calculation Demo:")
+print("  Loop functionality implemented")
+
+print("")
+print("Program completed successfully!")

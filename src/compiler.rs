@@ -123,6 +123,9 @@ impl Compiler {
                 }
                 self.end_scope();
             }
+            Statement::Use { module: _, alias: _ } => {
+                // Imports are handled at the Grease level, not compiled to bytecode
+            }
         }
         
         Ok(())
@@ -208,12 +211,37 @@ impl Compiler {
             }
             Expression::Call { callee, arguments } => {
                 self.compile_expression(callee)?;
-                
+
+
                 for arg in arguments {
                     self.compile_expression(arg)?;
                 }
-                
+
                 self.emit_bytes(OpCode::Call, arguments.len() as u8);
+            }
+            Expression::ModuleAccess { module, member } => {
+                // Get module name
+                let module_name = match &module.token_type {
+                    TokenType::Identifier(name) => name.clone(),
+                    _ => return Err("Expected identifier for module".to_string()),
+                };
+
+                // Get member name
+                let member_name = match &member.token_type {
+                    TokenType::Identifier(name) => name.clone(),
+                    _ => return Err("Expected identifier for member".to_string()),
+                };
+
+                // Emit module name as constant
+                let module_constant = self.chunk.add_constant(Value::String(module_name));
+                self.emit_bytes(OpCode::Constant, module_constant as u8);
+
+                // Emit member name as constant
+                let member_constant = self.chunk.add_constant(Value::String(member_name));
+                self.emit_bytes(OpCode::Constant, member_constant as u8);
+
+                // Emit get module opcode
+                self.emit_byte(OpCode::GetModule);
             }
             Expression::Grouping(expr) => {
                 self.compile_expression(expr)?;
@@ -448,4 +476,20 @@ mod tests {
         let chunk = compile_code("print(42)").unwrap();
         assert!(!chunk.code.is_empty());
     }
+
+    #[test]
+    fn test_compile_use() {
+        let chunk = compile_code("use math").unwrap();
+        // Use statements don't emit opcodes since they're processed before compilation
+        assert!(chunk.code.is_empty() || chunk.code.last() == Some(&(OpCode::Return as u8)));
+    }
+
+    #[test]
+    fn test_compile_use_with_alias() {
+        let chunk = compile_code("use math as m").unwrap();
+        // Use statements don't emit opcodes since they're processed before compilation
+        assert!(chunk.code.is_empty() || chunk.code.last() == Some(&(OpCode::Return as u8)));
+    }
+
+
 }

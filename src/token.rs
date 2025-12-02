@@ -15,6 +15,8 @@ pub enum TokenType {
     For,
     In,
     Return,
+    Use,
+    As,
     True,
     False,
     Null,

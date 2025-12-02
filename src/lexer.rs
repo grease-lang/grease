@@ -171,6 +171,8 @@ impl Lexer {
             "for" => TokenType::For,
             "in" => TokenType::In,
             "return" => TokenType::Return,
+            "use" => TokenType::Use,
+            "as" => TokenType::As,
             "true" => TokenType::True,
             "false" => TokenType::False,
             "null" => TokenType::Null,
@@ -364,9 +366,9 @@ mod tests {
 
     #[test]
     fn test_tokenize_keywords() {
-        let mut lexer = Lexer::new("def if elif else while for in return true false null".to_string());
+        let mut lexer = Lexer::new("def if elif else while for in return use as true false null".to_string());
         let tokens = lexer.tokenize().unwrap();
-        assert_eq!(tokens.len(), 12); // 11 keywords + EOF
+        assert_eq!(tokens.len(), 14); // 13 keywords + EOF
         assert_eq!(tokens[0].token_type, TokenType::Fn);
         assert_eq!(tokens[1].token_type, TokenType::If);
         assert_eq!(tokens[2].token_type, TokenType::Elif);
@@ -375,10 +377,12 @@ mod tests {
         assert_eq!(tokens[5].token_type, TokenType::For);
         assert_eq!(tokens[6].token_type, TokenType::In);
         assert_eq!(tokens[7].token_type, TokenType::Return);
-        assert_eq!(tokens[8].token_type, TokenType::True);
-        assert_eq!(tokens[9].token_type, TokenType::False);
-        assert_eq!(tokens[10].token_type, TokenType::Null);
-        assert_eq!(tokens[11].token_type, TokenType::EOF);
+        assert_eq!(tokens[8].token_type, TokenType::Use);
+        assert_eq!(tokens[9].token_type, TokenType::As);
+        assert_eq!(tokens[10].token_type, TokenType::True);
+        assert_eq!(tokens[11].token_type, TokenType::False);
+        assert_eq!(tokens[12].token_type, TokenType::Null);
+        assert_eq!(tokens[13].token_type, TokenType::EOF);
     }
 
     #[test]

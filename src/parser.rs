@@ -43,6 +43,8 @@ impl Parser {
     fn declaration(&mut self) -> Result<Option<Statement>, String> {
         if self.match_token(&TokenType::Fn) {
             Ok(Some(self.function_declaration()?))
+        } else if self.match_token(&TokenType::Use) {
+            Ok(Some(self.use_statement()?))
         } else {
             self.statement()
         }
@@ -79,6 +81,28 @@ impl Parser {
             return_type: None, // No return type annotations
             body,
         })
+    }
+
+    fn use_statement(&mut self) -> Result<Statement, String> {
+        let module_token = self.consume_identifier("Expected module name after 'use'")?;
+        let module = if let TokenType::Identifier(ref name) = module_token.token_type {
+            name.clone()
+        } else {
+            return Err("Expected identifier for module name".to_string());
+        };
+
+        let alias = if self.match_token(&TokenType::As) {
+            let alias_token = self.consume_identifier("Expected alias name after 'as'")?;
+            if let TokenType::Identifier(ref name) = alias_token.token_type {
+                Some(name.clone())
+            } else {
+                return Err("Expected identifier for alias".to_string());
+            }
+        } else {
+            None
+        };
+
+        Ok(Statement::Use { module, alias })
     }
 
     fn statement(&mut self) -> Result<Option<Statement>, String> {
@@ -360,11 +384,24 @@ impl Parser {
 
     fn call(&mut self) -> Result<Expression, String> {
         let mut expr = self.primary()?;
-        
-        while self.match_token(&TokenType::LeftParen) {
-            expr = self.finish_call(expr)?;
+
+        loop {
+            if self.match_token(&TokenType::LeftParen) {
+                expr = self.finish_call(expr)?;
+            } else if self.match_token(&TokenType::Dot) {
+                let member = self.consume_identifier("Expected property name after '.'")?;
+                expr = Expression::ModuleAccess {
+                    module: match expr {
+                        Expression::Identifier(token) => token,
+                        _ => return Err("Expected identifier before '.'".to_string()),
+                    },
+                    member,
+                };
+            } else {
+                break;
+            }
         }
-        
+
         Ok(expr)
     }
 
@@ -648,4 +685,32 @@ fn parse_program(input: &str) -> Result<Program, String> {
             _ => panic!("Expected while statement"),
         }
     }
+
+    #[test]
+    fn test_parse_use_statement() {
+        let program = parse_program("use math").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::Use { module, alias } => {
+                assert_eq!(module, "math");
+                assert_eq!(*alias, None);
+            }
+            _ => panic!("Expected use statement"),
+        }
+    }
+
+    #[test]
+    fn test_parse_use_statement_with_alias() {
+        let program = parse_program("use math as m").unwrap();
+        assert_eq!(program.statements.len(), 1);
+        match &program.statements[0] {
+            Statement::Use { module, alias } => {
+                assert_eq!(module, "math");
+                assert_eq!(*alias, Some("m".to_string()));
+            }
+            _ => panic!("Expected use statement"),
+        }
+    }
+
+
 }

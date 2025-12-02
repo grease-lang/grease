@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_mangen::Man;
@@ -38,6 +40,11 @@ enum Commands {
     },
     /// Generate manpage
     Manpage,
+    /// Lint Grease source code
+    Lint {
+        /// File to lint
+        file: String,
+    },
 }
 
 fn main() {
@@ -50,6 +57,33 @@ fn main() {
         Some(Commands::Manpage) => {
             let man = Man::new(Args::command());
             man.render(&mut io::stdout()).unwrap();
+        }
+        Some(Commands::Lint { file }) => {
+            match fs::read_to_string(&file) {
+                Ok(source) => {
+                    let mut grease = Grease::new().with_verbose(args.verbose);
+                    match grease.lint(&source) {
+                        Ok(errors) => {
+                            if errors.is_empty() {
+                                println!("No lint errors found.");
+                            } else {
+                                for error in errors {
+                                    println!("{}:{}:{}: {}", file, error.line, error.column, error.message);
+                                }
+                                std::process::exit(1);
+                            }
+                        }
+                        Err(msg) => {
+                            eprintln!("Lint Error: {}", msg);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                Err(err) => {
+                    eprintln!("Error reading file '{}': {}", file, err);
+                    std::process::exit(1);
+                }
+            }
         }
         None => {
             if let Some(code) = args.eval {

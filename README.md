@@ -27,6 +27,10 @@ name = "Grease"
 version: Number = 0.1
 is_awesome = true
 
+# Module imports
+use math
+use string as str
+
 # Basic arithmetic
 x = 10
 y = 20

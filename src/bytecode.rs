@@ -45,6 +45,10 @@ pub enum OpCode {
     
     // Stack
     Pop,
+
+    // Modules
+    Import,
+    GetModule,
 }
 
 #[derive(Debug, Clone)]
@@ -54,6 +58,14 @@ pub enum Value {
     Boolean(bool),
     Null,
     Function(Function),
+    NativeFunction(NativeFunction),
+}
+
+#[derive(Debug, Clone)]
+pub struct NativeFunction {
+    pub name: String,
+    pub arity: usize,
+    pub function: fn(&mut crate::vm::VM, Vec<Value>) -> Result<Value, String>,
 }
 
 #[derive(Debug, Clone)]
@@ -140,6 +152,8 @@ impl Chunk {
                 OpCode::And => self.simple_instruction("AND", offset),
                 OpCode::Or => self.simple_instruction("OR", offset),
                 OpCode::Pop => self.simple_instruction("POP", offset),
+                OpCode::Import => self.constant_instruction("IMPORT", offset),
+                OpCode::GetModule => self.constant_instruction("GET_MODULE", offset),
             },
             None => {
                 println!("Unknown opcode {}", instruction);
@@ -206,6 +220,8 @@ impl OpCode {
             OpCode::And => 27,
             OpCode::Or => 28,
             OpCode::Pop => 29,
+            OpCode::Import => 30,
+            OpCode::GetModule => 31,
         }
     }
 
@@ -241,6 +257,8 @@ impl OpCode {
             27 => Some(OpCode::And),
             28 => Some(OpCode::Or),
             29 => Some(OpCode::Pop),
+            30 => Some(OpCode::Import),
+            31 => Some(OpCode::GetModule),
             _ => None,
         }
     }

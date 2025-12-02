@@ -1,0 +1,5 @@
+result = native_add(5, 3)
+print("5 + 3 = " + result)
+
+result2 = native_add(10, 20)
+print("10 + 20 = " + result2)

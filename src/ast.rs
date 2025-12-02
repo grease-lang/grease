@@ -24,6 +24,10 @@ pub enum Expression {
         callee: Box<Expression>,
         arguments: Vec<Expression>,
     },
+    ModuleAccess {
+        module: Token,
+        member: Token,
+    },
     Grouping(Box<Expression>),
 }
 
@@ -59,6 +63,10 @@ pub enum Statement {
         body: Vec<Statement>,
     },
     Block(Vec<Statement>),
+    Use {
+        module: String,
+        alias: Option<String>,
+    },
 }
 
 #[derive(Debug)]

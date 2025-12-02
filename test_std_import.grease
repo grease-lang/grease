@@ -1,0 +1,9 @@
+use math
+
+result = math.add(5, 3)
+print("5 + 3 = " + result)
+
+product = math.multiply(4, 7)
+print("4 * 7 = " + product)
+
+print("Pi is approximately: " + math.pi)

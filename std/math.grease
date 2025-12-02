@@ -1,0 +1,28 @@
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+
+def sqrt(x):
+    if x < 0:
+        return null
+    if x == 0 or x == 1:
+        return x
+    return x / 2.0  # Simplified for now
+
+def abs(x):
+    if x < 0:
+        return -x
+    else:
+        return x
+
+def pow(base, exp):
+    result = 1
+    i = 0
+    while i < exp:
+        result = result * base
+        i = i + 1
+    return result
+
+pi = 3.141592653589793

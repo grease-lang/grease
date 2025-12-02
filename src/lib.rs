@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pub mod token;
 pub mod lexer;
 pub mod ast;
@@ -7,6 +9,7 @@ pub mod compiler;
 pub mod vm;
 pub mod repl;
 pub mod grease;
+pub mod linter;
 
 pub use token::*;
 pub use lexer::*;
@@ -17,6 +20,7 @@ pub use compiler::*;
 pub use vm::*;
 pub use repl::*;
 pub use grease::*;
+pub use linter::*;
 
 #[cfg(test)]
 mod tests {
@@ -114,6 +118,35 @@ mod tests {
     fn test_type_annotations() {
         let mut grease = Grease::new();
         let result = grease.run("x = 42\nname = \"test\"\nprint(x)\nprint(name)");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_linter_unused_variables() {
+        let mut grease = Grease::new();
+        let source = "x = 42\ny = \"unused\"\nprint(x)";
+        let result = grease.lint(source);
+        assert!(result.is_ok());
+        let errors = result.unwrap();
+        assert_eq!(errors.len(), 1);
+        assert!(errors[0].message.contains("Unused variable 'y'"));
+    }
+
+    #[test]
+    fn test_linter_no_errors() {
+        let mut grease = Grease::new();
+        let source = "x = 42\nprint(x)";
+        let result = grease.lint(source);
+        assert!(result.is_ok());
+        let errors = result.unwrap();
+        assert_eq!(errors.len(), 0);
+    }
+
+    #[test]
+    fn test_native_function() {
+        let mut grease = Grease::new();
+        let result = grease.run("result = native_add(5, 3)\nprint('5 + 3 = ' + result)");
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), InterpretResult::Ok);
     }
