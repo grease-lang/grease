@@ -249,6 +249,12 @@ impl Compiler {
             Expression::Grouping(expr) => {
                 self.compile_expression(expr)?;
             }
+            Expression::Array(elements) => {
+                for element in elements {
+                    self.compile_expression(element)?;
+                }
+                self.emit_bytes(OpCode::Array, elements.len() as u8);
+            }
         }
         
         Ok(())

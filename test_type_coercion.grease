@@ -1,0 +1,7 @@
+# Test various type coercions
+print("Number + String: " + (42 + " answer"))
+print("String + Number: " + ("answer: " + 42))
+print("Boolean + String: " + (true + " value"))
+print("String + Boolean: " + ("value: " + false))
+print("Number + Boolean: " + (42 + true))  # This should fail
+print("Boolean + Number: " + (false + 42))  # This should fail

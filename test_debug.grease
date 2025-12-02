@@ -1,0 +1,3 @@
+i = 0
+print("Type of i: " + i)
+print("Value of i: " + i)

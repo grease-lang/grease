@@ -1,0 +1,4 @@
+use math
+print("Testing pow with 2 and 3")
+result = math.pow(2, 3)
+print("Result: " + result)

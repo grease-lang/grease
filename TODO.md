@@ -14,12 +14,12 @@
   - [x] create comprehensive documentation
 
 ## 🚧 Current Development Priorities
-  - [ ] fix standard library syntax errors in std/math.grease and std/string.grease
-  - [ ] fix boolean concatenation runtime error
-  - [ ] improve type coercion in string operations
-  - [ ] enhance array functionality beyond basic syntax
+  - [x] fix standard library syntax errors in std/math.grease and std/string.grease
+  - [x] fix boolean concatenation runtime error
+  - [x] improve type coercion in string operations
+  - [x] enhance array functionality beyond basic syntax
   - [ ] improve for loop implementation
-  - [ ] add more string functions to standard library
+  - [x] add more string functions to standard library
 
 ## 🎯 Next Major Features
   - [ ] create support for inline Rust
