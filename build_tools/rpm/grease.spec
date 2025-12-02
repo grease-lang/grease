@@ -2,8 +2,8 @@
 # Maintainer: Nick Girga <nickgirga@gmail.com>
 
 Name:           grease
-Version:        0.1.1
-Release:        1%{?dist}
+Version: 0.1.1
+Release: 1%{?dist}
 Summary:        A modern scripting language written in pure Rust
 
 License:        Apache-2.0
@@ -75,15 +75,15 @@ cp -r examples/* %{buildroot}%{_docdir}/%{name}/examples/
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md docs/LSP_README.md docs/TODO.md
+%doc examples/
 %{_bindir}/grease
 %{_mandir}/man1/grease.1*
 %{_datadir}/bash-completion/completions/grease
 %{_datadir}/zsh/site-functions/_grease
 
 %files devel
-%doc docs/LSP_README.md docs/TODO.md
-%doc examples/
+# Development package currently contains no additional files beyond main package
 
 %changelog
 * Tue Dec 02 2025 Nick Girga <nickgirga@gmail.com> - 0.1.1-1

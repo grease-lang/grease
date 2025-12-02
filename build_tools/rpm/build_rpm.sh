@@ -120,7 +120,7 @@ get_version() {
     
     if [ "$NIGHTLY" = true ]; then
         COMMIT_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-        VERSION="${VERSION}-nightly-${COMMIT_SHORT}"
+        VERSION="${VERSION}.nightly.${COMMIT_SHORT}"
     fi
     
     log_info "Building version: $VERSION"
@@ -131,7 +131,7 @@ prepare_source() {
     log_info "Preparing source tarball..."
     
     # Create temporary directory for source
-    local temp_dir="grease-${VERSION}"
+    temp_dir="grease-${VERSION}"
     
     # Clean up any existing temp directory
     rm -rf "$temp_dir"
@@ -180,6 +180,9 @@ update_spec() {
         
         # Update source line to use local tarball
         sed -i "s|^Source0:.*|Source0: ${temp_dir}.tar.gz|" "$nightly_spec"
+        
+        # Fix autosetup line for nightly builds (use original directory name)
+        sed -i "s|^%autosetup -n %{name}-%{version}|%autosetup -n ${temp_dir}|" "$nightly_spec"
         
         SPEC_FILE="$nightly_spec"
         log_success "Spec file updated for nightly build"
