@@ -88,6 +88,15 @@ curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/*.pkg.t
 sudo pacman -U *.pkg.tar.zst
 ```
 
+**Fedora/RHEL/CentOS (.rpm packages):**
+```bash
+# Download from GitLab CI/CD artifacts
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/*.rpm?job=nightly-rpm
+sudo dnf install *.rpm
+# Or for older systems:
+sudo yum install *.rpm
+```
+
 **Or browse all artifacts:** https://gitlab.com/grease-lang/grease/-/artifacts
 
 #### Option 2: Build Packages Locally
@@ -97,9 +106,13 @@ sudo pacman -U *.pkg.tar.zst
 sudo dpkg -i grease_*.deb
 
 # Arch Linux package
-cd build_tools/archlinux/nightly
+cd build_tools/arch/nightly
 makepkg -s --noconfirm
 sudo pacman -U *.pkg.tar.zst
+
+# RPM package (Fedora/RHEL/CentOS)
+./build_tools/rpm/build_rpm.sh --nightly
+sudo dnf install rpmbuild/RPMS/*/grease-nightly-*.rpm
 ```
 
 #### Option 3: Stable Releases
@@ -126,8 +139,17 @@ sudo cp target/release/grease /usr/local/bin/
 
 #### Arch Linux Package
 ```bash
-cd build_tools/archlinux/nightly
+cd build_tools/arch/nightly
 makepkg -s --noconfirm
+```
+
+#### RPM Package (Fedora/RHEL/CentOS)
+```bash
+# Nightly build
+./build_tools/rpm/build_rpm.sh --nightly
+
+# Stable build
+./build_tools/rpm/build_rpm.sh
 ```
 
 ## Usage

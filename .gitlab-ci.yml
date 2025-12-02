@@ -57,16 +57,37 @@ nightly-arch:
     - main
   script:
     - pacman -Syu --noconfirm
-    - pacman -S --noconfirm base-devel rust
+    - pacman -S --noconfirm base-devel rust sudo
     - rustc --version
     - cargo --version
     - cargo test
-    - cp build_tools/archlinux/nightly/PKGBUILD .
-    - makepkg -s --noconfirm
+    - useradd -m -G wheel builder
+    - echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    - cp build_tools/arch/nightly/PKGBUILD .
+    - chown -R builder:builder .
+    - sudo -u builder makepkg -s --noconfirm
   artifacts:
     paths:
       - "*.pkg.tar.zst"
     name: "grease-nightly-arch-$CI_COMMIT_SHORT_SHA"
+
+nightly-rpm:
+  stage: build
+  image: fedora:latest
+  only:
+    - main
+  script:
+    - dnf update -y
+    - dnf install -y rpm-build rust cargo gcc
+    - rustc --version
+    - cargo --version
+    - cargo test
+    - chmod +x build_tools/rpm/build_rpm.sh
+    - ./build_tools/rpm/build_rpm.sh --nightly
+  artifacts:
+    paths:
+      - "rpmbuild/RPMS/**/*.rpm"
+    name: "grease-nightly-rpm-$CI_COMMIT_SHORT_SHA"
 
 stable:
   stage: build
