@@ -1,4 +1,0 @@
-use math
-
-result = math.add(5, 3)
-print(result)

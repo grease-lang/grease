@@ -1,0 +1,34 @@
+# Basics Example: Variables, Arithmetic, Comparisons, Booleans, Strings
+
+# Variables and types
+name = "Grease"
+version: Number = 0.1
+is_cool = true
+
+print("Language: " + name)
+print("Version: " + version)
+print("Is cool: " + is_cool)
+
+# Arithmetic
+x = 10
+y = 20
+print("Addition: " + (x + y))
+print("Subtraction: " + (y - x))
+print("Multiplication: " + (x * y))
+print("Division: " + (y / x))
+
+# Comparisons
+print("Greater than: " + (y > x))
+print("Equal: " + (x == 10))
+print("Not equal: " + (x != y))
+
+# Boolean logic
+print("And: " + (true and false))
+print("Or: " + (true or false))
+print("Not: " + (not true))
+
+# Strings
+greeting = "Hello"
+world = "World"
+print(greeting + " " + world)
+print("Length of greeting: " + 5)  # Simple length

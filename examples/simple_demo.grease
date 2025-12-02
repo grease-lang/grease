@@ -1,2 +1,0 @@
-name = "Grease"
-print("Welcome to " + name)

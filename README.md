@@ -16,6 +16,9 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 - **Control Flow**: `if`/`else`, `while` loops, `for` loops
 - **Functions**: Function definitions with parameters
 - **Built-in Functions**: `print()` function
+- **Module System**: Import standard library modules with `use`
+- **Standard Library**: `math` (add, multiply, sqrt, abs, pow, pi) and `string` (length, uppercase, lowercase, contains) modules
+- **Native Functions**: Call Rust functions from Grease scripts
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
 
@@ -49,6 +52,16 @@ print("Value: " + 42)           # Value: 42
 print(10 > 5)   # true
 print(10 == 10) # true
 print(10 != 5)  # true
+
+# Using standard library
+use math
+print(math.add(5, 3))      # 8
+print(math.sqrt(16))       # 4.0
+print(math.pi)             # 3.141592653589793
+
+use string as str
+print(str.length("hello")) # 5
+print(str.contains("hello", "ell")) # true
 ```
 
 ## Installation & Usage
@@ -135,9 +148,8 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 ### 🎯 Next Features
 - [ ] Dictionaries/objects
 - [ ] Error handling
-- [ ] Module system
 - [ ] Classes and object-oriented features
-- [ ] Standard library expansion
+- [x] Standard library expansion
 
 ### 🚀 Long-term Goals
 - [ ] Package manager
@@ -155,7 +167,7 @@ cargo test
 
 Run examples:
 ```bash
-cargo run examples/simple_final.grease
+cargo run examples/hello.grease
 ```
 
 ## Contributing

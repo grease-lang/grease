@@ -1,0 +1,15 @@
+# Native Functions Example: Integration with Rust
+
+# Call native function (assuming native_add is registered)
+result1 = native_add(5, 3)
+print("Native add 5 + 3 = " + result1)
+
+result2 = native_add(100, 50)
+print("Native add 100 + 50 = " + result2)
+
+# Demonstrate mixing native and Grease functions
+def double_native(x):
+    return native_add(x, x)
+
+doubled = double_native(25)
+print("Double 25 using native: " + doubled)

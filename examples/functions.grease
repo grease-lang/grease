@@ -1,17 +1,30 @@
-# Function definition test
-def greet(name):
-    return "Hello, " + name + "!"
+# Functions Example: Definitions, Calls, and Recursion
 
+# Simple function
+def greet(name):
+    return "Hello, " + name
+
+print(greet("Grease"))
+
+# Function with multiple parameters
 def add(a, b):
     return a + b
 
+result = add(5, 3)
+print("5 + 3 = " + result)
+
+# Recursive function
 def factorial(n):
     if n <= 1:
         return 1
     else:
         return n * factorial(n - 1)
 
-# Test functions
-print(greet("World"))
-print("5 + 3 = " + add(5, 3))
-print("5! = " + factorial(5))
+print("Factorial of 5: " + factorial(5))
+
+# Function calling another function
+def compute_and_greet(x, y):
+    sum = add(x, y)
+    return greet("result is " + sum)
+
+print(compute_and_greet(10, 20))

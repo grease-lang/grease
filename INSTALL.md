@@ -69,7 +69,7 @@ cd Grease
 ./build_deb.sh
 
 # Install package
-sudo dpkg -i grease_0.1.0_amd64.deb
+sudo dpkg -i grease_0.1.1_amd64.deb
 
 # Remove package (if needed)
 sudo dpkg -r grease
