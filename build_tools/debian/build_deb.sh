@@ -33,9 +33,9 @@ if [ "$1" = "--nightly" ]; then
     echo "📝 Updated Cargo.toml version to: $(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')"
     
     # Update man page version
-    sed -i "s/\"grease $BASE_VERSION\"/\"grease $VERSION\"/" grease.1
-    sed -i "s/v$BASE_VERSION/v$VERSION/" grease.1
-    echo "📝 Updated grease.1 version to: $VERSION"
+    sed -i "s/\"grease $BASE_VERSION\"/\"grease $VERSION\"/" docs/grease.1
+    sed -i "s/v$BASE_VERSION/v$VERSION/" docs/grease.1
+    echo "📝 Updated docs/grease.1 version to: $VERSION"
     
 
     
@@ -49,8 +49,8 @@ if [ "$1" = "--nightly" ]; then
     
     # Restore original versions
     sed -i "s/version = \"$VERSION\"/version = \"$BASE_VERSION\"/" Cargo.toml
-    sed -i "s/\"grease $VERSION\"/\"grease $BASE_VERSION\"/" grease.1
-    sed -i "s/v$VERSION/v$BASE_VERSION/" grease.1
+    sed -i "s/\"grease $VERSION\"/\"grease $BASE_VERSION\"/" docs/grease.1
+    sed -i "s/v$VERSION/v$BASE_VERSION/" docs/grease.1
     echo "🔄 Restored original versions"
 else
     VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')

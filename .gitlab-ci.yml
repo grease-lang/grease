@@ -23,8 +23,8 @@ nightly:
     - BASE_VERSION="0.1.1"
     - NIGHTLY_VERSION="0.1.1-nightly-$COMMIT_SHORT"
     - sed -i "s/version = \"$BASE_VERSION\"/version = \"$NIGHTLY_VERSION\"/" Cargo.toml
-    - sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" grease.1
-    - sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" grease.1
+    - sed -i "s/\"grease $BASE_VERSION\"/\"grease $NIGHTLY_VERSION\"/" docs/grease.1
+    - sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" docs/grease.1
     - cat Cargo.toml | grep version
     - cargo clean
     - cargo build --release
@@ -52,11 +52,12 @@ nightly-deb:
 
 nightly-arch:
   stage: build
+  image: archlinux:latest
   only:
     - main
   script:
     - pacman -Syu --noconfirm
-    - pacman -S --noconfirm base-devel
+    - pacman -S --noconfirm base-devel rust
     - rustc --version
     - cargo --version
     - cargo test
