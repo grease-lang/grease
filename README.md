@@ -102,16 +102,16 @@ sudo yum install *.rpm
 **Cross-compiled Binaries:**
 ```bash
 # ARM64 (64-bit ARM)
-curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/aarch64-unknown-linux-gnu/release/grease?job=arm64-cross
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/aarch64-unknown-linux-gnu/release/grease?job=nightly-arm64
 
 # ARM32 (32-bit ARM)
-curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/armv7-unknown-linux-gnueabihf/release/grease?job=arm32-cross
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/armv7-unknown-linux-gnueabihf/release/grease?job=nightly-arm32
 
 # i686 (32-bit x86)
-curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/i686-unknown-linux-gnu/release/grease?job=i686-cross
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/i686-unknown-linux-gnu/release/grease?job=nightly-i686
 
 # RISC-V 64-bit
-curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/riscv64gc-unknown-linux-gnu/release/grease?job=riscv64-cross
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/riscv64gc-unknown-linux-gnu/release/grease?job=nightly-riscv64
 ```
 
 #### Option 2: Build Packages Locally

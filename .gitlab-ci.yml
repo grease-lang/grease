@@ -93,7 +93,7 @@ nightly-rpm:
 
 
 # Cross-compilation jobs for different architectures
-arm64-cross:
+nightly-arm64:
   stage: build
   image: rust:latest
   only:
@@ -107,9 +107,9 @@ arm64-cross:
   artifacts:
     paths:
       - target/aarch64-unknown-linux-gnu/release/grease
-    name: "grease-arm64-$CI_COMMIT_SHORT_SHA"
+    name: "grease-nightly-arm64-$CI_COMMIT_SHORT_SHA"
 
-arm32-cross:
+nightly-arm32:
   stage: build
   image: rust:latest
   only:
@@ -123,9 +123,9 @@ arm32-cross:
   artifacts:
     paths:
       - target/armv7-unknown-linux-gnueabihf/release/grease
-    name: "grease-arm32-$CI_COMMIT_SHORT_SHA"
+    name: "grease-nightly-arm32-$CI_COMMIT_SHORT_SHA"
 
-i686-cross:
+nightly-i686:
   stage: build
   image: rust:latest
   only:
@@ -139,9 +139,9 @@ i686-cross:
   artifacts:
     paths:
       - target/i686-unknown-linux-gnu/release/grease
-    name: "grease-i686-$CI_COMMIT_SHORT_SHA"
+    name: "grease-nightly-i686-$CI_COMMIT_SHORT_SHA"
 
-riscv64-cross:
+nightly-riscv64:
   stage: build
   image: rust:latest
   only:
@@ -155,7 +155,7 @@ riscv64-cross:
   artifacts:
     paths:
       - target/riscv64gc-unknown-linux-gnu/release/grease
-    name: "grease-riscv64-$CI_COMMIT_SHORT_SHA"
+    name: "grease-nightly-riscv64-$CI_COMMIT_SHORT_SHA"
 
 nightly-windows-x64:
   stage: build
