@@ -107,3 +107,72 @@ stable:
     paths:
       - target/release/grease
     name: "grease-$CI_COMMIT_TAG"
+
+# Cross-compilation jobs for different architectures
+arm64-cross:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+    - tags
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - cross test --target aarch64-unknown-linux-gnu
+    - cross build --release --target aarch64-unknown-linux-gnu
+  artifacts:
+    paths:
+      - target/aarch64-unknown-linux-gnu/release/grease
+    name: "grease-arm64-$CI_COMMIT_SHORT_SHA"
+
+arm32-cross:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+    - tags
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - cross test --target armv7-unknown-linux-gnueabihf
+    - cross build --release --target armv7-unknown-linux-gnueabihf
+  artifacts:
+    paths:
+      - target/armv7-unknown-linux-gnueabihf/release/grease
+    name: "grease-arm32-$CI_COMMIT_SHORT_SHA"
+
+i686-cross:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+    - tags
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - cross test --target i686-unknown-linux-gnu
+    - cross build --release --target i686-unknown-linux-gnu
+  artifacts:
+    paths:
+      - target/i686-unknown-linux-gnu/release/grease
+    name: "grease-i686-$CI_COMMIT_SHORT_SHA"
+
+riscv64-cross:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+    - tags
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - cross test --target riscv64gc-unknown-linux-gnu
+    - cross build --release --target riscv64gc-unknown-linux-gnu
+  artifacts:
+    paths:
+      - target/riscv64gc-unknown-linux-gnu/release/grease
+    name: "grease-riscv64-$CI_COMMIT_SHORT_SHA"

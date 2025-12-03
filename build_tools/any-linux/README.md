@@ -14,6 +14,7 @@ A user-friendly installation script that handles both system-wide and user-local
 - 🛣️ Automatically updates PATH if needed
 - 🧪 Verifies installation success
 - 🎖️ No sudo required for user-local installs
+- 🌐 Cross-compilation support for ARM architectures
 
 **Usage:**
 ```bash
@@ -23,15 +24,36 @@ cd grease
 
 # Run the installer
 ./build_tools/any-linux/install.sh
+
+# Build for specific architecture
+./build_tools/any-linux/install.sh --arch arm64-v8a
+./build_tools/any-linux/install.sh --arch armeabi-v7a
+./build_tools/any-linux/install.sh --arch x86_64
+./build_tools/any-linux/install.sh --arch riscv64
+./build_tools/any-linux/install.sh --arch i686
+./build_tools/any-linux/install.sh --arch i386
 ```
 
 **What it does:**
 1. Checks if Rust/Cargo is installed (installs if needed)
-2. Builds Grease using `cargo build --release`
-3. Attempts system-wide installation to `/usr/local/bin` (requires sudo)
-4. Falls back to user-local installation in `~/.local/bin` if no sudo access
-5. Updates PATH in `~/.bashrc` if `~/.local/bin` isn't already in PATH
-6. Tests the installation and provides usage examples
+2. Auto-detects or uses specified target architecture
+3. Builds Grease using `cargo build --release` (native) or `cross build --release --target <target>` (cross-compilation)
+4. Attempts system-wide installation to `/usr/local/bin` (requires sudo)
+5. Falls back to user-local installation in `~/.local/bin` if no sudo access
+6. Updates PATH in `~/.bashrc` if `~/.local/bin` isn't already in PATH
+7. Tests the installation and provides usage examples
+
+**Architecture Options:**
+- `--arch arm64-v8a`: Build for 64-bit ARM (aarch64-unknown-linux-gnu)
+- `--arch armeabi-v7a`: Build for 32-bit ARM v7 (armv7-unknown-linux-gnueabihf)
+- `--arch x86_64`: Build for x86-64 (x86_64-unknown-linux-gnu)
+- `--arch riscv64`: Build for RISC-V 64-bit (riscv64gc-unknown-linux-gnu)
+- `--arch i686`: Build for 32-bit x86 (i686-unknown-linux-gnu, modern)
+- `--arch i386`: Build for 32-bit x86 (i686-unknown-linux-gnu, legacy alias)
+- Auto-detection: If no `--arch` specified, detects from system (`uname -m`)
+
+**Cross-Compilation:**
+For ARM, RISC-V, and 32-bit x86 targets, the script automatically installs and uses the `cross` tool if not present. This allows building binaries for these architectures on x86-64 hosts.
 
 ### `install_system.sh` - System-Wide Installation
 A comprehensive installation script that creates a proper system-wide installation with man page and documentation.
@@ -43,6 +65,7 @@ A comprehensive installation script that creates a proper system-wide installati
 - 📚 Installs documentation and examples
 - 🏗️ Creates proper directory structure
 - 🔧 System-wide integration
+- 🌐 Cross-compilation support for ARM architectures
 
 **Usage:**
 ```bash
@@ -50,8 +73,16 @@ A comprehensive installation script that creates a proper system-wide installati
 git clone https://gitlab.com/grease-lang/grease.git
 cd grease
 
-# Run the system installer (requires sudo)
+# Run the system installer (auto-detects architecture, requires sudo)
 ./build_tools/any-linux/install_system.sh
+
+# Build for specific architecture
+sudo ./build_tools/any-linux/install_system.sh --arch arm64-v8a
+sudo ./build_tools/any-linux/install_system.sh --arch armeabi-v7a
+sudo ./build_tools/any-linux/install_system.sh --arch x86_64
+sudo ./build_tools/any-linux/install_system.sh --arch riscv64
+sudo ./build_tools/any-linux/install_system.sh --arch i686
+sudo ./build_tools/any-linux/install_system.sh --arch i386
 ```
 
 **What it installs:**
@@ -60,12 +91,25 @@ cd grease
 - Documentation: `/usr/local/share/doc/grease/`
 - Examples: `/usr/local/share/doc/grease/*.grease`
 
+**Architecture Options:**
+- `--arch arm64-v8a`: Build for 64-bit ARM (aarch64-unknown-linux-gnu)
+- `--arch armeabi-v7a`: Build for 32-bit ARM v7 (armv7-unknown-linux-gnueabihf)
+- `--arch x86_64`: Build for x86-64 (x86_64-unknown-linux-gnu)
+- `--arch riscv64`: Build for RISC-V 64-bit (riscv64gc-unknown-linux-gnu)
+- `--arch i686`: Build for 32-bit x86 (i686-unknown-linux-gnu, modern)
+- `--arch i386`: Build for 32-bit x86 (i686-unknown-linux-gnu, legacy alias)
+- Auto-detection: If no `--arch` specified, detects from system (`uname -m`)
+
+**Cross-Compilation:**
+For ARM, RISC-V, and 32-bit x86 targets, the script automatically installs and uses the `cross` tool if not present. This allows building binaries for these architectures on x86-64 hosts.
+
 ## Requirements
 
 ### System Requirements
-- **Linux**: Any x86-64 Linux distribution
+- **Linux**: x86-64, ARM64, or ARMv7 Linux distribution
 - **Rust**: Latest stable Rust toolchain with Cargo
-- **Permissions**: 
+- **Cross-compilation**: `cross` tool (automatically installed if needed for ARM targets)
+- **Permissions**:
   - `install.sh`: No special permissions required
   - `install_system.sh`: sudo/root access for system-wide installation
 
@@ -91,6 +135,7 @@ source ~/.bashrc  # or ~/.zshrc, etc.
 | **Examples** | ❌ | ✅ |
 | **PATH Management** | ✅ | ❌ (assumes /usr/local/bin in PATH) |
 | **User-Friendly** | ✅ | ⚠️ (more technical) |
+| **Cross-Compilation** | ✅ | ✅ |
 
 ## Post-Installation Verification
 

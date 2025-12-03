@@ -99,6 +99,21 @@ sudo yum install *.rpm
 
 **Or browse all artifacts:** https://gitlab.com/grease-lang/grease/-/artifacts
 
+**Cross-compiled Binaries:**
+```bash
+# ARM64 (64-bit ARM)
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/aarch64-unknown-linux-gnu/release/grease?job=arm64-cross
+
+# ARM32 (32-bit ARM)
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/armv7-unknown-linux-gnueabihf/release/grease?job=arm32-cross
+
+# i686 (32-bit x86)
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/i686-unknown-linux-gnu/release/grease?job=i686-cross
+
+# RISC-V 64-bit
+curl -LO https://gitlab.com/grease-lang/grease/-/jobs/artifacts/main/raw/target/riscv64gc-unknown-linux-gnu/release/grease?job=riscv64-cross
+```
+
 #### Option 2: Build Packages Locally
 ```bash
 # Debian package
@@ -122,8 +137,14 @@ For stable releases, visit: https://gitlab.com/grease-lang/grease/-/releases
 ```bash
 git clone https://gitlab.com/grease-lang/grease.git
 cd grease
+
+# Native build (auto-detects architecture)
 cargo build --release
 sudo cp target/release/grease /usr/local/bin/
+
+# Or use the installation scripts for cross-compilation support
+./build_tools/any-linux/install.sh --arch arm64-v8a
+./build_tools/any-linux/install.sh --arch i686
 ```
 
 ### 🛠️ Building Packages
