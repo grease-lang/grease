@@ -100,13 +100,18 @@ nightly-arm64:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   only:
     - main
   script:
-     - rustc --version
-     - cargo --version
-     - apt-get update -y && apt-get install -y docker.io
-     - cargo install cross --locked
+    - rustc --version
+    - cargo --version
+    - apt-get update -y && apt-get install -y docker.io
+    - docker info
+    - cargo install cross --locked
      - export PATH="$CARGO_HOME/bin:$PATH"
      - cross test --target aarch64-unknown-linux-gnu
      - cross build --release --target aarch64-unknown-linux-gnu
@@ -124,12 +129,17 @@ nightly-arm32:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   only:
     - main
   script:
     - rustc --version
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
+    - docker info
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target armv7-unknown-linux-gnueabihf
@@ -148,16 +158,21 @@ nightly-i686:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   only:
     - main
   script:
-    - rustc --version
-    - cargo --version
-    - apt-get update -y && apt-get install -y docker.io
-    - cargo install cross --locked
-    - export PATH="$CARGO_HOME/bin:$PATH"
-    - cross test --target i686-unknown-linux-gnu
-    - cross build --release --target i686-unknown-linux-gnu
+     - rustc --version
+     - cargo --version
+     - apt-get update -y && apt-get install -y docker.io
+     - docker info
+     - cargo install cross --locked
+     - export PATH="$CARGO_HOME/bin:$PATH"
+     - cross test --target i686-unknown-linux-gnu
+     - cross build --release --target i686-unknown-linux-gnu
   artifacts:
     paths:
       - target/i686-unknown-linux-gnu/release/grease
@@ -172,6 +187,12 @@ nightly-riscv64:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  before_script:
+    - docker info
   only:
     - main
   script:
@@ -196,12 +217,17 @@ nightly-windows-x64:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   only:
     - main
   script:
     - rustc --version
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
+    - docker info
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
@@ -220,12 +246,17 @@ nightly-windows-x86:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   only:
     - main
   script:
     - rustc --version
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
+    - docker info
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh

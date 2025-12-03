@@ -107,13 +107,18 @@ services:
   - docker:dind
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
 ```
 
 - **Services**: Docker-in-Docker to enable cross-compilation with the `cross` tool
-- **Variables**: Configure Docker TLS certificates for secure communication
+- **Variables**: Configure Docker TLS certificates, storage driver, and daemon connection for secure communication
 
 **Commands**:
 - Install Docker client
+- Verify Docker daemon connectivity with `docker info`
 - Install `cross` tool for cross-compilation
 - Run tests and build for target architecture using `cross test` and `cross build`
 
@@ -175,7 +180,12 @@ All jobs are triggered only on the `main` branch (`only: - main`), ensuring nigh
 ### Docker-in-Docker Setup
 The cross-compilation jobs require Docker-in-Docker configuration:
 - `services: - docker:dind` enables Docker daemon in the CI job
-- `DOCKER_TLS_CERTDIR: "/certs"` configures TLS certificates
+- `DOCKER_TLS_CERTDIR: "/certs"` configures TLS certificates directory
+- `DOCKER_DRIVER: overlay2` sets the storage driver for better performance
+- `DOCKER_HOST: tcp://docker:2376` connects to the Docker daemon via TCP
+- `DOCKER_TLS_VERIFY: 1` enables TLS verification
+- `DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"` points to client certificates
+- `docker info` verifies Docker daemon connectivity after installation
 - This setup allows `cross` tool to function properly
 
 ### Version Updates
