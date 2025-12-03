@@ -101,23 +101,45 @@ impl Compiler {
                 self.emit_byte(OpCode::Pop);
             }
             Statement::For { variable, iterable, body } => {
-                // This is a simplified for loop implementation
-                // In a full implementation, we'd need iterator support
                 self.compile_expression(iterable)?;
                 
-                let _variable_name = match &variable.token_type {
-                    TokenType::Identifier(name) => name.clone(),
-                    _ => return Err("Expected identifier in for loop".to_string()),
+                self.declare_variable(variable)?;
+                self.define_variable(variable)?; // array in variable
+                
+                let variable_name = match &variable.token_type {
+                    TokenType::Identifier(name) => name,
+                    _ => return Err("Expected identifier".to_string()),
                 };
                 
-                self.declare_variable(variable)?;
-                self.define_variable(variable)?;
+                let zero_constant = self.chunk.add_constant(Value::Number(0.0));
+                self.emit_bytes(OpCode::Constant, zero_constant as u8); // index
+                let name_constant = self.chunk.add_constant(Value::String(variable_name.clone()));
+                self.emit_bytes(OpCode::GetGlobal, name_constant as u8); // get array
+                self.emit_byte(OpCode::Length); // length
                 
                 let loop_start = self.chunk.code.len();
                 
+                self.emit_byte(OpCode::Dup); // dup index
+                self.emit_bytes(OpCode::GetGlobal, name_constant as u8); // get array
+                self.emit_byte(OpCode::Index); // element
+                self.emit_bytes(OpCode::SetGlobal, name_constant as u8); // set variable to element
+                
                 self.compile_block(body)?;
                 
-                self.emit_loop(loop_start);
+                let one_constant = self.chunk.add_constant(Value::Number(1.0));
+                self.emit_bytes(OpCode::Constant, one_constant as u8);
+                self.emit_byte(OpCode::Add); // index + 1
+                self.emit_byte(OpCode::Dup); // dup new index
+                self.emit_byte(OpCode::Dup); // dup length
+                self.emit_byte(OpCode::Less); // index < length
+                let jump = self.emit_jump(OpCode::JumpIfTrue);
+                let offset = loop_start as i16 - (jump as i16 + 2);
+                self.chunk.code[jump] = (offset >> 8) as u8;
+                self.chunk.code[jump + 1] = (offset & 0xff) as u8;
+                
+                self.emit_byte(OpCode::Pop); // pop index+1
+                self.emit_byte(OpCode::Pop); // pop length
+                self.emit_byte(OpCode::Pop); // pop index
             }
             Statement::Block(statements) => {
                 self.begin_scope();
@@ -254,6 +276,11 @@ impl Compiler {
                     self.compile_expression(element)?;
                 }
                 self.emit_bytes(OpCode::Array, elements.len() as u8);
+            }
+            Expression::Index { array, index } => {
+                self.compile_expression(array)?;
+                self.compile_expression(index)?;
+                self.emit_byte(OpCode::Index);
             }
         }
         
@@ -490,14 +517,14 @@ mod tests {
     fn test_compile_use() {
         let chunk = compile_code("use math").unwrap();
         // Use statements don't emit opcodes since they're processed before compilation
-        assert!(chunk.code.is_empty() || chunk.code.last() == Some(&(OpCode::Return as u8)));
+        assert_eq!(chunk.code, vec![13]);
     }
 
     #[test]
     fn test_compile_use_with_alias() {
         let chunk = compile_code("use math as m").unwrap();
         // Use statements don't emit opcodes since they're processed before compilation
-        assert!(chunk.code.is_empty() || chunk.code.last() == Some(&(OpCode::Return as u8)));
+        assert_eq!(chunk.code, vec![13]);
     }
 
 

@@ -33,6 +33,10 @@ pub enum Expression {
     },
     Grouping(Box<Expression>),
     Array(Vec<Expression>),
+    Index {
+        array: Box<Expression>,
+        index: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone)]

@@ -22,7 +22,7 @@
   - [x] fix boolean concatenation runtime error
   - [x] improve type coercion in string operations
   - [x] enhance array functionality beyond basic syntax
-  - [ ] improve for loop implementation
+   - [x] improve for loop implementation
   - [x] add more string functions to standard library
 
 ## 🎯 Next Major Features

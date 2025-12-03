@@ -400,6 +400,13 @@ impl Parser {
                     },
                     member,
                 };
+            } else if self.match_token(&TokenType::LeftBracket) {
+                let index = self.expression()?;
+                self.consume(TokenType::RightBracket, "Expected ']' after index")?;
+                expr = Expression::Index {
+                    array: Box::new(expr),
+                    index: Box::new(index),
+                };
             } else {
                 break;
             }

@@ -214,6 +214,10 @@ impl Linter {
             Expression::Grouping(expr) => {
                 self.lint_expression(expr);
             }
+            Expression::Index { array, index } => {
+                self.lint_expression(array);
+                self.lint_expression(index);
+            }
             Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null | Expression::Array(_) => {
                 // Literals don't need linting
             }
