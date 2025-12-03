@@ -113,7 +113,7 @@ variables:
   DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/{target}:v0.2.5
   CROSS_CONTAINER_IN_CONTAINER: "true"
-  CROSS_CONTAINER_OPTS: "--hostname docker"
+  CROSS_REMOTE: "1"
 ```
 
 - **Services**: Docker-in-Docker v28.5.1 to enable cross-compilation with the `cross` tool
@@ -123,7 +123,6 @@ variables:
 - Install Docker client
 - Verify Docker daemon connectivity with `docker info`
 - Install `cross` tool v0.2.5 for cross-compilation
-- Set HOSTNAME to container ID for proper cross container detection
 - Run tests and build for target architecture using `cross test` and `cross build`
 
 ### nightly-windows-x64, nightly-windows-x86
@@ -191,8 +190,7 @@ The cross-compilation jobs require Docker-in-Docker configuration:
 - `DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"` points to client certificates
 - `CROSS_DOCKER_IMAGE` specifies the exact cross-compilation Docker image version
 - `CROSS_CONTAINER_IN_CONTAINER: "true"` tells cross it's running inside a container
-- `CROSS_CONTAINER_OPTS: "--hostname docker"` sets Docker container hostname for proper networking
-- `export HOSTNAME="$(docker container ls -q)"` sets HOSTNAME to container ID for cross container detection
+- `CROSS_REMOTE: "1"` enables remote cross-compilation mode
 - `docker info` verifies Docker daemon connectivity after installation
 - Cross tool version 0.2.5 and Docker images v0.2.5 are pinned for stability
 - This setup allows `cross` tool to function properly
@@ -213,7 +211,7 @@ For stability and reproducibility:
 - Docker-in-Docker: `docker:28.5.1-dind`
 - Cross tool: `cross 0.2.5`
 - Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.5`
-- Cross environment: `CROSS_CONTAINER_IN_CONTAINER=true`, `CROSS_CONTAINER_OPTS="--hostname docker"`
+- Cross environment: `CROSS_CONTAINER_IN_CONTAINER=true`, `CROSS_REMOTE=1`
 - Base images:
   - Rust: `rust:1.91.1`
   - Arch Linux: `archlinux:base-20251019.0.436919`
