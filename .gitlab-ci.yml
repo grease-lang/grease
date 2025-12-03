@@ -99,17 +99,19 @@ nightly-arm64:
   only:
     - main
   script:
-    - rustc --version
-    - cargo --version
-    - apt-get update -y && apt-get install -y podman
-    - cargo install cross --locked
-    - export PATH="$CARGO_HOME/bin:$PATH"
-    - cross test --target aarch64-unknown-linux-gnu
-    - cross build --release --target aarch64-unknown-linux-gnu
+     - rustc --version
+     - cargo --version
+     - apt-get update -y && apt-get install -y docker.io
+     - cargo install cross --locked
+     - export PATH="$CARGO_HOME/bin:$PATH"
+     - cross test --target aarch64-unknown-linux-gnu
+     - cross build --release --target aarch64-unknown-linux-gnu
   artifacts:
     paths:
       - target/aarch64-unknown-linux-gnu/release/grease
     name: "grease-nightly-arm64-$CI_COMMIT_SHORT_SHA"
+
+ 
 
 nightly-arm32:
   stage: build
@@ -119,7 +121,7 @@ nightly-arm32:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y podman
+    - apt-get update -y && apt-get install -y docker.io
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target armv7-unknown-linux-gnueabihf
@@ -129,6 +131,8 @@ nightly-arm32:
       - target/armv7-unknown-linux-gnueabihf/release/grease
     name: "grease-nightly-arm32-$CI_COMMIT_SHORT_SHA"
 
+ 
+
 nightly-i686:
   stage: build
   image: rust:latest
@@ -137,7 +141,7 @@ nightly-i686:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y podman
+    - apt-get update -y && apt-get install -y docker.io
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target i686-unknown-linux-gnu
@@ -147,6 +151,8 @@ nightly-i686:
       - target/i686-unknown-linux-gnu/release/grease
     name: "grease-nightly-i686-$CI_COMMIT_SHORT_SHA"
 
+ 
+
 nightly-riscv64:
   stage: build
   image: rust:latest
@@ -155,7 +161,7 @@ nightly-riscv64:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y podman
+    - apt-get update -y && apt-get install -y docker.io
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target riscv64gc-unknown-linux-gnu
@@ -165,6 +171,8 @@ nightly-riscv64:
       - target/riscv64gc-unknown-linux-gnu/release/grease
     name: "grease-nightly-riscv64-$CI_COMMIT_SHORT_SHA"
 
+ 
+
 nightly-windows-x64:
   stage: build
   image: rust:latest
@@ -173,7 +181,7 @@ nightly-windows-x64:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y podman
+    - apt-get update -y && apt-get install -y docker.io
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
@@ -183,6 +191,8 @@ nightly-windows-x64:
       - target/x86_64-pc-windows-gnu/release/grease.exe
     name: "grease-nightly-windows-x64-$CI_COMMIT_SHORT_SHA"
 
+ 
+
 nightly-windows-x86:
   stage: build
   image: rust:latest
@@ -191,7 +201,7 @@ nightly-windows-x86:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y podman
+    - apt-get update -y && apt-get install -y docker.io
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
