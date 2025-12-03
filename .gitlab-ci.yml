@@ -106,6 +106,7 @@ nightly-arm64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/aarch64-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -137,6 +138,7 @@ nightly-arm32:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/armv7-unknown-linux-gnueabihf:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -168,6 +170,7 @@ nightly-i686:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -199,6 +202,7 @@ nightly-riscv64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/riscv64gc-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -230,6 +234,7 @@ nightly-windows-x64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/x86_64-pc-windows-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -261,6 +266,7 @@ nightly-windows-x86:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-pc-windows-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
+    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
