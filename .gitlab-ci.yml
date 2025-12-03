@@ -90,23 +90,7 @@ nightly-rpm:
       - "rpmbuild/RPMS/**/*.rpm"
     name: "grease-nightly-rpm-$CI_COMMIT_SHORT_SHA"
 
-stable:
-  stage: build
-  only:
-    - tags
-  script:
-    - rustc --version
-    - cargo --version
-    - cargo test
-    - TAG_VERSION=${CI_COMMIT_TAG#v}  # Remove 'v' prefix if present
-    - sed -i "s/version = \"0.1.1\"/version = \"$TAG_VERSION\"/" Cargo.toml
-    - cat Cargo.toml | grep version
-    - cargo clean
-    - cargo build --release
-  artifacts:
-    paths:
-      - target/release/grease
-    name: "grease-$CI_COMMIT_TAG"
+
 
 # Cross-compilation jobs for different architectures
 arm64-cross:
@@ -114,7 +98,6 @@ arm64-cross:
   image: rust:latest
   only:
     - main
-    - tags
   script:
     - rustc --version
     - cargo --version
@@ -131,7 +114,6 @@ arm32-cross:
   image: rust:latest
   only:
     - main
-    - tags
   script:
     - rustc --version
     - cargo --version
@@ -148,7 +130,6 @@ i686-cross:
   image: rust:latest
   only:
     - main
-    - tags
   script:
     - rustc --version
     - cargo --version
@@ -165,7 +146,6 @@ riscv64-cross:
   image: rust:latest
   only:
     - main
-    - tags
   script:
     - rustc --version
     - cargo --version
@@ -176,3 +156,35 @@ riscv64-cross:
     paths:
       - target/riscv64gc-unknown-linux-gnu/release/grease
     name: "grease-riscv64-$CI_COMMIT_SHORT_SHA"
+
+nightly-windows-x64:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - chmod +x build_tools/windows/build_windows.sh
+    - ./build_tools/windows/build_windows.sh --arch x64 --nightly
+  artifacts:
+    paths:
+      - target/x86_64-pc-windows-gnu/release/grease.exe
+    name: "grease-nightly-windows-x64-$CI_COMMIT_SHORT_SHA"
+
+nightly-windows-x86:
+  stage: build
+  image: rust:latest
+  only:
+    - main
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo install cross --locked
+    - chmod +x build_tools/windows/build_windows.sh
+    - ./build_tools/windows/build_windows.sh --arch x86 --nightly
+  artifacts:
+    paths:
+      - target/i686-pc-windows-gnu/release/grease.exe
+    name: "grease-nightly-windows-x86-$CI_COMMIT_SHORT_SHA"
