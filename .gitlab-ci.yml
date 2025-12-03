@@ -101,6 +101,7 @@ nightly-arm64:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target aarch64-unknown-linux-gnu
@@ -118,6 +119,7 @@ nightly-arm32:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target armv7-unknown-linux-gnueabihf
@@ -135,6 +137,7 @@ nightly-i686:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target i686-unknown-linux-gnu
@@ -152,6 +155,7 @@ nightly-riscv64:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target riscv64gc-unknown-linux-gnu
@@ -169,6 +173,7 @@ nightly-windows-x64:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
@@ -186,6 +191,7 @@ nightly-windows-x86:
   script:
     - rustc --version
     - cargo --version
+    - apt-get update -y && apt-get install -y podman
     - cargo install cross --locked
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
