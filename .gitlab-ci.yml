@@ -96,6 +96,10 @@ nightly-rpm:
 nightly-arm64:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
@@ -116,6 +120,10 @@ nightly-arm64:
 nightly-arm32:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
@@ -136,6 +144,10 @@ nightly-arm32:
 nightly-i686:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
@@ -156,6 +168,10 @@ nightly-i686:
 nightly-riscv64:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
@@ -176,6 +192,10 @@ nightly-riscv64:
 nightly-windows-x64:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
@@ -196,6 +216,10 @@ nightly-windows-x64:
 nightly-windows-x86:
   stage: build
   image: rust:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
   only:
     - main
   script:
