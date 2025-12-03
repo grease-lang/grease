@@ -151,6 +151,31 @@ impl Compiler {
             Statement::Use { module: _, alias: _ } => {
                 // Imports are handled at the Grease level, not compiled to bytecode
             }
+            Statement::ClassDeclaration { name, superclass, methods } => {
+                // Compile class definition
+                // Store methods in a class object
+                let mut method_map = std::collections::HashMap::new();
+                for method in methods {
+                    if let Statement::FunctionDeclaration { name: method_name, parameters, return_type: _, body } = method {
+                        let function = self.compile_function(&method_name, &parameters, &body)?;
+                        let method_constant = self.chunk.add_constant(Value::Function(function));
+                        method_map.insert(method_name.token_type.clone(), method_constant);
+                    }
+                }
+                
+                // Create class object
+                let class_value = Value::Class {
+                    name: name.token_type.clone(),
+                    methods: method_map,
+                    superclass: superclass.as_ref().map(|s| s.token_type.clone()),
+                };
+                let class_constant = self.chunk.add_constant(class_value);
+                
+                // Define class as global
+                self.emit_bytes(OpCode::Constant, class_constant as u8);
+                self.declare_variable(&name)?;
+                self.define_variable(&name)?;
+            }
         }
         
         Ok(())
@@ -281,6 +306,41 @@ impl Compiler {
                 self.compile_expression(array)?;
                 self.compile_expression(index)?;
                 self.emit_byte(OpCode::Index);
+            }
+            Expression::NewInstance { class, arguments } => {
+                self.compile_expression(class)?;
+                for arg in arguments {
+                    self.compile_expression(arg)?;
+                }
+                self.emit_bytes(OpCode::CreateInstance, arguments.len() as u8);
+            }
+            Expression::PropertyAccess { object, property } => {
+                self.compile_expression(object)?;
+                let property_constant = self.chunk.add_constant(Value::String(property.token_type.clone()));
+                self.emit_bytes(OpCode::Constant, property_constant as u8);
+                self.emit_byte(OpCode::GetProperty);
+            }
+            Expression::MethodCall { object, method, arguments } => {
+                self.compile_expression(object)?;
+                for arg in arguments {
+                    self.compile_expression(arg)?;
+                }
+                let method_constant = self.chunk.add_constant(Value::String(method.token_type.clone()));
+                self.emit_bytes(OpCode::Constant, method_constant as u8);
+                self.emit_bytes(OpCode::CallMethod, arguments.len() as u8);
+            }
+            Expression::SuperCall { method, arguments } => {
+                // For super(), resolve from class hierarchy
+                if let Some(method) = method {
+                    let method_constant = self.chunk.add_constant(Value::String(method.token_type.clone()));
+                    self.emit_bytes(OpCode::Constant, method_constant as u8);
+                } else {
+                    self.emit_byte(OpCode::Null); // No method for constructor
+                }
+                for arg in arguments {
+                    self.compile_expression(arg)?;
+                }
+                self.emit_bytes(OpCode::GetSuper, arguments.len() as u8);
             }
         }
         

@@ -223,6 +223,31 @@ impl Workspace {
                     self.extract_symbols_from_statement(stmt, uri, symbols, container.clone());
                 }
             }
+            Statement::ClassDeclaration { name, methods, .. } => {
+                if let TokenType::Identifier(ident) = &name.token_type {
+                    symbols.push(Symbol {
+                        name: ident.clone(),
+                        kind: SymbolKind::CLASS,
+                        range: self.token_to_range(name),
+                        selection_range: self.token_to_range(name),
+                        children: Vec::new(),
+                    });
+                    // Extract method symbols
+                    for method in methods {
+                        if let Statement::FunctionDeclaration { name: method_name, .. } = method {
+                            if let TokenType::Identifier(method_ident) = &method_name.token_type {
+                                symbols.last_mut().unwrap().children.push(Symbol {
+                                    name: method_ident.clone(),
+                                    kind: SymbolKind::METHOD,
+                                    range: self.token_to_range(method_name),
+                                    selection_range: self.token_to_range(method_name),
+                                    children: Vec::new(),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -268,8 +293,9 @@ impl Workspace {
         
         // Add language keywords
         let keywords = vec![
-            "def", "if", "elif", "else", "while", "for", "in", 
+            "def", "if", "elif", "else", "while", "for", "in",
             "return", "use", "as", "true", "false", "null",
+            "class", "new", "self", "super",
             "and", "or", "not"
         ];
         

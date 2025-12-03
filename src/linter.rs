@@ -167,6 +167,24 @@ impl Linter {
             Statement::Use { module: _, alias: _ } => {
                 // Imports are handled elsewhere
             }
+            Statement::ClassDeclaration { name, superclass: _, methods } => {
+                // Lint class name as variable
+                let class_name = match &name.token_type {
+                    crate::token::TokenType::Identifier(s) => s.clone(),
+                    _ => return,
+                };
+                let info = VariableInfo {
+                    declared_at: (name.line, name.column),
+                    used: false,
+                    scope_depth: self.scope_depth,
+                };
+                self.variables.insert(class_name, info);
+
+                // Lint methods
+                for method in methods {
+                    self.lint_statement(method);
+                }
+            }
         }
     }
 
@@ -217,6 +235,26 @@ impl Linter {
             Expression::Index { array, index } => {
                 self.lint_expression(array);
                 self.lint_expression(index);
+            }
+            Expression::NewInstance { class, arguments } => {
+                self.lint_expression(class);
+                for arg in arguments {
+                    self.lint_expression(arg);
+                }
+            }
+            Expression::PropertyAccess { object, property: _ } => {
+                self.lint_expression(object);
+            }
+            Expression::MethodCall { object, method: _, arguments } => {
+                self.lint_expression(object);
+                for arg in arguments {
+                    self.lint_expression(arg);
+                }
+            }
+            Expression::SuperCall { method: _, arguments } => {
+                for arg in arguments {
+                    self.lint_expression(arg);
+                }
             }
             Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null | Expression::Array(_) => {
                 // Literals don't need linting

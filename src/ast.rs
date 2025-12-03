@@ -37,6 +37,23 @@ pub enum Expression {
         array: Box<Expression>,
         index: Box<Expression>,
     },
+    NewInstance {
+        class: Box<Expression>,
+        arguments: Vec<Expression>,
+    },
+    PropertyAccess {
+        object: Box<Expression>,
+        property: Token,
+    },
+    MethodCall {
+        object: Box<Expression>,
+        method: Token,
+        arguments: Vec<Expression>,
+    },
+    SuperCall {
+        method: Option<Token>,
+        arguments: Vec<Expression>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -74,6 +91,11 @@ pub enum Statement {
     Use {
         module: String,
         alias: Option<String>,
+    },
+    ClassDeclaration {
+        name: Token,
+        superclass: Option<Token>,
+        methods: Vec<Statement>,
     },
 }
 

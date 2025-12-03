@@ -23,6 +23,10 @@ pub enum TokenType {
     True,
     False,
     Null,
+    Class,
+    New,
+    SelfKw,
+    Super,
     
     // Operators
     Assign,       // =

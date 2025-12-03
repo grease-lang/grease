@@ -115,6 +115,8 @@ impl Parser {
             Ok(Some(self.while_statement()?))
         } else if self.match_token(&TokenType::For) {
             Ok(Some(self.for_statement()?))
+        } else if self.match_token(&TokenType::Class) {
+            Ok(Some(self.class_statement()?))
         } else if self.match_token(&TokenType::Return) {
             Ok(Some(self.return_statement()?))
         } else if self.check(&TokenType::LeftBrace) {
@@ -393,20 +395,30 @@ impl Parser {
                 expr = self.finish_call(expr)?;
             } else if self.match_token(&TokenType::Dot) {
                 let member = self.consume_identifier("Expected property name after '.'")?;
-                expr = Expression::ModuleAccess {
-                    module: match expr {
-                        Expression::Identifier(token) => token,
-                        _ => return Err("Expected identifier before '.'".to_string()),
-                    },
-                    member,
-                };
-            } else if self.match_token(&TokenType::LeftBracket) {
-                let index = self.expression()?;
-                self.consume(TokenType::RightBracket, "Expected ']' after index")?;
-                expr = Expression::Index {
-                    array: Box::new(expr),
-                    index: Box::new(index),
-                };
+                if self.match_token(&TokenType::LeftParen) {
+                    // method call
+                    let mut arguments = Vec::new();
+                    if !self.check(&TokenType::RightParen) {
+                        loop {
+                            arguments.push(self.expression()?);
+                            if !self.match_token(&TokenType::Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
+                    expr = Expression::MethodCall {
+                        object: Box::new(expr),
+                        method: member,
+                        arguments,
+                    };
+                } else {
+                    // property access
+                    expr = Expression::PropertyAccess {
+                        object: Box::new(expr),
+                        property: member,
+                    };
+                }
             } else {
                 break;
             }
@@ -458,6 +470,48 @@ impl Parser {
                 TokenType::Null => {
                     self.advance();
                     return Ok(Expression::Null);
+                }
+                TokenType::New => {
+                    self.advance();
+                    let class = self.primary()?;
+                    self.consume(TokenType::LeftParen, "Expected '(' after new")?;
+                    let mut arguments = Vec::new();
+                    if !self.check(&TokenType::RightParen) {
+                        loop {
+                            arguments.push(self.expression()?);
+                            if !self.match_token(&TokenType::Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
+                    return Ok(Expression::NewInstance {
+                        class: Box::new(class),
+                        arguments,
+                    });
+                }
+                TokenType::Super => {
+                    self.advance();
+                    self.consume(TokenType::LeftParen, "Expected '(' after super")?;
+                    let method = if self.check(&TokenType::RightParen) {
+                        None
+                    } else {
+                        Some(self.consume_identifier("Expected method name")?)
+                    };
+                    let mut arguments = Vec::new();
+                    if !self.check(&TokenType::RightParen) {
+                        loop {
+                            arguments.push(self.expression()?);
+                            if !self.match_token(&TokenType::Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    self.consume(TokenType::RightParen, "Expected ')' after super")?;
+                    return Ok(Expression::SuperCall {
+                        method,
+                        arguments,
+                    });
                 }
                 TokenType::Identifier(_) => {
                     let token = self.advance().unwrap().clone();
@@ -532,50 +586,31 @@ impl Parser {
         }
     }
 
-    fn previous(&self) -> Option<Token> {
-        self.previous.clone()
-    }
-
-    fn current_line(&mut self) -> usize {
-        match self.tokens.peek() {
-            Some(token) => token.line,
-            None => 0,
-        }
-    }
-
-    fn consume_identifier(&mut self, message: &str) -> Result<Token, String> {
-        match self.tokens.peek() {
-            Some(token) => {
-                match &token.token_type {
-                    TokenType::Identifier(_) => {
-                        Ok(self.advance().unwrap())
-                    }
-                    _ => Err(format!("{} at line {}", message, token.line))
-                }
+    fn class_statement(&mut self) -> Result<Statement, String> {
+        let name = self.consume_identifier("Expected class name")?;
+        let superclass = if self.match_token(&TokenType::LeftParen) {
+            let super_name = self.consume_identifier("Expected superclass name")?;
+            self.consume(TokenType::RightParen, "Expected ')' after superclass")?;
+            Some(super_name)
+        } else {
+            None
+        };
+        self.consume(TokenType::Colon, "Expected ':' after class declaration")?;
+        let mut methods = Vec::new();
+        while !self.check(&TokenType::Dedent) && !self.is_at_end() {
+            if self.match_token(&TokenType::Fn) {
+                let method = self.function_declaration()?;
+                methods.push(method);
+            } else {
+                return Err("Expected method declaration in class".to_string());
             }
-            None => Err(format!("{} at end of input", message))
         }
+        Ok(Statement::ClassDeclaration {
+            name,
+            superclass,
+            methods,
+        })
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::lexer::Lexer;
-
-    fn parse_expr(input: &str) -> Result<Expression, String> {
-        let mut lexer = Lexer::new(input.to_string());
-        let tokens = lexer.tokenize()?;
-        let mut parser = Parser::new(tokens);
-        parser.expression()
-    }
-
-fn parse_program(input: &str) -> Result<Program, String> {
-    let mut lexer = Lexer::new(input.to_string());
-    let tokens = lexer.tokenize()?;
-    let mut parser = Parser::new(tokens);
-    parser.parse()
-}
 
     #[test]
     fn test_parse_number() {

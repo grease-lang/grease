@@ -179,6 +179,10 @@ impl Lexer {
             "true" => TokenType::True,
             "false" => TokenType::False,
             "null" => TokenType::Null,
+            "class" => TokenType::Class,
+            "new" => TokenType::New,
+            "self" => TokenType::SelfKw,
+            "super" => TokenType::Super,
             "and" => TokenType::And,
             "or" => TokenType::Or,
             "not" => TokenType::Not,
@@ -370,9 +374,9 @@ mod tests {
 
     #[test]
     fn test_tokenize_keywords() {
-        let mut lexer = Lexer::new("def if elif else while for in return use as true false null".to_string());
+        let mut lexer = Lexer::new("def if elif else while for in return use as true false null class new self super".to_string());
         let tokens = lexer.tokenize().unwrap();
-        assert_eq!(tokens.len(), 14); // 13 keywords + EOF
+        assert_eq!(tokens.len(), 18); // 17 keywords + EOF
         assert_eq!(tokens[0].token_type, TokenType::Fn);
         assert_eq!(tokens[1].token_type, TokenType::If);
         assert_eq!(tokens[2].token_type, TokenType::Elif);
