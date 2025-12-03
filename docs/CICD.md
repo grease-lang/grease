@@ -104,22 +104,23 @@ The following jobs use cross-compilation to build for different architectures an
 **Configuration**:
 ```yaml
 services:
-  - docker:dind
+  - docker:28.5.1-dind
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2376
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/{target}:v0.2.5
 ```
 
-- **Services**: Docker-in-Docker to enable cross-compilation with the `cross` tool
-- **Variables**: Configure Docker TLS certificates, storage driver, and daemon connection for secure communication
+- **Services**: Docker-in-Docker v24.0.5 to enable cross-compilation with the `cross` tool
+- **Variables**: Configure Docker TLS certificates, storage driver, daemon connection, and specify cross-compilation Docker images
 
 **Commands**:
 - Install Docker client
 - Verify Docker daemon connectivity with `docker info`
-- Install `cross` tool for cross-compilation
+- Install `cross` tool v0.2.5 for cross-compilation
 - Run tests and build for target architecture using `cross test` and `cross build`
 
 ### nightly-windows-x64, nightly-windows-x86
@@ -179,13 +180,15 @@ All jobs are triggered only on the `main` branch (`only: - main`), ensuring nigh
 
 ### Docker-in-Docker Setup
 The cross-compilation jobs require Docker-in-Docker configuration:
-- `services: - docker:dind` enables Docker daemon in the CI job
+- `services: - docker:28.5.1-dind` enables Docker daemon v28.5.1 in the CI job
 - `DOCKER_TLS_CERTDIR: "/certs"` configures TLS certificates directory
 - `DOCKER_DRIVER: overlay2` sets the storage driver for better performance
 - `DOCKER_HOST: tcp://docker:2376` connects to the Docker daemon via TCP
 - `DOCKER_TLS_VERIFY: 1` enables TLS verification
 - `DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"` points to client certificates
+- `CROSS_DOCKER_IMAGE` specifies the exact cross-compilation Docker image version
 - `docker info` verifies Docker daemon connectivity after installation
+- Cross tool version 0.2.5 and Docker images v0.2.5 are pinned for stability
 - This setup allows `cross` tool to function properly
 
 ### Version Updates
@@ -198,6 +201,12 @@ Current platforms supported:
 - Linux: x64, ARM64, ARM32, x86, RISC-V64
 - Windows: x64, x86
 - Packaging: Debian, Arch Linux, RPM
+
+### Version Pinning
+For stability and reproducibility:
+- Docker-in-Docker: `docker:28.5.1-dind`
+- Cross tool: `cross 0.2.5`
+- Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.5`
 
 ## Troubleshooting
 
