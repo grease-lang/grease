@@ -106,18 +106,18 @@ nightly-arm64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/aarch64-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
-     - rustc --version
-     - cargo --version
-     - apt-get update -y && apt-get install -y docker.io
-     - docker info
-     - cargo install cross --version 0.2.5
-     - export PATH="$CARGO_HOME/bin:$PATH"
-     - cross test --target aarch64-unknown-linux-gnu
-     - cross build --release --target aarch64-unknown-linux-gnu
+    - rustc --version
+    - cargo --version
+    - apt-get update -y && apt-get install -y docker.io
+    - docker info
+    - cargo install cross --version 0.2.5
+    - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
+    - cross test --target aarch64-unknown-linux-gnu
+    - cross build --release --target aarch64-unknown-linux-gnu
   artifacts:
     paths:
       - target/aarch64-unknown-linux-gnu/release/grease
@@ -138,7 +138,6 @@ nightly-arm32:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/armv7-unknown-linux-gnueabihf:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -148,6 +147,7 @@ nightly-arm32:
     - docker info
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
     - cross test --target armv7-unknown-linux-gnueabihf
     - cross build --release --target armv7-unknown-linux-gnueabihf
   artifacts:
@@ -170,7 +170,6 @@ nightly-i686:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -179,9 +178,10 @@ nightly-i686:
     - apt-get update -y && apt-get install -y docker.io
     - docker info
     - cargo install cross --version 0.2.5
-     - export PATH="$CARGO_HOME/bin:$PATH"
-     - cross test --target i686-unknown-linux-gnu
-     - cross build --release --target i686-unknown-linux-gnu
+    - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
+    - cross test --target i686-unknown-linux-gnu
+    - cross build --release --target i686-unknown-linux-gnu
   artifacts:
     paths:
       - target/i686-unknown-linux-gnu/release/grease
@@ -202,7 +202,6 @@ nightly-riscv64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/riscv64gc-unknown-linux-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -212,6 +211,7 @@ nightly-riscv64:
     - docker info
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
     - cross test --target riscv64gc-unknown-linux-gnu
     - cross build --release --target riscv64gc-unknown-linux-gnu
   artifacts:
@@ -234,7 +234,6 @@ nightly-windows-x64:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/x86_64-pc-windows-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -244,6 +243,7 @@ nightly-windows-x64:
     - docker info
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
     - chmod +x build_tools/windows/build_windows.sh
     - ./build_tools/windows/build_windows.sh --arch x64 --nightly
   artifacts:
@@ -266,7 +266,6 @@ nightly-windows-x86:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-pc-windows-gnu:v0.2.5
     CROSS_CONTAINER_IN_CONTAINER: "true"
-    CROSS_CONTAINER_OPTS: "--hostname docker"
   only:
     - main
   script:
@@ -276,6 +275,7 @@ nightly-windows-x86:
     - docker info
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
+    - export HOSTNAME="$(docker container ls -q)"
     - chmod +x build_tools/windows/build_windows.sh
     - ./build_tools/windows/build_windows.sh --arch x86 --nightly
   artifacts:
