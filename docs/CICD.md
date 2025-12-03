@@ -16,7 +16,7 @@ The CI/CD pipeline is defined in `.gitlab-ci.yml` at the root of the repository.
 stages:
   - build
 
-image: rust:latest
+image: rust:1.91.1
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
@@ -28,7 +28,7 @@ cache:
 ```
 
 - **Stages**: Single `build` stage containing all compilation and packaging jobs
-- **Image**: Uses the latest Rust Docker image as the base environment
+- **Image**: Uses Rust 1.91.1 Docker image as the base environment
 - **Variables**: Sets `CARGO_HOME` to cache Rust toolchain and dependencies within the project directory
 - **Cache**: Caches Cargo registry and build artifacts to speed up subsequent builds
 
@@ -68,7 +68,7 @@ Builds Arch Linux packages.
 
 **Purpose**: Distribution for Arch Linux and derivatives.
 
-**Environment**: Uses `archlinux:latest` image with Arch Linux package manager.
+**Environment**: Uses `archlinux:base-20251019.0.436919` image with Arch Linux package manager.
 
 **Commands**:
 - `pacman -Syu --noconfirm && pacman -S --noconfirm base-devel rust sudo`: Update system and install build dependencies
@@ -84,7 +84,7 @@ Builds RPM packages.
 
 **Purpose**: Distribution for RPM-based Linux distributions (Fedora, RHEL, etc.).
 
-**Environment**: Uses `fedora:latest` image.
+**Environment**: Uses `fedora:43` image.
 
 **Commands**:
 - `dnf update -y && dnf install -y rpm-build rust cargo gcc`: Update system and install RPM build tools
@@ -112,10 +112,11 @@ variables:
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/{target}:v0.2.5
+  CROSS_CONTAINER_IN_CONTAINER: "true"
 ```
 
-- **Services**: Docker-in-Docker v24.0.5 to enable cross-compilation with the `cross` tool
-- **Variables**: Configure Docker TLS certificates, storage driver, daemon connection, and specify cross-compilation Docker images
+- **Services**: Docker-in-Docker v28.5.1 to enable cross-compilation with the `cross` tool
+- **Variables**: Configure Docker TLS certificates, storage driver, daemon connection, cross-compilation images, and container-in-container mode
 
 **Commands**:
 - Install Docker client
@@ -187,6 +188,7 @@ The cross-compilation jobs require Docker-in-Docker configuration:
 - `DOCKER_TLS_VERIFY: 1` enables TLS verification
 - `DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"` points to client certificates
 - `CROSS_DOCKER_IMAGE` specifies the exact cross-compilation Docker image version
+- `CROSS_CONTAINER_IN_CONTAINER: "true"` tells cross it's running inside a container
 - `docker info` verifies Docker daemon connectivity after installation
 - Cross tool version 0.2.5 and Docker images v0.2.5 are pinned for stability
 - This setup allows `cross` tool to function properly
@@ -207,6 +209,11 @@ For stability and reproducibility:
 - Docker-in-Docker: `docker:28.5.1-dind`
 - Cross tool: `cross 0.2.5`
 - Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.5`
+- Cross environment: `CROSS_CONTAINER_IN_CONTAINER=true`
+- Base images:
+  - Rust: `rust:1.91.1`
+  - Arch Linux: `archlinux:base-20251019.0.436919`
+  - Fedora: `fedora:43`
 
 ## Troubleshooting
 
