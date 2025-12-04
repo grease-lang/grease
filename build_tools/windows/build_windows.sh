@@ -53,9 +53,9 @@ fi
 
 # Set target based on arch
 if [ "$ARCH" = "x64" ]; then
-    TARGET="x86_64-pc-windows-msvc"
+    TARGET="x86_64-pc-windows-gnu"
 else
-    TARGET="i686-pc-windows-msvc"
+    TARGET="i686-pc-windows-gnu"
 fi
 
 echo "🦀 Building Grease for Windows $ARCH..."

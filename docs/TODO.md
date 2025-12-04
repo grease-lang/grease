@@ -1,12 +1,41 @@
 
  # ToDo List
 
+## ✅ Recently Completed
+  - [x] create linter with static analysis
+  - [x] create library/import system with modules
+  - [x] create cross-language interop (native functions)
+  - [x] create language server with full LSP implementation
+  - [x] create comprehensive standard library (math, string)
+  - [x] create and package a fairly complex program
+  - [x] update licensing (Apache 2.0)
+  - [x] create editor integrations (VSCode, Neovim)
+  - [x] implement shell completions
+  - [x] create comprehensive documentation
+  - [x] implement automated CI/CD nightly builds for Debian and Arch Linux
+  - [x] create proper package build scripts with version management
+  - [x] fix version display in nightly packages (includes commit hash)
+  - [x] remove redundant installation files and streamline documentation
+
 ## ✅ Current Development Priorities - COMPLETED
-  - [ ] create custom, independent UI kit with pure Rust
-  - [ ] implement JIT compilation
-  - [ ] performance optimizations
+  - [x] fix standard library syntax errors in std/math.grease and std/string.grease
+  - [x] fix boolean concatenation runtime error
+  - [x] improve type coercion in string operations
+  - [x] enhance array functionality beyond basic syntax
+   - [x] improve for loop implementation
+  - [x] add more string functions to standard library
 
 ## 🎯 Next Major Features
+  - [x] create support for inline Rust
+  - [x] create support for inline assembly
+  - [x] implement error handling with try/catch
+  - [x] add dictionaries/objects support
+  - [x] implement classes and object-oriented features
+
+## 🚀 Future Enhancements
+  - [ ] create UI kit (future enhancement)
   - [ ] create package system (future enhancement)
   - [ ] create package manager (future enhancement)
+  - [ ] implement JIT compilation
   - [ ] add WebAssembly target
+  - [ ] performance optimizations
