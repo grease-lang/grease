@@ -53,9 +53,9 @@ fi
 
 # Set target based on arch
 if [ "$ARCH" = "x64" ]; then
-    TARGET="x86_64-pc-windows-msvc"
+    TARGET="x86_64-pc-windows-gnullvm"
 else
-    TARGET="i686-pc-windows-msvc"
+    TARGET="i686-pc-windows-gnullvm"
 fi
 
 echo "🦀 Building Grease for Windows $ARCH..."
@@ -67,8 +67,7 @@ if ! rustup target list --installed | grep -q "$TARGET"; then
     rustup target add "$TARGET"
 fi
 
-# MSVC targets don't require additional toolchain installation
-# Rust's MSVC targets use the Microsoft Visual C++ toolchain automatically
+# gnullvm targets use LLVM's lld linker and don't require additional toolchain installation
 
 # Handle nightly version
 if [ "$NIGHTLY" = true ]; then
