@@ -9,9 +9,9 @@ def multiply(a, b):
 
 def sqrt(x):
     if x < 0:
-        return null
-    if x == 0 or x == 1:
-        return x
+            return null
+        if x == 0 or x == 1:
+            return x
     return x / 2.0  # Simplified for now
 
 def abs(x):

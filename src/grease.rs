@@ -34,6 +34,7 @@ impl Grease {
     pub fn run(&mut self, source: &str) -> Result<InterpretResult, String> {
         if self.verbose {
             eprintln!("🔍 Lexical analysis...");
+            eprintln!("Source input: '{}'", source);
         }
         let mut lexer = Lexer::new(source.to_string());
         let tokens = lexer.tokenize()?;

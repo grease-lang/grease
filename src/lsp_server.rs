@@ -397,8 +397,8 @@ fn extract_document_symbols(ast: &crate::ast::Program, _uri: &Url) -> Vec<Docume
                         tags: None,
                         range: Range::default(),
                         selection_range: Range::default(),
-                                children: None,
-                                deprecated: None,
+                        children: None,
+                        deprecated: None,
                     });
                 }
             }
