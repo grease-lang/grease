@@ -1,3 +1,0 @@
-class Animal:
-    fn make_sound():
-        print("test")

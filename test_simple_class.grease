@@ -1,6 +1,0 @@
-class Animal:
-    fn make_sound():
-        print("Some generic animal sound")
-
-animal = new Animal()
-animal.make_sound()

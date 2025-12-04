@@ -1,3 +1,0 @@
-class Test:
-    fn test():
-        print("hello")
