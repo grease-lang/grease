@@ -52,6 +52,24 @@ impl VM {
                 }
         });
 
+        // Initialize UI functions
+        crate::ui::init_ui(&mut vm);
+
+        // Initialize JIT functions
+        crate::jit::init_jit(&mut vm);
+
+        // Initialize performance optimization functions
+        crate::performance::init_performance_optimizations(&mut vm);
+
+        // Initialize package system functions
+        crate::package::init_package_system(&mut vm);
+
+        // Initialize package manager functions
+        crate::package_manager::init_package_cli(&mut vm);
+
+        // Initialize WebAssembly functions
+        crate::webassembly::init_webassembly(&mut vm);
+
         vm
     }
 

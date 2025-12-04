@@ -1,0 +1,48 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# UI Kit Example for Grease Programming Language
+# This example demonstrates the basic UI functionality
+
+# Create a main window
+window_id = ui_window_create("Grease UI Example", 800, 600, "main_window")
+
+# Add a label
+ui_label_add(window_id, "title_label", "Welcome to Grease UI!", 20, 20)
+
+# Add an input field
+ui_input_add(window_id, "name_input", "Enter your name:", 20, 60, 200)
+
+# Add buttons
+ui_button_add(window_id, "greet_button", "Say Hello", 20, 100, 120)
+ui_button_add(window_id, "exit_button", "Exit", 20, 140, 120)
+
+# Show the window
+ui_window_show(window_id)
+
+# Simple event loop (simplified implementation)
+print("UI Example started!")
+print("Window ID: " + window_id)
+print("In a full implementation, this would start an interactive event loop")
+print("Available UI functions:")
+print("- ui_window_create(title, width, height, window_id)")
+print("- ui_window_show/hide(window_id)")
+print("- ui_button_add(window_id, button_id, label, x, y, width)")
+print("- ui_label_add(window_id, label_id, text, x, y)")
+print("- ui_input_add(window_id, input_id, label, x, y, width)")
+print("- ui_button_clicked(window_id, button_id)")
+print("- ui_input_get_value(window_id, input_id)")
+print("- ui_run() and ui_stop()")
+
+# For now, this is a demonstration of the API
+# In a full implementation, you would have:
+# while ui_running:
+#     if ui_button_clicked(window_id, "greet_button"):
+#         name = ui_input_get_value(window_id, "name_input")
+#         print("Hello, " + name + "!")
+#     
+#     if ui_button_clicked(window_id, "exit_button"):
+#         ui_stop()
+#         break
+
+print("UI Example completed!")

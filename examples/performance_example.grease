@@ -1,0 +1,89 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Performance Optimization Example for Grease Programming Language
+# This example demonstrates performance optimization features
+
+print("Performance Optimization Example")
+print("===============================")
+
+# Enable performance optimizations
+print("Enabling performance optimizations...")
+perf_optimize(true)
+
+# Show performance statistics
+print("Performance Statistics:")
+print(perf_stats())
+
+# Show memory usage
+print("Memory Usage:")
+print(perf_memory())
+
+# Test constant folding optimization
+print("\nConstant Folding Test:")
+print("----------------------")
+
+# These should be optimized at compile time
+result1 = 2 + 3 * 4  # Should be folded to 14
+result2 = "Hello" + " " + "World"  # Should be folded to "Hello World"
+result3 = true and false  # Should be folded to false
+
+print("2 + 3 * 4 = " + result1)
+print("'Hello' + ' ' + 'World' = " + result2)
+print("true and false = " + result3)
+
+# Test dead code elimination
+print("\nDead Code Elimination Test:")
+print("------------------------------")
+
+# Unused variable should be eliminated
+unused_var = "This should be eliminated"
+used_var = "This should be kept"
+
+print("Used variable: " + used_var)
+
+# Test efficient string operations
+print("\nString Optimization Test:")
+print("--------------------------")
+
+# String interning test
+str1 = "frequently_used_string"
+str2 = "frequently_used_string"
+str3 = "another_string"
+
+print("String 1: " + str1)
+print("String 2: " + str2)
+print("String 3: " + str3)
+
+# Performance benchmark
+print("\nPerformance Benchmark:")
+print("----------------------")
+
+def benchmark_function():
+    # Simple computation that benefits from optimization
+    result = 0
+    i = 0
+    while i < 1000:
+        result = result + i
+        i = i + 1
+    return result
+
+# Run benchmark
+start_time = 0  # In a real implementation, this would be actual timing
+benchmark_result = benchmark_function()
+end_time = 0    # In a real implementation, this would be actual timing
+
+print("Benchmark result: " + benchmark_result)
+print("Execution time: " + (end_time - start_time) + "ms")
+
+print("\nPerformance Optimization Features:")
+print("- Constant folding for arithmetic and string operations")
+print("- Dead code elimination for unused variables")
+print("- String interning for efficient string storage")
+print("- Memory pooling for reduced allocation overhead")
+print("- JIT compilation for frequently executed functions")
+print("- Optimized garbage collection")
+
+print("\nPerformance Example completed!")
+print("These optimizations help Grease run faster while maintaining")
+print("the simplicity and ease of use that makes it special.")
