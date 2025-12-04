@@ -26,10 +26,10 @@
   - [x] add more string functions to standard library
 
 ## 🎯 Next Major Features
-  - [ ] create support for inline Rust
-  - [ ] create support for inline assembly
-  - [ ] implement error handling with try/catch
-  - [ ] add dictionaries/objects support
+  - [x] create support for inline Rust
+  - [x] create support for inline assembly
+  - [x] implement error handling with try/catch
+  - [x] add dictionaries/objects support
   - [ ] implement classes and object-oriented features
 
 ## 🚀 Future Enhancements

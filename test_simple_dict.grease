@@ -1,0 +1,3 @@
+# Simple dictionary test
+d = {"a": 1, "b": 2}
+print(d)

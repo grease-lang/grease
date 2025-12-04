@@ -1,0 +1,4 @@
+try:
+    print("In try block")
+catch:
+    print("In catch block")

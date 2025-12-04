@@ -33,6 +33,7 @@ pub enum Expression {
     },
     Grouping(Box<Expression>),
     Array(Vec<Expression>),
+    Dictionary(Vec<(Expression, Expression)>),
     Index {
         array: Box<Expression>,
         index: Box<Expression>,
@@ -53,6 +54,12 @@ pub enum Expression {
     SuperCall {
         method: Option<Token>,
         arguments: Vec<Expression>,
+    },
+    RustInline {
+        code: String,
+    },
+    AsmInline {
+        code: String,
     },
 }
 
@@ -100,6 +107,15 @@ pub enum Statement {
     Try {
         try_block: Vec<Statement>,
         catch_block: Vec<Statement>,
+    },
+    Throw {
+        value: Option<Expression>,
+    },
+    RustInline {
+        code: String,
+    },
+    AsmInline {
+        code: String,
     },
 }
 

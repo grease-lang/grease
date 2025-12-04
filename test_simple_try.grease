@@ -1,0 +1,4 @@
+try:
+    throw "test error"
+catch:
+    print("Caught it")

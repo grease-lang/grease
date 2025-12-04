@@ -1,0 +1,3 @@
+print("before")
+rust { print("hello") }
+print("after")

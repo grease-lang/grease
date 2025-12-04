@@ -21,6 +21,7 @@ pub enum TokenType {
     Use,
     Try,
     Catch,
+    Throw,
     As,
     True,
     False,
@@ -67,6 +68,8 @@ pub enum TokenType {
     Newline,
     Indent,
     Dedent,
+    RustInline,    // rust { ... }
+    AsmInline,     // asm { ... }
     EOF,
 }
 

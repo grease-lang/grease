@@ -1,0 +1,7 @@
+try:
+    print("In try block")
+    throw "Something went wrong"
+    print("This should not execute")
+catch:
+    print("Caught exception:")
+    print()  # This will print the caught exception

@@ -5,7 +5,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_mangen::Man;
 use grease::Grease;
-use grease::repl::REPL;
+use grease::repl;
 use grease::vm::InterpretResult;
 use grease::lsp_server::run_server;
 use std::fs;

@@ -152,7 +152,14 @@ impl Lexer {
             '"' => self.string(),
             '\'' => self.char_string(),
             '0'..='9' => self.number(),
-            'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
+            'a'..='z' | 'A'..='Z' | '_' => {
+                // Check if this is the start of an inline block
+                if self.check_inline_block_start() {
+                    self.inline_block()
+                } else {
+                    self.identifier()
+                }
+            },
             '\n' => self.newline(),
             _ => Err(format!("Unexpected character '{}' at line {}, column {}", c, self.line, self.column)),
         }
@@ -175,6 +182,7 @@ impl Lexer {
             "in" => TokenType::In,
             "return" => TokenType::Return,
             "use" => TokenType::Use,
+            "throw" => TokenType::Throw,
             "as" => TokenType::As,
             "true" => TokenType::True,
             "false" => TokenType::False,
@@ -186,6 +194,10 @@ impl Lexer {
             "and" => TokenType::And,
             "or" => TokenType::Or,
             "not" => TokenType::Not,
+            "rust" => TokenType::Identifier(text.clone()),
+            "asm" => TokenType::Identifier(text.clone()),
+            "try" => TokenType::Try,
+            "catch" => TokenType::Catch,
             "str" => TokenType::Identifier(text.clone()),
             _ => TokenType::Identifier(text.clone()),
         };
@@ -315,6 +327,99 @@ impl Lexer {
 
     fn current_char(&self) -> char {
         self.input[self.position]
+    }
+
+    fn check_inline_block_start(&mut self) -> bool {
+        let start_pos = self.position;
+        
+        // Check if the current identifier is "rust" or "asm"
+        while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+            self.advance();
+        }
+        
+        let text: String = self.input[start_pos..self.position].iter().collect();
+        let is_inline_keyword = text == "rust" || text == "asm";
+        
+        // Reset position
+        self.position = start_pos;
+        
+        if !is_inline_keyword {
+            return false;
+        }
+        
+        // Skip the identifier
+        while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+            self.advance();
+        }
+        
+        // Skip whitespace
+        while !self.is_at_end() && self.current_char().is_whitespace() && self.current_char() != '\n' {
+            self.advance();
+        }
+        
+        // Check if next character is '{'
+        let has_brace = !self.is_at_end() && self.current_char() == '{';
+        
+        // Reset position
+        self.position = start_pos;
+        
+        has_brace
+    }
+    
+    fn inline_block(&mut self) -> Result<Option<Token>, String> {
+        let start_pos = self.position;
+        
+        // Read the keyword (rust or asm)
+        while !self.is_at_end() && (self.current_char().is_alphanumeric() || self.current_char() == '_') {
+            self.advance();
+        }
+        
+        let keyword: String = self.input[start_pos..self.position].iter().collect();
+        
+        // Skip whitespace
+        while !self.is_at_end() && self.current_char().is_whitespace() && self.current_char() != '\n' {
+            self.advance();
+        }
+        
+        // Expect '{'
+        if self.is_at_end() || self.current_char() != '{' {
+            return Err(format!("Expected '{{' after {} at line {}, column {}", keyword, self.line, self.column));
+        }
+        self.advance(); // skip '{'
+        
+        // Find matching closing brace
+        let mut brace_count = 1;
+        let code_start = self.position;
+        
+        while !self.is_at_end() && brace_count > 0 {
+            if self.current_char() == '{' {
+                brace_count += 1;
+            } else if self.current_char() == '}' {
+                brace_count -= 1;
+            } else if self.current_char() == '\n' {
+                self.line += 1;
+                self.column = 1;
+                self.advance();
+                continue;
+            }
+            self.advance();
+        }
+        
+        if brace_count > 0 {
+            return Err(format!("Unterminated inline {} block at line {}", keyword, self.line));
+        }
+        
+        // Extract the code (everything between the braces)
+        let code_end = self.position - 1; // exclude the closing '}'
+        let code: String = self.input[code_start..code_end].iter().collect();
+        
+        let token_type = if keyword == "rust" {
+            TokenType::RustInline
+        } else {
+            TokenType::AsmInline
+        };
+        
+        Ok(Some(Token::new(token_type, code, self.line, self.column)))
     }
 
     fn is_at_end(&self) -> bool {

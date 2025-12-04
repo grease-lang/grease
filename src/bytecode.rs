@@ -36,6 +36,7 @@ pub enum OpCode {
     Array,
     Index,
     Length,
+    Dictionary,
 
     // Classes
     CreateClass,
@@ -64,6 +65,16 @@ pub enum OpCode {
     // Modules
     Import,
     GetModule,
+    
+    // Inline Code
+    RustInline,
+    AsmInline,
+    
+    // Exception Handling
+    Try,
+    Catch,
+    Throw,
+    PopException,
 }
 
 #[derive(Debug, Clone)]
@@ -86,6 +97,7 @@ pub enum Value {
         class_name: String,
         fields: std::collections::HashMap<String, Value>,
     },
+    Dictionary(std::collections::HashMap<String, Value>),
     Class {
         name: String,
         methods: std::collections::HashMap<String, usize>, // constant indices
@@ -178,6 +190,7 @@ impl Chunk {
                 OpCode::Array => self.byte_instruction("ARRAY", offset),
                 OpCode::Index => self.simple_instruction("INDEX", offset),
                 OpCode::Length => self.simple_instruction("LENGTH", offset),
+                OpCode::Dictionary => self.byte_instruction("DICTIONARY", offset),
                 OpCode::CreateClass => self.simple_instruction("CREATE_CLASS", offset),
                 OpCode::CreateInstance => self.simple_instruction("CREATE_INSTANCE", offset),
                 OpCode::GetProperty => self.simple_instruction("GET_PROPERTY", offset),
@@ -196,6 +209,12 @@ impl Chunk {
                 OpCode::Pop => self.simple_instruction("POP", offset),
                 OpCode::Import => self.constant_instruction("IMPORT", offset),
                 OpCode::GetModule => self.constant_instruction("GET_MODULE", offset),
+                OpCode::RustInline => self.constant_instruction("RUST_INLINE", offset),
+                OpCode::AsmInline => self.constant_instruction("ASM_INLINE", offset),
+                OpCode::Try => self.jump_instruction("TRY", 1, offset),
+                OpCode::Catch => self.simple_instruction("CATCH", offset),
+                OpCode::Throw => self.simple_instruction("THROW", offset),
+                OpCode::PopException => self.simple_instruction("POP_EXCEPTION", offset),
             },
             None => {
                 println!("Unknown opcode {}", instruction);
@@ -255,7 +274,8 @@ impl OpCode {
             OpCode::Array => 20,
             OpCode::Index => 30,
             OpCode::Length => 31,
-            OpCode::CreateClass => 32,
+            OpCode::Dictionary => 32,
+            OpCode::CreateClass => 33,
             OpCode::CreateInstance => 33,
             OpCode::GetProperty => 34,
             OpCode::SetProperty => 35,
@@ -274,6 +294,12 @@ impl OpCode {
             OpCode::Import => 49,
             OpCode::GetModule => 50,
             OpCode::Dup => 51,
+            OpCode::RustInline => 52,
+            OpCode::AsmInline => 53,
+            OpCode::Try => 54,
+            OpCode::Catch => 55,
+            OpCode::Throw => 56,
+            OpCode::PopException => 57,
         }
     }
 
@@ -302,12 +328,14 @@ impl OpCode {
             20 => Some(OpCode::Array),
             30 => Some(OpCode::Index),
             31 => Some(OpCode::Length),
-            32 => Some(OpCode::CreateClass),
-            33 => Some(OpCode::CreateInstance),
-            34 => Some(OpCode::GetProperty),
-            35 => Some(OpCode::SetProperty),
-            36 => Some(OpCode::CallMethod),
-            37 => Some(OpCode::GetSuper),
+            32 => Some(OpCode::Dictionary),
+            32 => Some(OpCode::Dictionary),
+            33 => Some(OpCode::CreateClass),
+            34 => Some(OpCode::CreateInstance),
+            35 => Some(OpCode::GetProperty),
+            36 => Some(OpCode::SetProperty),
+            37 => Some(OpCode::CallMethod),
+            38 => Some(OpCode::GetSuper),
             39 => Some(OpCode::Equal),
             40 => Some(OpCode::NotEqual),
             41 => Some(OpCode::Less),
@@ -321,6 +349,12 @@ impl OpCode {
             49 => Some(OpCode::Import),
             50 => Some(OpCode::GetModule),
             51 => Some(OpCode::Dup),
+            52 => Some(OpCode::RustInline),
+            53 => Some(OpCode::AsmInline),
+            54 => Some(OpCode::Try),
+            55 => Some(OpCode::Catch),
+            56 => Some(OpCode::Throw),
+            57 => Some(OpCode::PopException),
             _ => None,
         }
     }

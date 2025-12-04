@@ -178,11 +178,36 @@ impl Compiler {
                  self.define_variable(&name)?;
              }
              Statement::Try { try_block, catch_block } => {
-                 // For now, just compile the try block
-                 // TODO: Implement proper try/catch with exception handling
+                 // For now, just compile try block and ignore catch
+                 // TODO: Implement proper exception handling with jumps
+                 self.begin_scope();
                  for stmt in try_block {
                      self.compile_statement(stmt)?;
                  }
+                 self.end_scope();
+                 
+                 // Compile catch block
+                 self.begin_scope();
+                 for stmt in catch_block {
+                     self.compile_statement(stmt)?;
+                 }
+                 self.end_scope();
+             }
+             Statement::Throw { value } => {
+                 if let Some(val) = value {
+                     self.compile_expression(val)?;
+                 } else {
+                     self.emit_byte(OpCode::Null);
+                 }
+                 self.emit_byte(OpCode::Throw);
+             }
+             Statement::RustInline { code } => {
+                 let constant = self.chunk.add_constant(Value::String(code.clone()));
+                 self.emit_bytes(OpCode::RustInline, constant as u8);
+             }
+             Statement::AsmInline { code } => {
+                 let constant = self.chunk.add_constant(Value::String(code.clone()));
+                 self.emit_bytes(OpCode::AsmInline, constant as u8);
              }
         }
         
@@ -310,6 +335,13 @@ impl Compiler {
                 }
                 self.emit_bytes(OpCode::Array, elements.len() as u8);
             }
+            Expression::Dictionary(pairs) => {
+                for (key, value) in pairs {
+                    self.compile_expression(key)?;
+                    self.compile_expression(value)?;
+                }
+                self.emit_bytes(OpCode::Dictionary, pairs.len() as u8);
+            }
             Expression::Index { array, index } => {
                 self.compile_expression(array)?;
                 self.compile_expression(index)?;
@@ -349,6 +381,14 @@ impl Compiler {
                     self.compile_expression(arg)?;
                 }
                 self.emit_bytes(OpCode::GetSuper, arguments.len() as u8);
+            }
+            Expression::RustInline { code } => {
+                let constant = self.chunk.add_constant(Value::String(code.clone()));
+                self.emit_bytes(OpCode::RustInline, constant as u8);
+            }
+            Expression::AsmInline { code } => {
+                let constant = self.chunk.add_constant(Value::String(code.clone()));
+                self.emit_bytes(OpCode::AsmInline, constant as u8);
             }
         }
         

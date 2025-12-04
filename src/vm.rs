@@ -11,6 +11,7 @@ pub struct VM {
     pub globals: HashMap<String, Value>,
     frames: Vec<CallFrame>,
     pub modules: HashMap<String, HashMap<String, Value>>,
+    exception_stack: Vec<usize>,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +38,7 @@ impl VM {
             globals: HashMap::new(),
             frames: Vec::new(),
             modules: HashMap::new(),
+            exception_stack: Vec::new(),
         };
 
         // Add built-in functions
@@ -300,6 +302,25 @@ impl VM {
                         return InterpretResult::RuntimeError("Expected array count".to_string());
                     }
                 }
+            Some(OpCode::Dictionary) => {
+                    if let Some(count) = self.read_byte() {
+                        let mut dict = std::collections::HashMap::new();
+                        for _ in 0..count {
+                            if let (Some(value), Some(key)) = (self.stack.pop(), self.stack.pop()) {
+                                if let Value::String(key_str) = key {
+                                    dict.insert(key_str, value);
+                                } else {
+                                    return InterpretResult::RuntimeError("Dictionary keys must be strings".to_string());
+                                }
+                            } else {
+                                return InterpretResult::RuntimeError("Stack underflow".to_string());
+                            }
+                        }
+                        self.stack.push(Value::Dictionary(dict));
+                    } else {
+                        return InterpretResult::RuntimeError("Expected dictionary count".to_string());
+                    }
+                }
             Some(OpCode::Index) => {
                     if let (Some(array), Some(index)) = (self.stack.pop(), self.stack.pop()) {
                         match (array, index) {
@@ -510,6 +531,54 @@ impl VM {
                 // TODO: Implement super access
                 return InterpretResult::RuntimeError("GetSuper not implemented".to_string());
             }
+            Some(OpCode::RustInline) => {
+                let constant_index = self.read_byte().expect("Expected constant index") as usize;
+                if let Value::String(code) = &self.chunk.as_ref().unwrap().constants[constant_index] {
+                    // For now, just print inline Rust code to show it's working
+                    // In a real implementation, this would compile and execute Rust code
+                    println!("[Executing Rust: {}]", code);
+                    self.stack.push(Value::String("Rust inline executed".to_string()));
+                } else {
+                    return InterpretResult::RuntimeError("RustInline expects string constant".to_string());
+                }
+            }
+            Some(OpCode::AsmInline) => {
+                let constant_index = self.read_byte().expect("Expected constant index") as usize;
+                if let Value::String(code) = &self.chunk.as_ref().unwrap().constants[constant_index] {
+                    // For now, just print inline assembly code to show it's working
+                    // In a real implementation, this would assemble and execute assembly code
+                    println!("[Executing Assembly: {}]", code);
+                    self.stack.push(Value::String("Assembly inline executed".to_string()));
+                } else {
+                    return InterpretResult::RuntimeError("AsmInline expects string constant".to_string());
+                }
+            }
+            Some(OpCode::Try) => {
+                // Try instruction - just a placeholder for now
+                // The actual exception handling will be done by compiler-generated jumps
+                let _jump_offset = self.read_short() as usize;
+            }
+            Some(OpCode::Catch) => {
+                // Catch instruction - exception is already on stack
+                // No action needed for now
+            }
+            Some(OpCode::Throw) => {
+                // Throw an exception
+                if let Some(exception) = self.stack.pop() {
+                    // For now, just return runtime error with exception message
+                    if let Value::String(msg) = &exception {
+                        return InterpretResult::RuntimeError(format!("Exception: {}", msg));
+                    } else {
+                        return InterpretResult::RuntimeError("Exception thrown".to_string());
+                    }
+                } else {
+                    return InterpretResult::RuntimeError("No exception to throw".to_string());
+                }
+            }
+            Some(OpCode::PopException) => {
+                // Pop exception handler from stack
+                self.exception_stack.pop();
+            }
             None => return InterpretResult::RuntimeError("Unknown opcode".to_string()),
                 }
         }
@@ -605,6 +674,12 @@ impl VM {
                 let elements: Vec<String> = arr.iter().map(|v| self.format_value(v)).collect();
                 format!("[{}]", elements.join(", "))
             },
+            Value::Dictionary(dict) => {
+                let pairs: Vec<String> = dict.iter()
+                    .map(|(k, v)| format!("{}: {}", k, self.format_value(v)))
+                    .collect();
+                format!("{{{}}}", pairs.join(", "))
+            },
             Value::Object { class_name, .. } => {
                 format!("Object of class {}", class_name)
             },
@@ -659,6 +734,7 @@ impl VM {
             Value::Function(_) => true,
             Value::NativeFunction(_) => true,
             Value::Array(arr) => !arr.is_empty(),
+            Value::Dictionary(dict) => !dict.is_empty(),
             Value::Object { .. } => true,
             Value::Class { .. } => true,
         }

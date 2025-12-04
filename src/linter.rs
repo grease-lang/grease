@@ -198,6 +198,17 @@ impl Linter {
                  }
                  self.scope_depth -= 1;
              }
+             Statement::Throw { value } => {
+                 if let Some(val) = value {
+                     self.lint_expression(val);
+                 }
+             }
+             Statement::RustInline { code: _ } => {
+                 // Inline Rust code doesn't need linting for now
+             }
+             Statement::AsmInline { code: _ } => {
+                 // Inline assembly code doesn't need linting for now
+             }
         }
     }
 
@@ -269,7 +280,13 @@ impl Linter {
                     self.lint_expression(arg);
                 }
             }
-            Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null | Expression::Array(_) => {
+            Expression::RustInline { code: _ } => {
+                // Inline Rust code doesn't need linting for now
+            }
+            Expression::AsmInline { code: _ } => {
+                // Inline assembly code doesn't need linting for now
+            }
+            Expression::Number(_) | Expression::String(_) | Expression::Boolean(_) | Expression::Null | Expression::Array(_) | Expression::Dictionary(_) => {
                 // Literals don't need linting
             }
         }

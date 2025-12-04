@@ -1,0 +1,3 @@
+print("before")
+asm { mov eax, 42 }
+print("after")

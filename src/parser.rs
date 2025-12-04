@@ -133,10 +133,16 @@ impl Parser {
             Ok(Some(self.class_statement()?))
         } else if self.match_token(&TokenType::Try) {
             Ok(Some(self.try_statement()?))
+        } else if self.match_token(&TokenType::Throw) {
+            Ok(Some(self.throw_statement()?))
         } else if self.match_token(&TokenType::Return) {
             Ok(Some(self.return_statement()?))
         } else if self.check(&TokenType::LeftBrace) {
             Ok(Some(self.block_statement()?))
+        } else if self.check(&TokenType::RustInline) {
+            Ok(Some(self.rust_inline_statement()?))
+        } else if self.check(&TokenType::AsmInline) {
+            Ok(Some(self.asm_inline_statement()?))
         } else if self.is_assignment_statement() {
             Ok(Some(self.assignment_statement()?))
         } else {
@@ -177,6 +183,15 @@ impl Parser {
             try_block,
             catch_block,
         })
+    }
+
+    fn throw_statement(&mut self) -> Result<Statement, String> {
+        let value = if self.check(&TokenType::Newline) || self.check(&TokenType::EOF) {
+            None
+        } else {
+            Some(self.expression()?)
+        };
+        Ok(Statement::Throw { value })
     }
 
     fn while_statement(&mut self) -> Result<Statement, String> {
@@ -567,6 +582,26 @@ impl Parser {
                     self.consume(TokenType::RightBracket, "Expected ']' after array elements")?;
                     return Ok(Expression::Array(elements));
                 }
+                TokenType::LeftBrace => {
+                    self.advance();
+                    let mut pairs = Vec::new();
+                    
+                    if !self.check(&TokenType::RightBrace) {
+                        loop {
+                            let key = self.expression()?;
+                            self.consume(TokenType::Colon, "Expected ':' after dictionary key")?;
+                            let value = self.expression()?;
+                            pairs.push((key, value));
+                            
+                            if !self.match_token(&TokenType::Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    
+                    self.consume(TokenType::RightBrace, "Expected '}' after dictionary pairs")?;
+                    return Ok(Expression::Dictionary(pairs));
+                }
                 _ => {}
             }
         }
@@ -651,6 +686,24 @@ impl Parser {
 
     fn current_line(&self) -> usize {
         self.previous.as_ref().map(|t| t.line).unwrap_or(0)
+    }
+
+    fn rust_inline_statement(&mut self) -> Result<Statement, String> {
+        let token = self.advance().unwrap();
+        if let TokenType::RustInline = token.token_type {
+            Ok(Statement::RustInline { code: token.lexeme })
+        } else {
+            Err("Expected rust inline block".to_string())
+        }
+    }
+
+    fn asm_inline_statement(&mut self) -> Result<Statement, String> {
+        let token = self.advance().unwrap();
+        if let TokenType::AsmInline = token.token_type {
+            Ok(Statement::AsmInline { code: token.lexeme })
+        } else {
+            Err("Expected asm inline block".to_string())
+        }
     }
 
     #[cfg(test)]
