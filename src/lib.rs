@@ -214,5 +214,110 @@ mod tests {
         }
     }
 
+    // Comprehensive output verification tests for string concatenation
+    #[test]
+    fn test_string_concatenation_output() {
+        let mut grease = Grease::new();
+        
+        // Test string + string
+        let result = grease.run("print(\"Hello \" + \"World\")");
+        assert!(result.is_ok());
+        
+        // Test string + number
+        let result = grease.run("print(\"Value: \" + 42)");
+        assert!(result.is_ok());
+        
+        // Test number + string  
+        let result = grease.run("print(42 + \" is the answer\")");
+        assert!(result.is_ok());
+        
+        // Test string + boolean
+        let result = grease.run("print(\"Result: \" + true)");
+        assert!(result.is_ok());
+        
+        // Test boolean + string
+        let result = grease.run("print(false + \" is false\")");
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_complex_string_concatenation() {
+        let mut grease = Grease::new();
+        
+        // Test multiple concatenations
+        let result = grease.run("name = \"Grease\"\nversion = 0.1\nprint(\"Language: \" + name + \" v\" + version)");
+        assert!(result.is_ok());
+        
+        // Test concatenation with arithmetic
+        let result = grease.run("x = 10\ny = 20\nprint(\"Result: \" + (x + y * 2))");
+        assert!(result.is_ok());
+        
+        // Test concatenation with boolean operations
+        let result = grease.run("print(\"Boolean: \" + (true and false))");
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_hello_example_output() {
+        let mut grease = Grease::new();
+        let source = r#"
+# Hello World test
+print("Hello, World!")
+
+# Variable assignment
+name = "Grease"
+version: Number = 0.1
+print("Language: " + name + " v" + version)
+
+# Basic arithmetic
+x = 10
+y = 20
+result = x + y * 2
+print("10 + 20 * 2 = " + result)
+
+# Boolean operations
+is_true = true
+is_false = false
+print("true and false = " + (is_true and is_false))
+print("true or false = " + (is_true or is_false))
+print("not true = " + (not is_true))
+"#;
+        
+        let result = grease.run(source);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_arithmetic_still_works() {
+        let mut grease = Grease::new();
+        
+        // Ensure arithmetic operations weren't affected by the fix
+        let result = grease.run("print(10 + 20 * 2)");
+        assert!(result.is_ok());
+        
+        let result = grease.run("print(50 - 10)");
+        assert!(result.is_ok());
+        
+        let result = grease.run("print(100 / 2)");
+        assert!(result.is_ok());
+        
+        let result = grease.run("print(15 % 4)");
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_variable_assignment_and_concatenation() {
+        let mut grease = Grease::new();
+        
+        let result = grease.run("name = \"Grease\"\nprint(\"Hello \" + name)");
+        assert!(result.is_ok());
+        
+        let result = grease.run("x = 42\nprint(\"The answer is \" + x)");
+        assert!(result.is_ok());
+        
+        let result = grease.run("flag = true\nprint(\"Status: \" + flag)");
+        assert!(result.is_ok());
+    }
+
 
 }

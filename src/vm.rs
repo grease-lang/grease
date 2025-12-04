@@ -86,7 +86,7 @@ impl VM {
             }
             Some(OpCode::Add) => {
                 let (b, a) = match (self.stack.pop(), self.stack.pop()) {
-                    (Some(b), Some(a)) => (a, b),
+                    (Some(b), Some(a)) => (b, a),
                     _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
                 };
                 
