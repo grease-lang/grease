@@ -67,7 +67,8 @@ if ! rustup target list --installed | grep -q "$TARGET"; then
     rustup target add "$TARGET"
 fi
 
-# gnullvm targets use LLVM's lld linker and don't require additional toolchain installation
+# gnullvm targets use LLVM's lld linker (rust-lld) which comes with Rust toolchain
+# No external toolchain installation required
 
 # Handle nightly version
 if [ "$NIGHTLY" = true ]; then
