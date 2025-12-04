@@ -138,6 +138,10 @@ For stable releases, visit: https://gitlab.com/grease-lang/grease/-/releases
 git clone https://gitlab.com/grease-lang/grease.git
 cd grease
 
+# Ensure correct Rust version (required for Windows cross-compilation)
+rustup install 1.85.1
+rustup default 1.85.1
+
 # Native build (auto-detects architecture)
 cargo build --release
 sudo cp target/release/grease /usr/local/bin/
@@ -145,6 +149,23 @@ sudo cp target/release/grease /usr/local/bin/
 # Or use the installation scripts for cross-compilation support
 ./build_tools/any-linux/install.sh --arch arm64-v8a
 ./build_tools/any-linux/install.sh --arch i686
+```
+
+### 🔧 Rust Version Requirements
+
+**Required Rust version: 1.85.1**
+
+Grease requires Rust 1.85.1 specifically due to cross-compilation issues with Windows builds in newer Rust versions (1.86.0+). The project includes a `rust-toolchain.toml` file that automatically selects the correct version when using Rustup.
+
+To verify your Rust version:
+```bash
+rustc --version  # Should show rustc 1.85.1
+```
+
+To install the correct version:
+```bash
+rustup install 1.85.1
+rustup default 1.85.1
 ```
 
 ### 🛠️ Building Packages

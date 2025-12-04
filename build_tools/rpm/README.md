@@ -19,6 +19,10 @@ sudo dnf install rpm-build rust cargo
 
 # On older systems with yum
 sudo yum install rpm-build rust cargo
+
+# Ensure Rust 1.85.1 is installed
+rustup install 1.85.1
+rustup default 1.85.1
 ```
 
 ### Standard Build
@@ -192,7 +196,8 @@ sudo dnf install rpm-build rust cargo gcc
 - Don't run as root unless necessary
 
 **Rust compilation errors:**
-- Check Rust toolchain version: `rustc --version`
+- Check Rust toolchain version: `rustc --version` (should be 1.85.1)
+- Install correct version: `rustup install 1.85.1 && rustup default 1.85.1`
 - Clean build: `cargo clean` before rebuilding
 
 ### Package Conflicts

@@ -4,7 +4,7 @@ This directory contains scripts to build Windows binaries for Grease via cross-c
 
 ## Prerequisites
 
-- **Rust toolchain**: Latest stable Rust with Cargo
+- **Rust toolchain**: Rust 1.85.1 with Cargo
 - **Cross tool**: For cross-compilation to Windows
   ```bash
   cargo install cross --locked
@@ -73,7 +73,7 @@ cargo install cross --locked
 ```
 
 ### Build fails
-- Ensure Rust is up to date: `rustup update`
+- Ensure Rust 1.85.1 is installed: `rustup update 1.85.1` or use `rust-toolchain.toml`
 - Clean and retry: `cargo clean`
 
 ### Permission issues

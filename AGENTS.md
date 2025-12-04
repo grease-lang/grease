@@ -112,6 +112,11 @@ cargo run -- lsp                    # Start LSP server
 make test              # Run tests with output
 make test-integration  # End-to-end testing
 make build             # Release build
+
+# Rust version management
+rustup show            # Check current Rust version (should be 1.85.1)
+rustup install 1.85.1  # Install required version if needed
+rustup default 1.85.1  # Set as default
 ```
 
 ## Project Structure

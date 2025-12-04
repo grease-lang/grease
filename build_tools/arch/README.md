@@ -95,6 +95,7 @@ COMMIT_SHORT="custom"  # Optional custom identifier
 
 ### Build Failures
 - Ensure Rust toolchain is installed: `sudo pacman -S rust cargo git`
+- Ensure Rust 1.85.1: `rustup install 1.85.1 && rustup default 1.85.1`
 - Check internet connectivity for Git repository access
 - Verify sufficient disk space for build artifacts
 

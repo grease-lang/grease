@@ -16,7 +16,7 @@ The CI/CD pipeline is defined in `.gitlab-ci.yml` at the root of the repository.
 stages:
   - build
 
-image: rust:1.91.1
+image: rust:1.85.1
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
@@ -28,7 +28,7 @@ cache:
 ```
 
 - **Stages**: Single `build` stage containing all compilation and packaging jobs
-- **Image**: Uses Rust 1.91.1 Docker image as the base environment
+- **Image**: Uses Rust 1.85.1 Docker image as the base environment
 - **Variables**: Sets `CARGO_HOME` to cache Rust toolchain and dependencies within the project directory
 - **Cache**: Caches Cargo registry and build artifacts to speed up subsequent builds
 
@@ -212,7 +212,7 @@ For stability and reproducibility:
 - Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.5`
 - Cross environment: `CROSS_REMOTE=1`
 - Base images:
-  - Rust: `rust:1.91.1`
+  - Rust: `rust:1.85.1`
   - Arch Linux: `archlinux:base-20251019.0.436919`
   - Fedora: `fedora:43`
 
