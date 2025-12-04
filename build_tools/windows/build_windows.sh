@@ -86,6 +86,7 @@ fi
 
 # Build the binary
 echo "🔨 Building Grease..."
+export RUSTFLAGS="-C target-feature=+crt-static"
 cross test --target "$TARGET"
 cross build --release --target "$TARGET"
 
