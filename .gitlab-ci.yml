@@ -235,8 +235,9 @@ nightly-windows-x64:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y docker.io
+    - apt-get update -y && apt-get install -y docker.io wine
     - docker info
+    - wine --version
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
@@ -266,8 +267,9 @@ nightly-windows-x86:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y docker.io
+    - apt-get update -y && apt-get install -y docker.io wine
     - docker info
+    - wine --version
     - cargo install cross --version 0.2.5
     - export PATH="$CARGO_HOME/bin:$PATH"
     - chmod +x build_tools/windows/build_windows.sh
