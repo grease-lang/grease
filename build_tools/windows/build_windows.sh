@@ -61,10 +61,23 @@ fi
 echo "🦀 Building Grease for Windows $ARCH..."
 echo "Target: $TARGET"
 
-# Check if cross is available
-if ! command -v cross &> /dev/null; then
-    echo "❌ cross tool not found. Please install it:"
-    echo "   cargo install cross --locked"
+# Check if Rust target is installed
+if ! rustup target list --installed | grep -q "$TARGET"; then
+    echo "📦 Installing Windows target: $TARGET"
+    rustup target add "$TARGET"
+fi
+
+# Check for MinGW toolchain
+if [ "$ARCH" = "x64" ]; then
+    MINGW_PREFIX="x86_64-w64-mingw32"
+else
+    MINGW_PREFIX="i686-w64-mingw32"
+fi
+
+if ! command -v "${MINGW_PREFIX}-gcc" &> /dev/null; then
+    echo "❌ MinGW toolchain not found. Please install it:"
+    echo "   On Ubuntu/Debian: sudo apt-get install gcc-mingw-w64-$ARCH"
+    echo "   On Arch: sudo pacman -S mingw-w64-gcc"
     exit 1
 fi
 
@@ -87,8 +100,10 @@ fi
 # Build the binary
 echo "🔨 Building Grease..."
 export RUSTFLAGS="-C target-feature=+crt-static"
-cross test --target "$TARGET"
-cross build --release --target "$TARGET"
+export CC="${MINGW_PREFIX}-gcc"
+export CXX="${MINGW_PREFIX}-g++"
+cargo test --target "$TARGET"
+cargo build --release --target "$TARGET"
 
 # Restore original version if nightly
 if [ "$NIGHTLY" = true ]; then
