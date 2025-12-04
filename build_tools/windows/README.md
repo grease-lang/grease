@@ -5,8 +5,8 @@ This directory contains scripts to build Windows binaries for Grease via cross-c
 ## Prerequisites
 
 - **Rust toolchain**: Rust 1.91.1 with Cargo
-- **MinGW toolchain**: For Windows cross-compilation (installed via package manager)
-- **Cross-compilation**: Direct cargo cross-compilation to Windows targets
+- **MSVC targets**: Uses Microsoft Visual C++ toolchain for Windows compatibility
+- **Cross-compilation**: Direct cargo cross-compilation to Windows MSVC targets
 - **Linux host**: Cross-compilation is performed on Linux systems
 
 ## Usage
@@ -18,8 +18,8 @@ This directory contains scripts to build Windows binaries for Grease via cross-c
 ### Options
 
 - `--arch x64|x86`: Required. Target architecture
-  - `x64`: 64-bit Windows (x86_64-pc-windows-gnu)
-  - `x86`: 32-bit Windows (i686-pc-windows-gnu)
+  - `x64`: 64-bit Windows (x86_64-pc-windows-msvc)
+  - `x86`: 32-bit Windows (i686-pc-windows-msvc)
 - `--nightly`: Optional. Build a nightly version with commit hash in version string
 
 ## Examples
