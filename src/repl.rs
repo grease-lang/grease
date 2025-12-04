@@ -95,11 +95,16 @@ impl REPL {
                     crate::bytecode::Value::Array(_) => "[...]".to_string(),
                     crate::bytecode::Value::Object { class_name, .. } => format!("<{} instance>", class_name),
                     crate::bytecode::Value::Class { name, .. } => format!("<class {}>", name),
+                    crate::bytecode::Value::Dictionary(_) => "{...}".to_string(),
                 }).collect();
                 format!("[{}]", elements.join(", "))
             },
             crate::bytecode::Value::Object { class_name, .. } => format!("<{} instance>", class_name),
             crate::bytecode::Value::Class { name, .. } => format!("<class {}>", name),
+            crate::bytecode::Value::Dictionary(dict) => {
+                let elements: Vec<String> = dict.iter().map(|(k, v)| format!("\"{}\": {}", k, self.format_value(v))).collect();
+                format!("{{{}}}", elements.join(", "))
+            },
         }
     }
 }

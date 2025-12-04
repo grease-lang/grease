@@ -292,6 +292,13 @@ impl Compiler {
                     self.emit_bytes(OpCode::SetGlobal, constant as u8);
                 }
             }
+            Expression::PropertyAssignment { object, property, value } => {
+                self.compile_expression(object)?;
+                let property_constant = self.chunk.add_constant(Value::String(property.lexeme.clone()));
+                self.emit_bytes(OpCode::Constant, property_constant as u8);
+                self.compile_expression(value)?;
+                self.emit_byte(OpCode::SetProperty);
+            }
             Expression::Call { callee, arguments } => {
                 self.compile_expression(callee)?;
 

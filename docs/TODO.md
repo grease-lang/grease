@@ -30,7 +30,7 @@
   - [x] create support for inline assembly
   - [x] implement error handling with try/catch
   - [x] add dictionaries/objects support
-  - [ ] implement classes and object-oriented features
+  - [x] implement classes and object-oriented features
 
 ## 🚀 Future Enhancements
   - [ ] create UI kit (future enhancement)

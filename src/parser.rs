@@ -77,7 +77,11 @@ impl Parser {
         let mut parameters = Vec::new();
         if !self.check(&TokenType::RightParen) {
             loop {
-                let param_name = self.consume_identifier("Expected parameter name")?;
+                let param_name = if self.match_token(&TokenType::SelfKw) {
+                    self.previous.clone().unwrap()
+                } else {
+                    self.consume_identifier("Expected parameter name")?
+                };
                 parameters.push((param_name, None)); // No type annotations
 
                 if !self.match_token(&TokenType::Comma) {
@@ -311,7 +315,31 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Result<Expression, String> {
-        self.logical_or()
+        let expr = self.logical_or()?;
+        
+        // Check for assignment
+        if self.match_token(&TokenType::Assign) {
+            let value = self.expression()?;
+            
+            match expr {
+                Expression::Identifier(name) => {
+                    return Ok(Expression::Assignment {
+                        name,
+                        value: Box::new(value),
+                    });
+                }
+                Expression::PropertyAccess { object, property } => {
+                    return Ok(Expression::PropertyAssignment {
+                        object,
+                        property,
+                        value: Box::new(value),
+                    });
+                }
+                _ => return Err("Invalid assignment target".to_string()),
+            }
+        }
+        
+        Ok(expr)
     }
 
 
@@ -560,6 +588,10 @@ impl Parser {
                     let token = self.advance().unwrap().clone();
                     return Ok(Expression::Identifier(token));
                 }
+                TokenType::SelfKw => {
+                    let token = self.advance().unwrap().clone();
+                    return Ok(Expression::Identifier(token));
+                }
                 TokenType::LeftParen => {
                     self.advance();
                     let expr = self.expression()?;
@@ -659,8 +691,19 @@ impl Parser {
             None
         };
         self.consume(TokenType::Colon, "Expected ':' after class declaration")?;
+        
+        // Skip the newline after the colon
+        self.match_token(&TokenType::Newline);
+        
+        // Expect an indent
+        self.consume(TokenType::Indent, "Expected indented block")?;
+        
         let mut methods = Vec::new();
         while !self.check(&TokenType::Dedent) && !self.is_at_end() {
+            self.skip_newlines();
+            if self.check(&TokenType::Dedent) {
+                break;
+            }
             if self.match_token(&TokenType::Fn) {
                 let method = self.function_declaration()?;
                 methods.push(method);
@@ -668,6 +711,8 @@ impl Parser {
                 return Err("Expected method declaration in class".to_string());
             }
         }
+        
+        self.consume(TokenType::Dedent, "Expected end of indented block")?;
         Ok(Statement::ClassDeclaration {
             name,
             superclass,

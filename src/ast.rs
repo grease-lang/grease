@@ -23,6 +23,11 @@ pub enum Expression {
         name: Token,
         value: Box<Expression>,
     },
+    PropertyAssignment {
+        object: Box<Expression>,
+        property: Token,
+        value: Box<Expression>,
+    },
     Call {
         callee: Box<Expression>,
         arguments: Vec<Expression>,

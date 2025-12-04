@@ -1,0 +1,7 @@
+class Animal:
+	def make_sound():
+		print("Some generic animal sound")
+
+animal = new Animal()
+animal.make_sound()
+print("Animal name:", animal.name)

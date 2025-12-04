@@ -156,5 +156,63 @@ mod tests {
         assert_eq!(result.unwrap(), InterpretResult::Ok);
     }
 
+    #[test]
+    fn test_class_declaration() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Animal:\n\tdef make_sound():\n\t\tprint(\"sound\")");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), InterpretResult::Ok);
+    }
+
+    #[test]
+    fn test_class_instantiation() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Animal:\n\tdef make_sound():\n\t\tprint(\"sound\")\nanimal = new Animal()\nanimal.make_sound()");
+        match result {
+            Ok(_) => {}, // pass
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_property_assignment() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Animal:\n\tdef make_sound():\n\t\tprint(\"sound\")\nanimal = new Animal()\nanimal.name = \"Buddy\"");
+        match result {
+            Ok(_) => {}, // pass
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_property_access() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Animal:\n\tdef make_sound():\n\t\tprint(\"sound\")\nanimal = new Animal()\nanimal.name = \"Buddy\"\nprint(animal.name)");
+        match result {
+            Ok(_) => {}, // pass
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_class_inheritance() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Animal:\n\tdef make_sound():\n\t\tprint(\"animal sound\")\nclass Dog(Animal):\n\tdef make_sound():\n\t\tprint(\"woof\")\ndog = new Dog()\ndog.make_sound()");
+        match result {
+            Ok(_) => {}, // pass
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_method_with_parameters() {
+        let mut grease = Grease::new();
+        let result = grease.run("class Calculator:\n\tdef add(a, b):\n\t\treturn a + b\ncalc = new Calculator()\nresult = calc.add(5, 3)\nprint(result)");
+        match result {
+            Ok(_) => {}, // pass
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
 
 }

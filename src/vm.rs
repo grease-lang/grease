@@ -499,8 +499,9 @@ impl VM {
                 }
             }
             Some(OpCode::CreateClass) => {
-                // TODO: Implement class creation
-                return InterpretResult::RuntimeError("CreateClass not implemented".to_string());
+                // Class creation is handled at compile time by storing the class value as a constant
+                // This opcode is just a placeholder that should never be executed
+                return InterpretResult::RuntimeError("CreateClass should not be executed at runtime".to_string());
             }
             Some(OpCode::GetProperty) => {
                 // Stack: [..., object, property_name]
@@ -520,16 +521,151 @@ impl VM {
                 }
             }
             Some(OpCode::SetProperty) => {
-                // TODO: Implement property setting
-                return InterpretResult::RuntimeError("SetProperty not implemented".to_string());
+                // Stack: [..., object, property_name, value]
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                
+                let property_name = match self.stack.pop() {
+                    Some(Value::String(s)) => s,
+                    _ => return InterpretResult::RuntimeError("Property name must be a string".to_string()),
+                };
+
+                if let Some(Value::Object { fields, class_name }) = self.stack.pop() {
+                    // Create a new object with the updated property
+                    let mut new_fields = fields.clone();
+                    new_fields.insert(property_name, value);
+                    
+                    // Push the updated object back on the stack
+                    self.stack.push(Value::Object {
+                        class_name,
+                        fields: new_fields,
+                    });
+                } else {
+                    return InterpretResult::RuntimeError("Expected object".to_string());
+                }
             }
             Some(OpCode::CallMethod) => {
-                // TODO: Implement method calling
-                return InterpretResult::RuntimeError("CallMethod not implemented".to_string());
+                // Stack: [..., object, method_name, arg1, arg2, ..., argN]
+                // The number of arguments is encoded in the instruction
+                let arg_count = self.read_byte().expect("Expected argument count") as usize;
+
+                // Collect arguments
+                let mut args = Vec::new();
+                for _ in 0..arg_count {
+                    if let Some(arg) = self.stack.pop() {
+                        args.push(arg);
+                    } else {
+                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                    }
+                }
+                args.reverse(); // Arguments were popped in reverse order
+
+                let method_name = match self.stack.pop() {
+                    Some(Value::String(s)) => s,
+                    _ => return InterpretResult::RuntimeError("Method name must be a string".to_string()),
+                };
+
+                let object = match self.stack.pop() {
+                    Some(obj) => obj,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+
+                // Get the class name from the object
+                let class_name = match &object {
+                    Value::Object { class_name, .. } => class_name.clone(),
+                    _ => return InterpretResult::RuntimeError("Expected object".to_string()),
+                };
+
+                // Look up the class in globals
+                let class_value = match self.globals.get(&class_name) {
+                    Some(Value::Class { methods, .. }) => methods,
+                    _ => return InterpretResult::RuntimeError(format!("Class '{}' not found", class_name)),
+                };
+
+                // Look up the method in the class
+                let method_constant_index = match class_value.get(&method_name) {
+                    Some(index) => index,
+                    None => return InterpretResult::RuntimeError(format!("Method '{}' not found in class '{}'", method_name, class_name)),
+                };
+
+                // Get the method function from constants
+                let method_function = match &self.chunk.as_ref().unwrap().constants[*method_constant_index] {
+                    Value::Function(func) => func.clone(),
+                    _ => return InterpretResult::RuntimeError("Method is not a function".to_string()),
+                };
+
+                // Create a new call frame for the method
+                let frame = CallFrame {
+                    ip: 0,
+                    slot: self.stack.len(),
+                    chunk: method_function.chunk.clone(),
+                };
+                self.frames.push(frame);
+
+                // Push the object as the first argument (self)
+                self.stack.push(object);
+
+                // Push the arguments
+                for arg in args {
+                    self.stack.push(arg);
+                }
+
+                // Set up the new chunk
+                self.chunk = Some(method_function.chunk.clone());
+                self.ip = 0;
             }
             Some(OpCode::GetSuper) => {
-                // TODO: Implement super access
-                return InterpretResult::RuntimeError("GetSuper not implemented".to_string());
+                // Stack: [..., object, super_method_name]
+                let method_name = match self.stack.pop() {
+                    Some(Value::String(s)) => s,
+                    _ => return InterpretResult::RuntimeError("Method name must be a string".to_string()),
+                };
+
+                let object = match self.stack.pop() {
+                    Some(obj) => obj,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+
+                // Get the class name from the object
+                let class_name = match &object {
+                    Value::Object { class_name, .. } => class_name.clone(),
+                    _ => return InterpretResult::RuntimeError("Expected object".to_string()),
+                };
+
+                // Look up the class in globals
+                let class_value = match self.globals.get(&class_name) {
+                    Some(Value::Class { methods, superclass, .. }) => (methods, superclass),
+                    _ => return InterpretResult::RuntimeError(format!("Class '{}' not found", class_name)),
+                };
+
+                // Get the superclass name
+                let superclass_name = match class_value.1 {
+                    Some(name) => name,
+                    None => return InterpretResult::RuntimeError(format!("Class '{}' has no superclass", class_name)),
+                };
+
+                // Look up the superclass in globals
+                let superclass_value = match self.globals.get(superclass_name.as_str()) {
+                    Some(Value::Class { methods, .. }) => methods,
+                    _ => return InterpretResult::RuntimeError(format!("Superclass '{}' not found", superclass_name)),
+                };
+
+                // Look up the method in the superclass
+                let method_constant_index = match superclass_value.get(&method_name) {
+                    Some(index) => index,
+                    None => return InterpretResult::RuntimeError(format!("Method '{}' not found in superclass '{}'", method_name, superclass_name)),
+                };
+
+                // Get the method function from constants
+                let method_function = match &self.chunk.as_ref().unwrap().constants[*method_constant_index] {
+                    Value::Function(func) => func.clone(),
+                    _ => return InterpretResult::RuntimeError("Super method is not a function".to_string()),
+                };
+
+                // Push the method function onto the stack
+                self.stack.push(Value::Function(method_function));
             }
             Some(OpCode::RustInline) => {
                 let constant_index = self.read_byte().expect("Expected constant index") as usize;

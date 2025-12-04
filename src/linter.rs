@@ -238,6 +238,10 @@ impl Linter {
                     }
                 }
             }
+            Expression::PropertyAssignment { object, property: _, value } => {
+                self.lint_expression(object);
+                self.lint_expression(value);
+            }
             Expression::Call { callee, arguments } => {
                 self.lint_expression(callee);
                 for arg in arguments {
