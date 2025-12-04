@@ -97,6 +97,10 @@ pub enum Statement {
         superclass: Option<Token>,
         methods: Vec<Statement>,
     },
+    Try {
+        try_block: Vec<Statement>,
+        catch_block: Vec<Statement>,
+    },
 }
 
 #[derive(Debug, Clone)]

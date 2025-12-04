@@ -83,6 +83,9 @@ pub struct Symbol {
     pub kind: SymbolKind,
     pub location: Location,
     pub container_name: Option<String>,
+    pub range: Option<Range>,
+    pub selection_range: Option<Range>,
+    pub children: Vec<Symbol>,
 }
 
 #[derive(Debug, Clone)]
@@ -161,6 +164,9 @@ impl Workspace {
                             range: self.token_to_range(name),
                         },
                         container_name: container.clone(),
+                        range: Some(self.token_to_range(name)),
+                        selection_range: Some(self.token_to_range(name)),
+                        children: Vec::new(),
                     });
                 }
             }
@@ -174,6 +180,9 @@ impl Workspace {
                             range: self.token_to_range(name),
                         },
                         container_name: container.clone(),
+                        range: Some(self.token_to_range(name)),
+                        selection_range: Some(self.token_to_range(name)),
+                        children: Vec::new(),
                     };
                     symbols.push(func_symbol);
                     
@@ -188,6 +197,9 @@ impl Workspace {
                                     range: self.token_to_range(param),
                                 },
                                 container_name: Some(ident.clone()),
+                                range: Some(self.token_to_range(param)),
+                                selection_range: Some(self.token_to_range(param)),
+                                children: Vec::new(),
                             });
                         }
                     }
@@ -228,8 +240,13 @@ impl Workspace {
                     symbols.push(Symbol {
                         name: ident.clone(),
                         kind: SymbolKind::CLASS,
-                        range: self.token_to_range(name),
-                        selection_range: self.token_to_range(name),
+                        location: Location {
+                            uri: uri.clone(),
+                            range: self.token_to_range(name),
+                        },
+                        container_name: container.clone(),
+                        range: Some(self.token_to_range(name)),
+                        selection_range: Some(self.token_to_range(name)),
                         children: Vec::new(),
                     });
                     // Extract method symbols
@@ -239,8 +256,13 @@ impl Workspace {
                                 symbols.last_mut().unwrap().children.push(Symbol {
                                     name: method_ident.clone(),
                                     kind: SymbolKind::METHOD,
-                                    range: self.token_to_range(method_name),
-                                    selection_range: self.token_to_range(method_name),
+                                    location: Location {
+                                        uri: uri.clone(),
+                                        range: self.token_to_range(method_name),
+                                    },
+                                    container_name: Some(ident.clone()),
+                                    range: Some(self.token_to_range(method_name)),
+                                    selection_range: Some(self.token_to_range(method_name)),
                                     children: Vec::new(),
                                 });
                             }

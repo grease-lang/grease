@@ -67,6 +67,13 @@ pub enum OpCode {
 }
 
 #[derive(Debug, Clone)]
+pub struct Class {
+    pub name: String,
+    pub methods: std::collections::HashMap<String, usize>, // constant indices
+    pub superclass: Option<String>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Value {
     Number(f64),
     String(String),
@@ -76,13 +83,13 @@ pub enum Value {
     NativeFunction(NativeFunction),
     Array(Vec<Value>),
     Object {
-        class: std::rc::Rc<Class>,
+        class_name: String,
         fields: std::collections::HashMap<String, Value>,
     },
     Class {
-        name: TokenType,
-        methods: std::collections::HashMap<TokenType, usize>, // constant indices
-        superclass: Option<TokenType>,
+        name: String,
+        methods: std::collections::HashMap<String, usize>, // constant indices
+        superclass: Option<String>,
     },
 }
 
@@ -266,7 +273,7 @@ impl OpCode {
             OpCode::Pop => 48,
             OpCode::Import => 49,
             OpCode::GetModule => 50,
-            OpCode::Dup => 45,
+            OpCode::Dup => 51,
         }
     }
 
@@ -293,21 +300,27 @@ impl OpCode {
             18 => Some(OpCode::Modulo),
             19 => Some(OpCode::Negate),
             20 => Some(OpCode::Array),
-            38 => Some(OpCode::Equal),
-            34 => Some(OpCode::NotEqual),
-            35 => Some(OpCode::Less),
-            36 => Some(OpCode::LessEqual),
-            37 => Some(OpCode::Greater),
-            38 => Some(OpCode::GreaterEqual),
-            39 => Some(OpCode::Not),
-            40 => Some(OpCode::And),
-            41 => Some(OpCode::Or),
-            42 => Some(OpCode::Pop),
             30 => Some(OpCode::Index),
             31 => Some(OpCode::Length),
-            43 => Some(OpCode::Import),
-            44 => Some(OpCode::GetModule),
-            45 => Some(OpCode::Dup),
+            32 => Some(OpCode::CreateClass),
+            33 => Some(OpCode::CreateInstance),
+            34 => Some(OpCode::GetProperty),
+            35 => Some(OpCode::SetProperty),
+            36 => Some(OpCode::CallMethod),
+            37 => Some(OpCode::GetSuper),
+            39 => Some(OpCode::Equal),
+            40 => Some(OpCode::NotEqual),
+            41 => Some(OpCode::Less),
+            42 => Some(OpCode::LessEqual),
+            43 => Some(OpCode::Greater),
+            44 => Some(OpCode::GreaterEqual),
+            45 => Some(OpCode::Not),
+            46 => Some(OpCode::And),
+            47 => Some(OpCode::Or),
+            48 => Some(OpCode::Pop),
+            49 => Some(OpCode::Import),
+            50 => Some(OpCode::GetModule),
+            51 => Some(OpCode::Dup),
             _ => None,
         }
     }

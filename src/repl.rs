@@ -93,9 +93,13 @@ impl REPL {
                     crate::bytecode::Value::Function(f) => format!("<fn {}>", f.name),
                     crate::bytecode::Value::NativeFunction(f) => format!("<native fn {}>", f.name),
                     crate::bytecode::Value::Array(_) => "[...]".to_string(),
+                    crate::bytecode::Value::Object { class_name, .. } => format!("<{} instance>", class_name),
+                    crate::bytecode::Value::Class { name, .. } => format!("<class {}>", name),
                 }).collect();
                 format!("[{}]", elements.join(", "))
             },
+            crate::bytecode::Value::Object { class_name, .. } => format!("<{} instance>", class_name),
+            crate::bytecode::Value::Class { name, .. } => format!("<class {}>", name),
         }
     }
 }

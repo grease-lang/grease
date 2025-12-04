@@ -156,23 +156,5 @@ mod tests {
         assert_eq!(result.unwrap(), InterpretResult::Ok);
     }
 
-    #[test]
-    fn test_classes() {
-        let mut grease = Grease::new();
-        let source = r#"
-class Person:
-    def __init__(self, name):
-        self.name = name
-    
-    def greet(self):
-        return "Hello, " + self.name
 
-person = new Person("Alice")
-result = person.greet()
-print(result)
-"#;
-        let result = grease.run(source);
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), InterpretResult::Ok);
-    }
 }

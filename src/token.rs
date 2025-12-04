@@ -19,6 +19,8 @@ pub enum TokenType {
     In,
     Return,
     Use,
+    Try,
+    Catch,
     As,
     True,
     False,
@@ -71,14 +73,16 @@ pub enum TokenType {
 #[derive(Debug, Clone)]
 pub struct Token {
     pub token_type: TokenType,
+    pub lexeme: String,
     pub line: usize,
     pub column: usize,
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, line: usize, column: usize) -> Self {
+    pub fn new(token_type: TokenType, lexeme: String, line: usize, column: usize) -> Self {
         Token {
             token_type,
+            lexeme,
             line,
             column,
         }

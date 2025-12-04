@@ -180,11 +180,24 @@ impl Linter {
                 };
                 self.variables.insert(class_name, info);
 
-                // Lint methods
-                for method in methods {
-                    self.lint_statement(method);
-                }
-            }
+                 // Lint methods
+                 for method in methods {
+                     self.lint_statement(method);
+                 }
+             }
+             Statement::Try { try_block, catch_block } => {
+                 self.scope_depth += 1;
+                 for stmt in try_block {
+                     self.lint_statement(stmt);
+                 }
+                 self.scope_depth -= 1;
+
+                 self.scope_depth += 1;
+                 for stmt in catch_block {
+                     self.lint_statement(stmt);
+                 }
+                 self.scope_depth -= 1;
+             }
         }
     }
 

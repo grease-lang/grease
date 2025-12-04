@@ -39,7 +39,8 @@ impl Compiler {
         match statement {
             Statement::Expression(expr) => {
                 self.compile_expression(expr)?;
-                // Don't pop for REPL - let the value stay on stack
+                // Don't pop for now - this needs more thought about REPL vs script mode
+                // self.emit_byte(OpCode::Pop);
             }
             Statement::VariableDeclaration { name, type_annotation: _, initializer } => {
                 if let Some(initializer) = initializer {
@@ -92,13 +93,13 @@ impl Compiler {
                 
                 self.compile_expression(condition)?;
                 let exit_jump = self.emit_jump(OpCode::JumpIfFalse);
-                self.emit_byte(OpCode::Pop);
+                self.emit_byte(OpCode::Pop); // Pop condition result
                 
                 self.compile_block(body)?;
                 
                 self.emit_loop(loop_start);
                 self.patch_jump(exit_jump);
-                self.emit_byte(OpCode::Pop);
+                // No pop here - condition was already popped before loop body
             }
             Statement::For { variable, iterable, body } => {
                 self.compile_expression(iterable)?;
@@ -159,23 +160,30 @@ impl Compiler {
                     if let Statement::FunctionDeclaration { name: method_name, parameters, return_type: _, body } = method {
                         let function = self.compile_function(&method_name, &parameters, &body)?;
                         let method_constant = self.chunk.add_constant(Value::Function(function));
-                        method_map.insert(method_name.token_type.clone(), method_constant);
+                        method_map.insert(method_name.lexeme.clone(), method_constant);
                     }
                 }
                 
                 // Create class object
                 let class_value = Value::Class {
-                    name: name.token_type.clone(),
+                    name: name.lexeme.clone(),
                     methods: method_map,
-                    superclass: superclass.as_ref().map(|s| s.token_type.clone()),
+                    superclass: superclass.as_ref().map(|s| s.lexeme.clone()),
                 };
                 let class_constant = self.chunk.add_constant(class_value);
                 
                 // Define class as global
                 self.emit_bytes(OpCode::Constant, class_constant as u8);
-                self.declare_variable(&name)?;
-                self.define_variable(&name)?;
-            }
+                 self.declare_variable(&name)?;
+                 self.define_variable(&name)?;
+             }
+             Statement::Try { try_block, catch_block } => {
+                 // For now, just compile the try block
+                 // TODO: Implement proper try/catch with exception handling
+                 for stmt in try_block {
+                     self.compile_statement(stmt)?;
+                 }
+             }
         }
         
         Ok(())
@@ -316,7 +324,7 @@ impl Compiler {
             }
             Expression::PropertyAccess { object, property } => {
                 self.compile_expression(object)?;
-                let property_constant = self.chunk.add_constant(Value::String(property.token_type.clone()));
+                let property_constant = self.chunk.add_constant(Value::String(property.lexeme.clone()));
                 self.emit_bytes(OpCode::Constant, property_constant as u8);
                 self.emit_byte(OpCode::GetProperty);
             }
@@ -325,14 +333,14 @@ impl Compiler {
                 for arg in arguments {
                     self.compile_expression(arg)?;
                 }
-                let method_constant = self.chunk.add_constant(Value::String(method.token_type.clone()));
+                    let method_constant = self.chunk.add_constant(Value::String(method.lexeme.clone()));
                 self.emit_bytes(OpCode::Constant, method_constant as u8);
                 self.emit_bytes(OpCode::CallMethod, arguments.len() as u8);
             }
             Expression::SuperCall { method, arguments } => {
                 // For super(), resolve from class hierarchy
                 if let Some(method) = method {
-                    let method_constant = self.chunk.add_constant(Value::String(method.token_type.clone()));
+                let method_constant = self.chunk.add_constant(Value::String(method.lexeme.clone()));
                     self.emit_bytes(OpCode::Constant, method_constant as u8);
                 } else {
                     self.emit_byte(OpCode::Null); // No method for constructor

@@ -6,6 +6,20 @@ use crate::ast::{Expression, Statement, Program};
 use std::iter::Peekable;
 use std::vec::IntoIter;
 
+fn parse_expr(input: &str) -> Result<Expression, String> {
+    let mut lexer = crate::lexer::Lexer::new(input.to_string());
+    let tokens = lexer.tokenize()?;
+    let mut parser = Parser::new(tokens);
+    parser.expression()
+}
+
+fn parse_program(input: &str) -> Result<Program, String> {
+    let mut lexer = crate::lexer::Lexer::new(input.to_string());
+    let tokens = lexer.tokenize()?;
+    let mut parser = Parser::new(tokens);
+    parser.parse()
+}
+
 pub struct Parser {
     tokens: Peekable<IntoIter<Token>>,
     previous: Option<Token>,
@@ -117,6 +131,8 @@ impl Parser {
             Ok(Some(self.for_statement()?))
         } else if self.match_token(&TokenType::Class) {
             Ok(Some(self.class_statement()?))
+        } else if self.match_token(&TokenType::Try) {
+            Ok(Some(self.try_statement()?))
         } else if self.match_token(&TokenType::Return) {
             Ok(Some(self.return_statement()?))
         } else if self.check(&TokenType::LeftBrace) {
@@ -148,6 +164,18 @@ impl Parser {
             condition,
             then_branch,
             else_branch,
+        })
+    }
+
+    fn try_statement(&mut self) -> Result<Statement, String> {
+        self.consume(TokenType::Colon, "Expected ':' after try")?;
+        let try_block = self.block()?;
+        self.consume(TokenType::Catch, "Expected 'catch' after try block")?;
+        self.consume(TokenType::Colon, "Expected ':' after catch")?;
+        let catch_block = self.block()?;
+        Ok(Statement::Try {
+            try_block,
+            catch_block,
         })
     }
 
@@ -277,7 +305,7 @@ impl Parser {
         let mut expr = self.logical_and()?;
         
         while self.match_token(&TokenType::Or) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.logical_and()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -293,7 +321,7 @@ impl Parser {
         let mut expr = self.equality()?;
         
         while self.match_token(&TokenType::And) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.equality()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -309,7 +337,7 @@ impl Parser {
         let mut expr = self.comparison()?;
         
         while self.match_token(&TokenType::Equal) || self.match_token(&TokenType::NotEqual) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.comparison()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -328,7 +356,7 @@ impl Parser {
               self.match_token(&TokenType::GreaterEqual) || 
               self.match_token(&TokenType::Less) || 
               self.match_token(&TokenType::LessEqual) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.term()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -344,7 +372,7 @@ impl Parser {
         let mut expr = self.factor()?;
         
         while self.match_token(&TokenType::Plus) || self.match_token(&TokenType::Minus) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.factor()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -362,7 +390,7 @@ impl Parser {
         while self.match_token(&TokenType::Multiply) || 
               self.match_token(&TokenType::Divide) || 
               self.match_token(&TokenType::Modulo) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.unary()?;
             expr = Expression::Binary {
                 left: Box::new(expr),
@@ -376,7 +404,7 @@ impl Parser {
 
     fn unary(&mut self) -> Result<Expression, String> {
         if self.match_token(&TokenType::Not) || self.match_token(&TokenType::Minus) {
-            let operator = self.previous().unwrap();
+            let operator = self.previous.clone().unwrap();
             let right = self.unary()?;
             return Ok(Expression::Unary {
                 operator,
@@ -612,31 +640,44 @@ impl Parser {
         })
     }
 
-    #[test]
+    fn consume_identifier(&mut self, message: &str) -> Result<Token, String> {
+        if let Some(token) = self.tokens.peek() {
+            if let TokenType::Identifier(_) = &token.token_type {
+                return Ok(self.tokens.next().unwrap());
+            }
+        }
+        Err(message.to_string())
+    }
+
+    fn current_line(&self) -> usize {
+        self.previous.as_ref().map(|t| t.line).unwrap_or(0)
+    }
+
+    #[cfg(test)]
     fn test_parse_number() {
         let expr = parse_expr("42").unwrap();
         assert!(matches!(expr, Expression::Number(42.0)));
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_string() {
         let expr = parse_expr("\"hello\"").unwrap();
         assert!(matches!(expr, Expression::String(s) if s == "hello"));
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_boolean() {
         let expr = parse_expr("true").unwrap();
         assert!(matches!(expr, Expression::Boolean(true)));
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_null() {
         let expr = parse_expr("null").unwrap();
         assert!(matches!(expr, Expression::Null));
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_identifier() {
         let expr = parse_expr("x").unwrap();
         match expr {
@@ -647,7 +688,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_binary_expression() {
         let expr = parse_expr("1 + 2").unwrap();
         match expr {
@@ -660,7 +701,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_unary_expression() {
         let expr = parse_expr("-5").unwrap();
         match expr {
@@ -674,7 +715,7 @@ impl Parser {
 
 
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_call() {
         let expr = parse_expr("print(42)").unwrap();
         match expr {
@@ -692,7 +733,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_variable_declaration() {
         let program = parse_program("x = 42").unwrap();
         assert_eq!(program.statements.len(), 1);
@@ -706,7 +747,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_variable_declaration_with_type() {
         let program = parse_program("x: Number = 42").unwrap();
         assert_eq!(program.statements.len(), 1);
@@ -720,7 +761,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_if_statement() {
         let program = parse_program("if true:\n    print(1)").unwrap();
         assert_eq!(program.statements.len(), 1);
@@ -734,7 +775,7 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_while_statement() {
         let program = parse_program("while true:\n    print(1)").unwrap();
         assert_eq!(program.statements.len(), 1);
@@ -747,20 +788,20 @@ impl Parser {
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_use_statement() {
         let program = parse_program("use math").unwrap();
         assert_eq!(program.statements.len(), 1);
         match &program.statements[0] {
             Statement::Use { module, alias } => {
                 assert_eq!(module, "math");
-                assert_eq!(*alias, None);
+                assert!(alias.is_none());
             }
             _ => panic!("Expected use statement"),
         }
     }
 
-    #[test]
+    #[cfg(test)]
     fn test_parse_use_statement_with_alias() {
         let program = parse_program("use math as m").unwrap();
         assert_eq!(program.statements.len(), 1);

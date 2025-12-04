@@ -112,7 +112,7 @@ impl Grease {
 
         // Handle relative imports
         if module_name.starts_with('.') {
-            // For relative imports, we need the current file's directory
+            // For relative imports, we need to current file's directory
             // For now, assume we're in the current working directory
             // In a real implementation, we'd track the importing file's path
             let relative_path = if module_name.starts_with("./") {
@@ -127,7 +127,7 @@ impl Grease {
         }
 
         let mut source = None;
-        for path in paths_to_try {
+        for path in &paths_to_try {
             if Path::new(&path).exists() {
                 source = Some(fs::read_to_string(&path).map_err(|e| format!("Failed to read module {}: {}", path, e))?);
                 break;
@@ -149,6 +149,55 @@ impl Grease {
         let mut compiler = Compiler::new();
         let chunk = compiler.compile(&module_program)?.clone();
 
+        // Execute module
+        let mut module_vm = VM::new();
+        let result = module_vm.interpret(chunk);
+        if let InterpretResult::RuntimeError(e) = result {
+            return Err(format!("Error executing module {}: {}", module_name, e));
+        }
+
+        // Handle relative imports
+        if module_name.starts_with('.') {
+            // For relative imports, we need the current file's directory
+            // For now, assume we're in the current working directory
+            // In a real implementation, we'd track the importing file's path
+            let relative_path = if module_name.starts_with("./") {
+                module_name[2..].to_string()
+            } else if module_name.starts_with("../") {
+                // Go up one directory
+                format!("../{}", &module_name[3..])
+            } else {
+                module_name[1..].to_string() // Remove leading .
+            };
+            paths_to_try.insert(0, format!("{}.grease", relative_path));
+        }
+
+        let mut source = None;
+        for path in paths_to_try {
+            eprintln!("Trying path: {}", path);
+            if Path::new(&path).exists() {
+                eprintln!("Found file at: {}", path);
+                source = Some(fs::read_to_string(&path).map_err(|e| format!("Failed to read module {}: {}", path, e))?);
+                break;
+            }
+        }
+
+        let source = source.ok_or_else(|| format!("Module '{}' not found. Searched in current directory, modules/, and std/", module_name))?;
+        if self.verbose {
+            eprintln!("📦 Loading module '{}' from source:\n{}", module_name, source);
+        }
+
+        // Parse and execute the module
+        let mut lexer = Lexer::new(source);
+        let tokens = lexer.tokenize()?;
+        let mut parser = Parser::new(tokens);
+        let module_program = parser.parse()?;
+        eprintln!("Module '{}' parsed with {} statements", module_name, module_program.statements.len());
+
+        // Compile the module
+        let mut compiler = Compiler::new();
+        let chunk = compiler.compile(&module_program)?.clone();
+
         // Execute the module in a new VM instance to capture its globals
         let mut module_vm = VM::new();
         let result = module_vm.interpret(chunk);
@@ -158,6 +207,9 @@ impl Grease {
 
         if self.verbose {
             eprintln!("📦 Module '{}' loaded with {} symbols", module_name, module_vm.globals.len());
+            for (name, value) in &module_vm.globals {
+                eprintln!("  {} = {:?}", name, value);
+            }
         }
 
         // Make the module's globals available

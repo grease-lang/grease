@@ -35,11 +35,11 @@ impl Lexer {
         
         // Add remaining dedents
         while self.indent_stack.len() > 1 {
-            tokens.push(Token::new(TokenType::Dedent, self.line, self.column));
+            tokens.push(Token::new(TokenType::Dedent, "".to_string(), self.line, self.column));
             self.indent_stack.pop();
         }
-        
-        tokens.push(Token::new(TokenType::EOF, self.line, self.column));
+
+        tokens.push(Token::new(TokenType::EOF, "".to_string(), self.line, self.column));
         Ok(tokens)
     }
 
@@ -55,55 +55,55 @@ impl Lexer {
         match c {
             '(' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::LeftParen, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::LeftParen, "(".to_string(), self.line, self.column)))
             }
             ')' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::RightParen, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::RightParen, ")".to_string(), self.line, self.column)))
             }
             '{' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::LeftBrace, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::LeftBrace, "{".to_string(), self.line, self.column)))
             }
             '}' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::RightBrace, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::RightBrace, "}".to_string(), self.line, self.column)))
             }
             '[' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::LeftBracket, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::LeftBracket, "[".to_string(), self.line, self.column)))
             }
             ']' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::RightBracket, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::RightBracket, "]".to_string(), self.line, self.column)))
             }
             ',' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Comma, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Comma, ",".to_string(), self.line, self.column)))
             }
             '.' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Dot, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Dot, ".".to_string(), self.line, self.column)))
             }
             ':' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Colon, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Colon, ":".to_string(), self.line, self.column)))
             }
             ';' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Semicolon, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Semicolon, ";".to_string(), self.line, self.column)))
             }
             '+' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Plus, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Plus, "+".to_string(), self.line, self.column)))
             }
             '-' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Minus, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Minus, "-".to_string(), self.line, self.column)))
             }
             '*' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Multiply, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Multiply, "*".to_string(), self.line, self.column)))
             }
             '#' => {
                 self.skip_comment();
@@ -111,24 +111,24 @@ impl Lexer {
             }
             '/' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Divide, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Divide, "/".to_string(), self.line, self.column)))
             }
             '%' => {
                 self.advance();
-                Ok(Some(Token::new(TokenType::Modulo, self.line, self.column)))
+                Ok(Some(Token::new(TokenType::Modulo, "%".to_string(), self.line, self.column)))
             }
             '=' => {
                 self.advance();
                 if self.match_char('=') {
-                    Ok(Some(Token::new(TokenType::Equal, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::Equal, "==".to_string(), self.line, self.column)))
                 } else {
-                    Ok(Some(Token::new(TokenType::Assign, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::Assign, "=".to_string(), self.line, self.column)))
                 }
             }
             '!' => {
                 self.advance();
                 if self.match_char('=') {
-                    Ok(Some(Token::new(TokenType::NotEqual, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::NotEqual, "!=".to_string(), self.line, self.column)))
                 } else {
                     Err(format!("Unexpected character '!' at line {}, column {}", self.line, self.column))
                 }
@@ -136,17 +136,17 @@ impl Lexer {
             '<' => {
                 self.advance();
                 if self.match_char('=') {
-                    Ok(Some(Token::new(TokenType::LessEqual, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::LessEqual, "<=".to_string(), self.line, self.column)))
                 } else {
-                    Ok(Some(Token::new(TokenType::Less, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::Less, "<".to_string(), self.line, self.column)))
                 }
             }
             '>' => {
                 self.advance();
                 if self.match_char('=') {
-                    Ok(Some(Token::new(TokenType::GreaterEqual, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::GreaterEqual, ">=".to_string(), self.line, self.column)))
                 } else {
-                    Ok(Some(Token::new(TokenType::Greater, self.line, self.column)))
+                    Ok(Some(Token::new(TokenType::Greater, ">".to_string(), self.line, self.column)))
                 }
             }
             '"' => self.string(),
@@ -186,11 +186,11 @@ impl Lexer {
             "and" => TokenType::And,
             "or" => TokenType::Or,
             "not" => TokenType::Not,
-            "str" => TokenType::Identifier(text),
-            _ => TokenType::Identifier(text),
+            "str" => TokenType::Identifier(text.clone()),
+            _ => TokenType::Identifier(text.clone()),
         };
         
-        Ok(Some(Token::new(token_type, self.line, self.column)))
+        Ok(Some(Token::new(token_type, text, self.line, self.column)))
     }
 
     fn number(&mut self) -> Result<Option<Token>, String> {
@@ -209,7 +209,7 @@ impl Lexer {
         
         let text: String = self.input[start..self.position].iter().collect();
         match text.parse::<f64>() {
-            Ok(value) => Ok(Some(Token::new(TokenType::Number(value), self.line, self.column))),
+            Ok(value) => Ok(Some(Token::new(TokenType::Number(value), text, self.line, self.column))),
             Err(_) => Err(format!("Invalid number '{}' at line {}, column {}", text, self.line, self.column)),
         }
     }
@@ -232,7 +232,7 @@ impl Lexer {
         let text: String = self.input[start..self.position].iter().collect();
         self.advance(); // skip closing quote
         
-        Ok(Some(Token::new(TokenType::String(text), self.line, self.column)))
+        Ok(Some(Token::new(TokenType::String(text.clone()), text, self.line, self.column)))
     }
 
     fn char_string(&mut self) -> Result<Option<Token>, String> {
@@ -253,7 +253,7 @@ impl Lexer {
         let text: String = self.input[start..self.position].iter().collect();
         self.advance(); // skip closing quote
         
-        Ok(Some(Token::new(TokenType::String(text), self.line, self.column)))
+        Ok(Some(Token::new(TokenType::String(text.clone()), text, self.line, self.column)))
     }
 
     fn newline(&mut self) -> Result<Option<Token>, String> {
@@ -277,12 +277,12 @@ impl Lexer {
         
         if indent_level > current_indent {
             self.indent_stack.push(indent_level);
-            Ok(Some(Token::new(TokenType::Indent, self.line, self.column)))
+            Ok(Some(Token::new(TokenType::Indent, "".to_string(), self.line, self.column)))
         } else if indent_level < current_indent {
             self.indent_stack.pop();
-            Ok(Some(Token::new(TokenType::Dedent, self.line, self.column)))
+            Ok(Some(Token::new(TokenType::Dedent, "".to_string(), self.line, self.column)))
         } else {
-            Ok(Some(Token::new(TokenType::Newline, self.line, self.column)))
+            Ok(Some(Token::new(TokenType::Newline, "\n".to_string(), self.line, self.column)))
         }
     }
 
@@ -390,7 +390,11 @@ mod tests {
         assert_eq!(tokens[10].token_type, TokenType::True);
         assert_eq!(tokens[11].token_type, TokenType::False);
         assert_eq!(tokens[12].token_type, TokenType::Null);
-        assert_eq!(tokens[13].token_type, TokenType::EOF);
+        assert_eq!(tokens[13].token_type, TokenType::Class);
+        assert_eq!(tokens[14].token_type, TokenType::New);
+        assert_eq!(tokens[15].token_type, TokenType::SelfKw);
+        assert_eq!(tokens[16].token_type, TokenType::Super);
+        assert_eq!(tokens[17].token_type, TokenType::EOF);
     }
 
     #[test]
