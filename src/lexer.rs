@@ -18,7 +18,7 @@ impl Lexer {
             position: 0,
             line: 1,
             column: 1,
-            indent_stack: Vec::with_capacity(8),
+            indent_stack: vec![0], // Initialize with base indentation level
         }
     }
 

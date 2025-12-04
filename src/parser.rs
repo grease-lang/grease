@@ -6,6 +6,7 @@ use crate::ast::{Expression, Statement, Program};
 use std::iter::Peekable;
 use std::vec::IntoIter;
 
+#[allow(dead_code)]
 fn parse_expr(input: &str) -> Result<Expression, String> {
     let mut lexer = crate::lexer::Lexer::new(input.to_string());
     let tokens = lexer.tokenize()?;
@@ -13,6 +14,7 @@ fn parse_expr(input: &str) -> Result<Expression, String> {
     parser.expression()
 }
 
+#[allow(dead_code)]
 fn parse_program(input: &str) -> Result<Program, String> {
     let mut lexer = crate::lexer::Lexer::new(input.to_string());
     let tokens = lexer.tokenize()?;
