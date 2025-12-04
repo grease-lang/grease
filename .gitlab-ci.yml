@@ -113,7 +113,7 @@ nightly-arm64:
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
     - docker info
-    - cargo install cross --version 0.2.5
+    - cargo install cross --version 0.2.12
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target aarch64-unknown-linux-gnu
     - cross build --release --target aarch64-unknown-linux-gnu
@@ -144,7 +144,7 @@ nightly-arm32:
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
     - docker info
-    - cargo install cross --version 0.2.5
+    - cargo install cross --version 0.2.12
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target armv7-unknown-linux-gnueabihf
     - cross build --release --target armv7-unknown-linux-gnueabihf
@@ -175,7 +175,7 @@ nightly-i686:
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
     - docker info
-    - cargo install cross --version 0.2.5
+    - cargo install cross --version 0.2.12
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target i686-unknown-linux-gnu
     - cross build --release --target i686-unknown-linux-gnu
@@ -206,7 +206,7 @@ nightly-riscv64:
     - cargo --version
     - apt-get update -y && apt-get install -y docker.io
     - docker info
-    - cargo install cross --version 0.2.5
+    - cargo install cross --version 0.2.12
     - export PATH="$CARGO_HOME/bin:$PATH"
     - cross test --target riscv64gc-unknown-linux-gnu
     - cross build --release --target riscv64gc-unknown-linux-gnu
@@ -228,7 +228,7 @@ nightly-windows-x64:
      DOCKER_HOST: tcp://docker:2376
      DOCKER_TLS_VERIFY: 1
      DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/x86_64-pc-windows-msvc:v0.2.5
+     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/x86_64-pc-windows-msvc:v0.2.12
      CROSS_REMOTE: "1"
    only:
      - main
@@ -239,7 +239,7 @@ nightly-windows-x64:
      - apt-get update -y && apt-get install -y docker.io wine wine32:i386
      - docker info
      - wine --version
-     - cargo install cross --version 0.2.5
+     - cargo install cross --version 0.2.12
      - export PATH="$CARGO_HOME/bin:$PATH"
      - chmod +x build_tools/windows/build_windows.sh
      - ./build_tools/windows/build_windows.sh --arch x64 --nightly
@@ -261,7 +261,7 @@ nightly-windows-x86:
      DOCKER_HOST: tcp://docker:2376
      DOCKER_TLS_VERIFY: 1
      DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-pc-windows-msvc:v0.2.5
+     CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/i686-pc-windows-msvc:v0.2.12
      CROSS_REMOTE: "1"
    only:
      - main
@@ -272,7 +272,7 @@ nightly-windows-x86:
      - apt-get update -y && apt-get install -y docker.io wine wine32:i386
      - docker info
      - wine --version
-     - cargo install cross --version 0.2.5
+     - cargo install cross --version 0.2.12
      - export PATH="$CARGO_HOME/bin:$PATH"
      - chmod +x build_tools/windows/build_windows.sh
      - ./build_tools/windows/build_windows.sh --arch x86 --nightly

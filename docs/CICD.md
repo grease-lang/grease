@@ -111,7 +111,7 @@ variables:
   DOCKER_HOST: tcp://docker:2376
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-   CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/{target}:v0.2.5
+   CROSS_DOCKER_IMAGE: ghcr.io/cross-rs/{target}:v0.2.12
    CROSS_REMOTE: "1"
 ```
 
@@ -121,18 +121,19 @@ variables:
 **Commands**:
 - Install Docker client
 - Verify Docker daemon connectivity with `docker info`
-- Install `cross` tool v0.2.5 for cross-compilation
+- Install `cross` tool v0.2.12 for cross-compilation
 - Run tests and build for target architecture using `cross test` and `cross build`
 
 ### nightly-windows-x64, nightly-windows-x86
 
-**Purpose**: Build Windows binaries for 64-bit and 32-bit architectures.
+**Purpose**: Build Windows binaries for 64-bit and 32-bit architectures using MSVC targets for better Wine compatibility.
 
-**Configuration**: Same Docker-in-Docker setup as Linux cross-compilation jobs.
+**Configuration**: Same Docker-in-Docker setup as Linux cross-compilation jobs, but uses MSVC Docker images (`ghcr.io/cross-rs/x86_64-pc-windows-msvc:v0.2.12` and `ghcr.io/cross-rs/i686-pc-windows-msvc:v0.2.12`).
 
 **Commands**:
-- Install Docker client and `cross` tool
+- Install Docker client, Wine, and `cross` tool
 - Execute `build_tools/windows/build_windows.sh` script with appropriate architecture flag
+- Test binaries with Wine to ensure compatibility
 
 ## Why These Commands?
 
@@ -191,7 +192,7 @@ The cross-compilation jobs require Docker-in-Docker configuration:
 
 - `CROSS_REMOTE: "1"` enables remote cross-compilation mode
 - `docker info` verifies Docker daemon connectivity after installation
-- Cross tool version 0.2.5 and Docker images v0.2.5 are pinned for stability
+- Cross tool version 0.2.12 and Docker images v0.2.12 are pinned for stability
 - This setup allows `cross` tool to function properly
 
 ### Version Updates
@@ -202,14 +203,14 @@ Nightly version format: `{base_version}-nightly-{commit_hash}`
 ### Platform Coverage
 Current platforms supported:
 - Linux: x64, ARM64, ARM32, x86, RISC-V64
-- Windows: x64, x86
+- Windows: x64 (MSVC), x86 (MSVC)
 - Packaging: Debian, Arch Linux, RPM
 
 ### Version Pinning
 For stability and reproducibility:
 - Docker-in-Docker: `docker:28.5.1-dind`
-- Cross tool: `cross 0.2.5`
-- Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.5`
+- Cross tool: `cross 0.2.12`
+- Cross-compilation images: `ghcr.io/cross-rs/{target}:v0.2.12`
 - Cross environment: `CROSS_REMOTE=1`
 - Base images:
   - Rust: `rust:1.91.1`
@@ -220,7 +221,8 @@ For stability and reproducibility:
 
 ### Common Issues
 - **Docker daemon not running**: Ensure `docker:dind` service is configured for cross-compilation jobs
-- **Cross-compilation failures**: Verify target architecture support in `cross` tool
+- **Cross-compilation failures**: Verify target architecture support in `cross` tool (note: Windows builds use MSVC targets for Wine compatibility)
+- **Wine compatibility issues**: Windows binaries are tested with Wine; MSVC targets provide better compatibility than GNU
 - **Package build failures**: Check platform-specific build scripts and dependencies
 
 ### Debugging
