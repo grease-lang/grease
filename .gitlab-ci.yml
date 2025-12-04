@@ -1,7 +1,7 @@
 stages:
   - build
 
-image: rust:1.91.1
+image: rust:1.85.1-bullseye
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
@@ -95,7 +95,7 @@ nightly-rpm:
 # Cross-compilation jobs for different architectures
 nightly-arm64:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
@@ -126,7 +126,7 @@ nightly-arm64:
 
 nightly-arm32:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
@@ -157,7 +157,7 @@ nightly-arm32:
 
 nightly-i686:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
@@ -188,7 +188,7 @@ nightly-i686:
 
 nightly-riscv64:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
@@ -219,7 +219,7 @@ nightly-riscv64:
 
 nightly-windows-x64:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
@@ -252,7 +252,7 @@ nightly-windows-x64:
 
 nightly-windows-x86:
   stage: build
-  image: rust:1.85.1
+  image: rust:1.85.1-bullseye
   services:
     - docker:28.5.1-dind
   variables:
