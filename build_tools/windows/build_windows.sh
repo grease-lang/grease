@@ -53,9 +53,9 @@ fi
 
 # Set target based on arch
 if [ "$ARCH" = "x64" ]; then
-    TARGET="x86_64-pc-windows-gnullvm"
+    TARGET="x86_64-pc-windows-gnu"
 else
-    TARGET="i686-pc-windows-gnullvm"
+    TARGET="i686-pc-windows-gnu"
 fi
 
 echo "🦀 Building Grease for Windows $ARCH..."
@@ -67,8 +67,19 @@ if ! rustup target list --installed | grep -q "$TARGET"; then
     rustup target add "$TARGET"
 fi
 
-# gnullvm targets use LLVM's lld linker (rust-lld) which comes with Rust toolchain
-# No external toolchain installation required
+# Check for MinGW toolchain
+if [ "$ARCH" = "x64" ]; then
+    MINGW_PREFIX="x86_64-w64-mingw32"
+else
+    MINGW_PREFIX="i686-w64-mingw32"
+fi
+
+if ! command -v "${MINGW_PREFIX}-gcc" &> /dev/null; then
+    echo "❌ MinGW toolchain not found. Please install it:"
+    echo "   On Ubuntu/Debian: sudo apt-get install gcc-mingw-w64-$ARCH"
+    echo "   On Arch: sudo pacman -S mingw-w64-gcc"
+    exit 1
+fi
 
 # Handle nightly version
 if [ "$NIGHTLY" = true ]; then
@@ -88,6 +99,9 @@ fi
 
 # Build the binary
 echo "🔨 Building Grease..."
+export RUSTFLAGS="-C target-feature=+crt-static"
+export CC="${MINGW_PREFIX}-gcc"
+export CXX="${MINGW_PREFIX}-g++"
 cargo test --target "$TARGET"
 cargo build --release --target "$TARGET"
 

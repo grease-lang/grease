@@ -5,9 +5,8 @@ This directory contains scripts to build Windows binaries for Grease via cross-c
 ## Prerequisites
 
 - **Rust toolchain**: Rust 1.91.1 with Cargo
-- **gnullvm targets**: Uses LLVM's lld linker (rust-lld) for Windows compatibility without external dependencies
-- **Cargo configuration**: `.cargo/config.toml` configures rust-lld linker for gnullvm targets
-- **Cross-compilation**: Direct cargo cross-compilation to Windows gnullvm targets
+- **MinGW toolchain**: For Windows cross-compilation (installed via package manager)
+- **Cross-compilation**: Direct cargo cross-compilation to Windows targets
 - **Linux host**: Cross-compilation is performed on Linux systems
 
 ## Usage
@@ -19,8 +18,8 @@ This directory contains scripts to build Windows binaries for Grease via cross-c
 ### Options
 
 - `--arch x64|x86`: Required. Target architecture
-  - `x64`: 64-bit Windows (x86_64-pc-windows-gnullvm) with rust-lld linker
-  - `x86`: 32-bit Windows (i686-pc-windows-gnullvm) with rust-lld linker
+  - `x64`: 64-bit Windows (x86_64-pc-windows-gnu)
+  - `x86`: 32-bit Windows (i686-pc-windows-gnu)
 - `--nightly`: Optional. Build a nightly version with commit hash in version string
 
 ## Examples

@@ -226,12 +226,13 @@ nightly-windows-x64:
     - rustc --version
     - cargo --version
     - cargo test
-    - rustup target add x86_64-pc-windows-gnullvm
+    - apt-get update -y && apt-get install -y gcc-mingw-w64-x86-64
+    - rustup target add x86_64-pc-windows-gnu
     - chmod +x build_tools/windows/build_windows.sh
     - ./build_tools/windows/build_windows.sh --arch x64 --nightly
   artifacts:
     paths:
-      - target/x86_64-pc-windows-gnullvm/release/grease.exe
+      - target/x86_64-pc-windows-gnu/release/grease.exe
     name: "grease-nightly-windows-x64-$CI_COMMIT_SHORT_SHA"
 
  
@@ -245,10 +246,11 @@ nightly-windows-x86:
     - rustc --version
     - cargo --version
     - cargo test
-    - rustup target add i686-pc-windows-gnullvm
+    - apt-get update -y && apt-get install -y gcc-mingw-w64-i686
+    - rustup target add i686-pc-windows-gnu
     - chmod +x build_tools/windows/build_windows.sh
     - ./build_tools/windows/build_windows.sh --arch x86 --nightly
   artifacts:
     paths:
-      - target/i686-pc-windows-gnullvm/release/grease.exe
+      - target/i686-pc-windows-gnu/release/grease.exe
     name: "grease-nightly-windows-x86-$CI_COMMIT_SHORT_SHA"
