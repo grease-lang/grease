@@ -235,7 +235,8 @@ nightly-windows-x64:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y docker.io wine
+    - dpkg --add-architecture i386
+    - apt-get update -y && apt-get install -y docker.io wine wine32:i386
     - docker info
     - wine --version
     - cargo install cross --version 0.2.5
@@ -267,7 +268,8 @@ nightly-windows-x86:
   script:
     - rustc --version
     - cargo --version
-    - apt-get update -y && apt-get install -y docker.io wine
+    - dpkg --add-architecture i386
+    - apt-get update -y && apt-get install -y docker.io wine wine32:i386
     - docker info
     - wine --version
     - cargo install cross --version 0.2.5
