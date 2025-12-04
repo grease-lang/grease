@@ -34,11 +34,11 @@ impl VM {
         let mut vm = VM {
             chunk: None,
             ip: 0,
-            stack: Vec::new(),
-            globals: HashMap::new(),
-            frames: Vec::new(),
+            stack: Vec::with_capacity(256),
+            globals: HashMap::with_capacity(64),
+            frames: Vec::with_capacity(16),
             modules: HashMap::new(),
-            exception_stack: Vec::new(),
+            exception_stack: Vec::with_capacity(8),
         };
 
         // Add built-in functions
@@ -69,6 +69,7 @@ impl VM {
         self.ip = 0;
         self.stack.clear();
         self.frames.clear();
+        self.exception_stack.clear();
         
         self.run()
     }
@@ -76,75 +77,76 @@ impl VM {
     fn run(&mut self) -> InterpretResult {
     loop {
         let instruction = self.read_byte().expect("Unexpected end of bytecode");
-            match OpCode::from_byte(instruction) {
+        match OpCode::from_byte(instruction) {
             Some(OpCode::Constant) => {
                 let constant_index = self.read_byte().expect("Expected constant index") as usize;
-                let constant = self.chunk.as_ref().unwrap().constants[constant_index].clone();
+                let chunk = self.chunk.as_ref().expect("No chunk loaded");
+                let constant = chunk.constants[constant_index].clone();
                 self.stack.push(constant);
             }
             Some(OpCode::Add) => {
-                let b_opt = self.stack.pop();
-                let a_opt = self.stack.pop();
-                if let (Some(b), Some(a)) = (b_opt, a_opt) {
-                    match (&a, &b) {
-                        (Value::Number(a_num), Value::Number(b_num)) => {
-                            self.stack.push(Value::Number(a_num + b_num));
-                        }
-                        (Value::String(a_str), Value::String(b_str)) => {
-                            self.stack.push(Value::String(a_str.clone() + b_str));
-                        }
-                        (Value::String(a_str), Value::Number(b_num)) => {
-                            self.stack.push(Value::String(a_str.clone() + &b_num.to_string()));
-                        }
-                        (Value::Number(a_num), Value::String(b_str)) => {
-                            self.stack.push(Value::String(a_num.to_string() + b_str));
-                        }
-                        (Value::String(a_str), Value::Boolean(b_bool)) => {
-                            self.stack.push(Value::String(a_str.clone() + if *b_bool { "true" } else { "false" }));
-                        }
-                        (Value::Boolean(a_bool), Value::String(b_str)) => {
-                            self.stack.push(Value::String(format!("{}{}", if *a_bool { "true" } else { "false" }, b_str)));
-                        }
-                        _ => {
-                            return InterpretResult::RuntimeError("Operands must be numbers or strings".to_string());
-                        }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                
+                match (a, b) {
+                    (Value::Number(a_num), Value::Number(b_num)) => {
+                        self.stack.push(Value::Number(a_num + b_num));
                     }
-                } else {
-                    return InterpretResult::RuntimeError("Stack underflow".to_string());
+                    (Value::String(mut a_str), Value::String(b_str)) => {
+                        a_str.push_str(&b_str);
+                        self.stack.push(Value::String(a_str));
+                    }
+                    (Value::String(mut a_str), Value::Number(b_num)) => {
+                        a_str.push_str(&b_num.to_string());
+                        self.stack.push(Value::String(a_str));
+                    }
+                    (Value::Number(a_num), Value::String(b_str)) => {
+                        let mut result = a_num.to_string();
+                        result.push_str(&b_str);
+                        self.stack.push(Value::String(result));
+                    }
+                    (Value::String(mut a_str), Value::Boolean(b_bool)) => {
+                        a_str.push_str(if b_bool { "true" } else { "false" });
+                        self.stack.push(Value::String(a_str));
+                    }
+                    (Value::Boolean(a_bool), Value::String(b_str)) => {
+                        let mut result = if a_bool { "true" } else { "false" }.to_string();
+                        result.push_str(&b_str);
+                        self.stack.push(Value::String(result));
+                    }
+                    _ => {
+                        return InterpretResult::RuntimeError("Operands must be numbers or strings".to_string());
+                    }
                 }
             }
             Some(OpCode::Multiply) => {
-                let b_opt = self.stack.pop();
-                let a_opt = self.stack.pop();
-                if let (Some(Value::Number(b)), Some(Value::Number(a))) = (b_opt, a_opt) {
-                    self.stack.push(Value::Number(a * b));
-                } else {
-                    return InterpretResult::RuntimeError("Operands must be numbers".to_string());
-                }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(Value::Number(b)), Some(Value::Number(a))) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
+                };
+                self.stack.push(Value::Number(a * b));
             }
             Some(OpCode::Divide) => {
-                let b_opt = self.stack.pop();
-                let a_opt = self.stack.pop();
-                if let (Some(Value::Number(b)), Some(Value::Number(a))) = (b_opt, a_opt) {
-                    if b == 0.0 {
-                        return InterpretResult::RuntimeError("Division by zero".to_string());
-                    }
-                    self.stack.push(Value::Number(a / b));
-                } else {
-                    return InterpretResult::RuntimeError("Operands must be numbers".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(Value::Number(b)), Some(Value::Number(a))) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
+                };
+                if b == 0.0 {
+                    return InterpretResult::RuntimeError("Division by zero".to_string());
                 }
+                self.stack.push(Value::Number(a / b));
             }
             Some(OpCode::Modulo) => {
-                let b_opt = self.stack.pop();
-                let a_opt = self.stack.pop();
-                if let (Some(Value::Number(b)), Some(Value::Number(a))) = (b_opt, a_opt) {
-                    if b == 0.0 {
-                        return InterpretResult::RuntimeError("Modulo by zero".to_string());
-                    }
-                    self.stack.push(Value::Number(a % b));
-                } else {
-                    return InterpretResult::RuntimeError("Operands must be numbers".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(Value::Number(b)), Some(Value::Number(a))) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
+                };
+                if b == 0.0 {
+                    return InterpretResult::RuntimeError("Modulo by zero".to_string());
                 }
+                self.stack.push(Value::Number(a % b));
             }
             Some(OpCode::Null) => {
                     self.stack.push(Value::Null);
@@ -156,99 +158,99 @@ impl VM {
                     self.stack.push(Value::Boolean(false));
                 }
             Some(OpCode::GetGlobal) => {
-                    let name = match self.read_string() {
-                        Value::String(s) => s,
-                        _ => return InterpretResult::RuntimeError("Global name must be a string".to_string()),
-                    };
-                    
-                    match self.globals.get(&name) {
-                        Some(value) => self.stack.push(value.clone()),
-                        None => return InterpretResult::RuntimeError(format!("Undefined variable '{}'", name)),
-                    }
+                let name = match self.read_string() {
+                    Value::String(s) => s,
+                    _ => return InterpretResult::RuntimeError("Global name must be a string".to_string()),
+                };
+                
+                match self.globals.get(&name) {
+                    Some(value) => self.stack.push(value.clone()),
+                    None => return InterpretResult::RuntimeError(format!("Undefined variable '{}'", name)),
                 }
+            }
             Some(OpCode::SetGlobal) => {
-                    let name = match self.read_string() {
-                        Value::String(s) => s,
-                        _ => return InterpretResult::RuntimeError("Global name must be a string".to_string()),
-                    };
-                    
-                    if let Some(value) = self.stack.pop() {
-                        self.globals.insert(name, value);
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let name = match self.read_string() {
+                    Value::String(s) => s,
+                    _ => return InterpretResult::RuntimeError("Global name must be a string".to_string()),
+                };
+                
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.globals.insert(name, value);
+            }
             Some(OpCode::GetLocal) => {
-                    let slot = self.read_byte().unwrap() as usize;
-                    if let Some(frame) = self.frames.last() {
-                        let absolute_slot = frame.slot + slot;
-                        if absolute_slot < self.stack.len() {
-                            self.stack.push(self.stack[absolute_slot].clone());
-                        } else {
-                            return InterpretResult::RuntimeError("Invalid local slot".to_string());
-                        }
+                let slot = self.read_byte().expect("Expected slot") as usize;
+                if let Some(frame) = self.frames.last() {
+                    let absolute_slot = frame.slot + slot;
+                    if absolute_slot < self.stack.len() {
+                        self.stack.push(self.stack[absolute_slot].clone());
                     } else {
-                        return InterpretResult::RuntimeError("GetLocal outside of function".to_string());
+                        return InterpretResult::RuntimeError("Invalid local slot".to_string());
                     }
+                } else {
+                    return InterpretResult::RuntimeError("GetLocal outside of function".to_string());
                 }
+            }
             Some(OpCode::SetLocal) => {
-                    let slot = self.read_byte().unwrap() as usize;
-                    if let Some(value) = self.stack.pop() {
-                        if let Some(frame) = self.frames.last() {
-                            let absolute_slot = frame.slot + slot;
-                            if absolute_slot < self.stack.len() {
-                                self.stack[absolute_slot] = value;
-                            } else {
-                                return InterpretResult::RuntimeError("Invalid local slot".to_string());
-                            }
-                        } else {
-                            return InterpretResult::RuntimeError("SetLocal outside of function".to_string());
-                        }
+                let slot = self.read_byte().expect("Expected slot") as usize;
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                if let Some(frame) = self.frames.last() {
+                    let absolute_slot = frame.slot + slot;
+                    if absolute_slot < self.stack.len() {
+                        self.stack[absolute_slot] = value;
                     } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                        return InterpretResult::RuntimeError("Invalid local slot".to_string());
                     }
+                } else {
+                    return InterpretResult::RuntimeError("SetLocal outside of function".to_string());
                 }
+            }
             Some(OpCode::Jump) => {
-                    let offset = self.read_short() as usize;
-                    self.ip += offset;
-                }
+                let offset = self.read_short() as usize;
+                self.ip += offset;
+            }
             Some(OpCode::JumpIfFalse) => {
-                    let offset = self.read_short() as usize;
-                    if let Some(value) = self.stack.last() {
-                        if !self.is_truthy(value) {
-                            self.ip += offset;
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let offset = self.read_short() as usize;
+                if let Some(value) = self.stack.last() {
+                    if !self.is_truthy(value) {
+                        self.ip += offset;
                     }
+                } else {
+                    return InterpretResult::RuntimeError("Stack underflow".to_string());
                 }
+            }
             Some(OpCode::JumpIfTrue) => {
-                    let offset = self.read_short() as usize;
-                    if let Some(value) = self.stack.last() {
-                        if self.is_truthy(value) {
-                            self.ip += offset;
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let offset = self.read_short() as usize;
+                if let Some(value) = self.stack.last() {
+                    if self.is_truthy(value) {
+                        self.ip += offset;
                     }
+                } else {
+                    return InterpretResult::RuntimeError("Stack underflow".to_string());
                 }
+            }
             Some(OpCode::Loop) => {
-                    let offset = self.read_short() as usize;
-                    self.ip -= offset;
-                }
+                let offset = self.read_short() as usize;
+                self.ip = self.ip.checked_sub(offset).expect("Loop underflow");
+            }
             Some(OpCode::Dup) => {
-                    if let Some(value) = self.stack.last().cloned() {
-                        self.stack.push(value);
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
+                if let Some(value) = self.stack.last() {
+                    self.stack.push(value.clone());
+                } else {
+                    return InterpretResult::RuntimeError("Stack underflow".to_string());
                 }
+            }
             Some(OpCode::Call) => {
-                    let arg_count = self.read_byte().unwrap() as usize;
-                    if !self.call_value(arg_count) {
-                        return InterpretResult::RuntimeError("Failed to call value".to_string());
-                    }
+                let arg_count = self.read_byte().expect("Expected argument count") as usize;
+                if !self.call_value(arg_count) {
+                    return InterpretResult::RuntimeError("Failed to call value".to_string());
                 }
+            }
             Some(OpCode::Return) => {
                 let result = self.stack.pop(); // May be None if no explicit return value
                 
@@ -266,173 +268,169 @@ impl VM {
                 }
             }
             Some(OpCode::Subtract) => {
-                if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                    match (a, b) {
-                        (Value::Number(a), Value::Number(b)) => {
-                            self.stack.push(Value::Number(a - b));
-                        }
-                        _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (a, b) {
+                    (Value::Number(a), Value::Number(b)) => {
+                        self.stack.push(Value::Number(a - b));
                     }
-                } else {
-                    return InterpretResult::RuntimeError("Stack underflow".to_string());
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
                 }
             }
             Some(OpCode::Negate) => {
-                    if let Some(value) = self.stack.pop() {
-                        match value {
-                            Value::Number(n) => self.stack.push(Value::Number(-n)),
-                            _ => return InterpretResult::RuntimeError("Operand must be a number".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match value {
+                    Value::Number(n) => self.stack.push(Value::Number(-n)),
+                    _ => return InterpretResult::RuntimeError("Operand must be a number".to_string()),
                 }
+            }
             Some(OpCode::Array) => {
-                    if let Some(count) = self.read_byte() {
-                        let mut elements = Vec::new();
-                        for _ in 0..count {
-                            if let Some(element) = self.stack.pop() {
-                                elements.insert(0, element); // Insert at beginning to maintain order
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                        }
-                        self.stack.push(Value::Array(elements));
-                    } else {
-                        return InterpretResult::RuntimeError("Expected array count".to_string());
-                    }
-                }
+                let count = self.read_byte().expect("Expected array count") as usize;
+                let start_idx = match self.stack.len().checked_sub(count) {
+                    Some(idx) => idx,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                let elements = self.stack.drain(start_idx..).collect();
+                self.stack.push(Value::Array(elements));
+            }
             Some(OpCode::Dictionary) => {
-                    if let Some(count) = self.read_byte() {
-                        let mut dict = std::collections::HashMap::new();
-                        for _ in 0..count {
-                            if let (Some(value), Some(key)) = (self.stack.pop(), self.stack.pop()) {
-                                if let Value::String(key_str) = key {
-                                    dict.insert(key_str, value);
-                                } else {
-                                    return InterpretResult::RuntimeError("Dictionary keys must be strings".to_string());
-                                }
-                            } else {
-                                return InterpretResult::RuntimeError("Stack underflow".to_string());
-                            }
+                let count = self.read_byte().expect("Expected dictionary count") as usize;
+                let pairs_needed = count * 2;
+                let start_idx = match self.stack.len().checked_sub(pairs_needed) {
+                    Some(idx) => idx,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                
+                let pairs = self.stack.drain(start_idx..).collect::<Vec<_>>();
+                let mut dict = std::collections::HashMap::with_capacity(count);
+                
+                for chunk in pairs.chunks(2) {
+                    match &chunk[0] {
+                        Value::String(key_str) => {
+                            dict.insert(key_str.clone(), chunk[1].clone());
                         }
-                        self.stack.push(Value::Dictionary(dict));
-                    } else {
-                        return InterpretResult::RuntimeError("Expected dictionary count".to_string());
+                        _ => return InterpretResult::RuntimeError("Dictionary keys must be strings".to_string()),
                     }
                 }
+                self.stack.push(Value::Dictionary(dict));
+            }
             Some(OpCode::Index) => {
-                    if let (Some(array), Some(index)) = (self.stack.pop(), self.stack.pop()) {
-                        match (array, index) {
-                            (Value::Array(elements), Value::Number(i))=> {
-                                let idx = i as usize;
-            if idx < elements.len() {
-                self.stack.push(elements[idx].clone());
-            } else {
-                return InterpretResult::RuntimeError(format!("Index {} out of bounds for array of length {}", idx, elements.len()));
-                }
-                            }
-        _ => return InterpretResult::RuntimeError("Index operation requires array and number".to_string()),
+                let (array, index) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(array), Some(index)) => (array, index),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (array, index) {
+                    (Value::Array(elements), Value::Number(i))=> {
+                        let idx = i as usize;
+                        if idx < elements.len() {
+                            self.stack.push(elements[idx].clone());
+                        } else {
+                            return InterpretResult::RuntimeError(format!("Index {} out of bounds for array of length {}", idx, elements.len()));
                         }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
                     }
+                    _ => return InterpretResult::RuntimeError("Index operation requires array and number".to_string()),
                 }
+            }
             Some(OpCode::Length) => {
-                    if let Some(value) = self.stack.pop() {
-                        match value {
-                            Value::Array(elements)=> {
-                                self.stack.push(Value::Number(elements.len() as f64));
-                            }
-                            _ => return InterpretResult::RuntimeError("Length operation requires array".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match value {
+                    Value::Array(elements)=> {
+                        self.stack.push(Value::Number(elements.len() as f64));
                     }
+                    _ => return InterpretResult::RuntimeError("Length operation requires array".to_string()),
                 }
+            }
             Some(OpCode::Equal) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        self.stack.push(Value::Boolean(self.values_equal(&a, &b)));
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.stack.push(Value::Boolean(self.values_equal(&a, &b)));
+            }
             Some(OpCode::NotEqual) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        self.stack.push(Value::Boolean(!self.values_equal(&a, &b)));
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.stack.push(Value::Boolean(!self.values_equal(&a, &b)));
+            }
             Some(OpCode::Less) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        match (a, b) {
-                            (Value::Number(a), Value::Number(b))=> {
-                                self.stack.push(Value::Boolean(a < b));
-                            }
-                            _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (a, b) {
+                    (Value::Number(a), Value::Number(b))=> {
+                        self.stack.push(Value::Boolean(a < b));
                     }
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
                 }
+            }
             Some(OpCode::LessEqual) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        match (a, b) {
-                            (Value::Number(a), Value::Number(b))=> {
-                                self.stack.push(Value::Boolean(a <= b));
-                            }
-                            _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (a, b) {
+                    (Value::Number(a), Value::Number(b))=> {
+                        self.stack.push(Value::Boolean(a <= b));
                     }
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
                 }
+            }
             Some(OpCode::Greater) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        match (a, b) {
-                            (Value::Number(a), Value::Number(b))=> {
-                                self.stack.push(Value::Boolean(a > b));
-                            }
-                            _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (a, b) {
+                    (Value::Number(a), Value::Number(b))=> {
+                        self.stack.push(Value::Boolean(a > b));
                     }
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
                 }
+            }
             Some(OpCode::GreaterEqual) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        match (a, b) {
-                            (Value::Number(a), Value::Number(b))=> {
-                                self.stack.push(Value::Boolean(a >= b));
-                            }
-                            _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
-                        }
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                match (a, b) {
+                    (Value::Number(a), Value::Number(b))=> {
+                        self.stack.push(Value::Boolean(a >= b));
                     }
+                    _ => return InterpretResult::RuntimeError("Operands must be numbers".to_string()),
                 }
+            }
             Some(OpCode::Not) => {
-                    if let Some(value) = self.stack.pop() {
-                        self.stack.push(Value::Boolean(!self.is_truthy(&value)));
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let value = match self.stack.pop() {
+                    Some(v) => v,
+                    None => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.stack.push(Value::Boolean(!self.is_truthy(&value)));
+            }
             Some(OpCode::And) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        self.stack.push(Value::Boolean(self.is_truthy(&a) && self.is_truthy(&b)));
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.stack.push(Value::Boolean(self.is_truthy(&a) && self.is_truthy(&b)));
+            }
             Some(OpCode::Or) => {
-                    if let (Some(b), Some(a)) = (self.stack.pop(), self.stack.pop()) {
-                        self.stack.push(Value::Boolean(self.is_truthy(&a) || self.is_truthy(&b)));
-                    } else {
-                        return InterpretResult::RuntimeError("Stack underflow".to_string());
-                    }
-                }
+                let (b, a) = match (self.stack.pop(), self.stack.pop()) {
+                    (Some(b), Some(a)) => (a, b),
+                    _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
+                };
+                self.stack.push(Value::Boolean(self.is_truthy(&a) || self.is_truthy(&b)));
+            }
             Some(OpCode::Pop) => {
                     self.stack.pop();
                 }
@@ -722,80 +720,86 @@ impl VM {
 
     fn call_value(&mut self, arg_count: usize) -> bool {
         // The function is below the arguments
-        let func_index = self.stack.len() - arg_count - 1;
-        if let Some(callee) = self.stack.get(func_index).cloned() {
-                match callee {
-                        Value::String(name) if name == "print" => {
-                    // Built-in print function
-                    if arg_count != 1 {
-                        return false;
-                    }
-                    if let Some(arg) = self.stack.pop() {
-                        self.stack.pop(); // Remove the function name
-                        println!("{}", self.format_value(&arg));
-                        self.stack.push(Value::Null);
-                        return true;
-                    }
+        let func_index = self.stack.len().checked_sub(arg_count + 1).unwrap_or(0);
+        let callee = match self.stack.get(func_index).cloned() {
+            Some(callee) => callee,
+            None => return false,
+        };
+        
+        match callee {
+            Value::String(name) if name == "print" => {
+                // Built-in print function
+                if arg_count != 1 {
+                    return false;
+                }
+                if let Some(arg) = self.stack.pop() {
+                    self.stack.pop(); // Remove the function name
+                    println!("{}", self.format_value(&arg));
+                    self.stack.push(Value::Null);
+                    true
+                } else {
+                    false
+                }
             }
-                        Value::Function(func) => {
-                    // User-defined function
-                    if arg_count != func.arity {
+            Value::Function(func) => {
+                // User-defined function
+                if arg_count != func.arity {
+                    return false;
+                }
+
+                // Remove the function from the stack
+                self.stack.remove(func_index);
+
+                // Create a new call frame
+                let slot = self.stack.len() - arg_count;
+                let current_chunk = self.chunk.take().unwrap_or_else(|| Chunk::new());
+                let frame = CallFrame {
+                    ip: self.ip,
+                    slot,
+                    chunk: current_chunk,
+                };
+                self.frames.push(frame);
+
+                // Set up the function's chunk
+                self.chunk = Some(func.chunk.clone());
+
+                // Jump to the start of the function
+                self.ip = 0;
+                true
+            }
+            Value::NativeFunction(native_func) => {
+                // Native function
+                if arg_count != native_func.arity {
+                    return false;
+                }
+
+                // Collect arguments (they are above the function on the stack)
+                let mut args = Vec::with_capacity(arg_count);
+                for i in 0..arg_count {
+                    if let Some(arg) = self.stack.get(func_index + 1 + i).cloned() {
+                        args.push(arg);
+                    } else {
                         return false;
                     }
-
-                    // Remove the function from the stack
-                    self.stack.remove(func_index);
-
-                    // Create a new call frame
-                    let slot = self.stack.len() - arg_count;
-                    let current_chunk = self.chunk.take().unwrap_or_else(|| Chunk::new());
-                    let frame = CallFrame {
-                        ip: self.ip,
-                        slot,
-                        chunk: current_chunk,
-                    };
-                    self.frames.push(frame);
-
-                    // Set up the function's chunk
-                    self.chunk = Some(func.chunk.clone());
-
-                    // Jump to the start of the function
-                    self.ip = 0;
-                    return true;
                 }
-                Value::NativeFunction(native_func) => {
-                    // Native function
-                    if arg_count != native_func.arity {
-                        return false;
-                    }
 
-                    // Collect arguments (they are above the function on the stack)
-                    let mut args = Vec::new();
-                    for i in 0..arg_count {
-                        if let Some(arg) = self.stack.get(func_index + 1 + i).cloned() {
-                            args.push(arg);
-                        } else {
-                            return false;
-                        }
-                    }
+                // Remove the function and arguments from the stack
+                self.stack.truncate(func_index);
 
-                    // Remove the function and arguments from the stack
-                    self.stack.truncate(func_index);
-
-                    // Call the native function
-                    match (native_func.function)(self, args) {
-                        Ok(result)=> {
-                            self.stack.push(result);
-                            return true;
-                        }
-                        Err(_) => return false,
+                // Call the native function
+                match (native_func.function)(self, args) {
+                    Ok(result)=> {
+                        self.stack.push(result);
+                        true
                     }
+                    Err(_) => false,
                 }
-                        _ => { () }
-                }
+            }
+            _ => {
+                self.stack.push(Value::Null);
+                true
+            }
         }
-        self.stack.push(Value::Null);
-        true
     }
 
     pub fn format_value(&self, value: &Value) -> String {
@@ -824,37 +828,28 @@ impl VM {
     }
 
     fn read_byte(&mut self) -> Option<u8> {
-        if let Some(ref chunk) = self.chunk {
-            if self.ip < chunk.code.len() {
-                let byte = chunk.code[self.ip];
-                self.ip += 1;
+        let chunk = self.chunk.as_ref()?;
+        if self.ip < chunk.code.len() {
+            let byte = chunk.code[self.ip];
+            self.ip += 1;
             Some(byte)
-            } else {
-                None
-                }
         } else {
             None
-                }
+        }
     }
 
     fn read_short(&mut self) -> u16 {
-        if let Some(ref chunk) = self.chunk {
-            let high = chunk.code[self.ip] as u16;
-            let low = chunk.code[self.ip + 1] as u16;
-            self.ip += 2;
-            (high << 8) | low
-        } else {
-            0
-                }
+        let chunk = self.chunk.as_ref().expect("No chunk loaded");
+        let high = chunk.code[self.ip] as u16;
+        let low = chunk.code[self.ip + 1] as u16;
+        self.ip += 2;
+        (high << 8) | low
     }
 
     fn read_constant(&mut self) -> Value {
-        let index = self.read_byte().unwrap() as usize;
-        if let Some(ref chunk) = self.chunk {
-            chunk.constants[index].clone()
-        } else {
-            Value::Null
-                }
+        let index = self.read_byte().expect("Expected constant") as usize;
+        let chunk = self.chunk.as_ref().expect("No chunk loaded");
+        chunk.constants[index].clone()
     }
 
     fn read_string(&mut self) -> Value {

@@ -129,9 +129,9 @@ pub struct Chunk {
 impl Chunk {
     pub fn new() -> Self {
         Chunk {
-            code: Vec::new(),
-            constants: Vec::new(),
-            lines: Vec::new(),
+            code: Vec::with_capacity(256),
+            constants: Vec::with_capacity(64),
+            lines: Vec::with_capacity(256),
         }
     }
 

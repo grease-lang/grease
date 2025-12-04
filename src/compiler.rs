@@ -21,7 +21,7 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             chunk: Chunk::new(),
-            locals: Vec::new(),
+            locals: Vec::with_capacity(16),
             scope_depth: 0,
         }
     }
@@ -225,11 +225,7 @@ impl Compiler {
                 self.emit_bytes(OpCode::Constant, constant as u8);
             }
             Expression::Boolean(value) => {
-                if *value {
-                    self.emit_byte(OpCode::True);
-                } else {
-                    self.emit_byte(OpCode::False);
-                }
+                self.emit_byte(if *value { OpCode::True } else { OpCode::False });
             }
             Expression::Null => {
                 self.emit_byte(OpCode::Null);
@@ -452,13 +448,10 @@ impl Compiler {
             };
             
             // Check if variable already exists in current scope
-            for local in self.locals.iter().rev() {
-                if local.depth < self.scope_depth {
-                    break;
-                }
-                if local.name == variable_name {
-                    return Err("Variable already declared in this scope".to_string());
-                }
+            if self.locals.iter().rev()
+                .take_while(|local| local.depth >= self.scope_depth)
+                .any(|local| local.name == variable_name) {
+                return Err("Variable already declared in this scope".to_string());
             }
             
             self.add_local(variable_name);
@@ -495,12 +488,7 @@ impl Compiler {
     }
 
     fn resolve_local(&self, name: &str) -> Option<usize> {
-        for (i, local) in self.locals.iter().enumerate().rev() {
-            if local.name == name {
-                return Some(i);
-            }
-        }
-        None
+        self.locals.iter().rev().position(|local| local.name == name)
     }
 
     fn begin_scope(&mut self) {
@@ -510,13 +498,9 @@ impl Compiler {
     fn end_scope(&mut self) {
         self.scope_depth -= 1;
         
-        while let Some(local) = self.locals.last() {
-            if local.depth > self.scope_depth {
-                self.emit_byte(OpCode::Pop);
-                self.locals.pop();
-            } else {
-                break;
-            }
+        while self.locals.last().map_or(false, |local| local.depth > self.scope_depth) {
+            self.emit_byte(OpCode::Pop);
+            self.locals.pop();
         }
     }
 
