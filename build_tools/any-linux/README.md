@@ -107,8 +107,8 @@ For ARM, RISC-V, and 32-bit x86 targets, the script automatically installs and u
 
 ### System Requirements
 - **Linux**: x86-64, ARM64, or ARMv7 Linux distribution
-- **Rust**: Rust 1.85.1 toolchain with Cargo
-- **Cross-compilation**: `cross` tool (automatically installed if needed for ARM targets)
+- **Rust**: Rust 1.91.1 toolchain with Cargo
+- **Cross-compilation**: Direct cargo cross-compilation for ARM targets
 - **Permissions**:
   - `install.sh`: No special permissions required
   - `install_system.sh`: sudo/root access for system-wide installation
@@ -118,7 +118,7 @@ If Rust isn't installed, the installer will guide you:
 
 ```bash
 # Install Rust using rustup
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain 1.85.1
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain 1.91.1
 
 # Reload your shell environment
 source ~/.bashrc  # or ~/.zshrc, etc.
@@ -188,7 +188,7 @@ source ~/.bashrc
 ### Build Failed
 ```bash
 # Update Rust to specific version
-rustup update 1.85.1
+rustup update 1.91.1
 
 # Clean and rebuild
 cargo clean
