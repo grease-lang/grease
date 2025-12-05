@@ -9,6 +9,7 @@ set -e
 NIGHTLY=false
 VERSION=""
 RELEASE="1"
+FEATURES=""
 SPEC_FILE="build_tools/rpm/grease.spec"
 BUILD_DIR="rpmbuild"
 
@@ -44,10 +45,11 @@ Grease RPM Build Script
 Usage: $0 [OPTIONS]
 
 OPTIONS:
-    --nightly          Build a nightly package with Git commit hash
-    --version VERSION  Override version (default: from Cargo.toml)
-    --release RELEASE  Override release number (default: 1)
-    --help             Show this help message
+     --nightly          Build a nightly package with Git commit hash
+     --version VERSION  Override version (default: from Cargo.toml)
+     --release RELEASE  Override release number (default: 1)
+     --features FEATURES  Build with specified Cargo features (e.g., "ui")
+     --help             Show this help message
 
 EXAMPLES:
     $0                              # Build stable release package
@@ -71,6 +73,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --release)
             RELEASE="$2"
+            shift 2
+            ;;
+        --features)
+            FEATURES="$2"
             shift 2
             ;;
         --help)
@@ -209,11 +215,17 @@ build_rpm() {
     # Build the package
     local spec_name=$(basename "$SPEC_FILE")
     
-    rpmbuild -ba \
-        --define "_topdir $PWD/$BUILD_DIR" \
-        --define "_version $VERSION" \
-        --define "_release $RELEASE" \
-        "$BUILD_DIR/SPECS/$spec_name"
+    # Build with features if specified
+    local rpmbuild_cmd="rpmbuild -ba"
+    if [ -n "$FEATURES" ]; then
+        rpmbuild_cmd="$rpmbuild_cmd --define '_features $FEATURES'"
+    fi
+    
+    rpmbuild_cmd="$rpmbuild_cmd \
+        --define '_topdir $PWD/$BUILD_DIR' \
+        --define '_version $VERSION' \
+        --define '_release $RELEASE' \
+        '$BUILD_DIR/SPECS/$spec_name'"
     
     log_success "RPM package built successfully"
 }

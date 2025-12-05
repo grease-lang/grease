@@ -41,8 +41,12 @@ build() {
   # Clean build cache to ensure version is picked up
   cargo clean
   
-  # Build the binary
-  cargo build --release
+  # Build binary
+  if [ -n "$FEATURES" ]; then
+    cargo build --release --features "$FEATURES"
+  else
+    cargo build --release
+  fi
 }
 
 package() {

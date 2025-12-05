@@ -4,8 +4,9 @@
 #!/bin/bash
 
 # Create Debian package for Grease
-# Usage: ./build_deb.sh [--nightly]
+# Usage: ./build_deb.sh [--nightly] [--features FEATURES]
 #   --nightly  Build a nightly package with commit hash in version
+#   --features  Build with specified Cargo features (e.g., "ui")
 
 set -e
 
@@ -21,12 +22,40 @@ PACKAGE_NAME="grease"
 ARCHITECTURE="amd64"
 MAINTAINER="Nick Girga <nickgirga@gmail.com>"
 
+# Parse arguments
+NIGHTLY_BUILD=false
+FEATURES=""
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --nightly)
+            NIGHTLY_BUILD=true
+            shift
+            ;;
+        --features)
+            FEATURES="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
 # Check if this is a nightly build
-if [ "$1" = "--nightly" ]; then
+if [ "$NIGHTLY_BUILD" = true ]; then
     COMMIT_SHORT=$(git rev-parse --short HEAD)
     BASE_VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
     VERSION="${BASE_VERSION}-nightly-${COMMIT_SHORT}"
     echo "🌙 Building nightly package: $VERSION"
+elif [ -n "$FEATURES" ]; then
+    VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    echo "🔧 Building package with features: $FEATURES"
+else
+    VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    echo "📦 Building stable package: $VERSION"
+fi
     
     # Update Cargo.toml with nightly version
     sed -i "s/version = \"$BASE_VERSION\"/version = \"$VERSION\"/" Cargo.toml
