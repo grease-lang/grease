@@ -420,23 +420,7 @@ impl WebAssemblyCompiler {
         }
     }
 
-    /// Emit LEB128 encoded unsigned 32-bit integer
-    fn emit_leb128_u32(&mut self, mut value: u32) {
-        loop {
-            let mut byte = (value & 0x7f) as u8;
-            value >>= 7;
-            
-            if value != 0 {
-                byte |= 0x80;
-            }
-            
-            self.emit_byte(byte);
-            
-            if value == 0 {
-                break;
-            }
-        }
-    }
+
 
     /// Generate JavaScript wrapper for WebAssembly
     pub fn generate_js_wrapper(&self) -> String {
@@ -535,7 +519,7 @@ impl WebAssemblyRuntime {
     }
 
     /// Compile Grease source to WebAssembly
-    pub fn compile(&mut self, source: &str) -> Result<String, String> {
+    pub fn compile(&mut self, _source: &str) -> Result<String, String> {
         // In a real implementation, this would:
         // 1. Parse Grease source
         // 2. Compile to bytecode

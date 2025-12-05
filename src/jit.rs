@@ -109,7 +109,7 @@ impl JITCompiler {
         }
 
         // Create a new memory page for this function
-        let mut memory_page = MemoryPage::new(4096)?; // 4KB page
+        let memory_page = MemoryPage::new(4096)?; // 4KB page
         self.memory_pages.push(memory_page);
 
         // Get the memory page back for writing

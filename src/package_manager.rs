@@ -13,7 +13,7 @@
 use crate::vm::VM;
 use crate::bytecode::Value;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::fs;
 
 /// Package repository information

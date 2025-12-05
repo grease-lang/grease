@@ -97,13 +97,11 @@ impl<T> MemoryPool<T> {
 
 /// Constant folding optimizer
 pub struct ConstantFolder {
-    interner: StringInterner,
 }
 
 impl ConstantFolder {
     pub fn new() -> Self {
         ConstantFolder {
-            interner: StringInterner::new(),
         }
     }
 

@@ -238,6 +238,7 @@ impl LanguageServer for GreaseLanguageServer {
                 for symbol in doc_symbols {
                     if params.query.is_empty() || 
                        symbol.name.to_lowercase().contains(&params.query.to_lowercase()) {
+                        #[allow(deprecated)]
                         symbols.push(SymbolInformation {
                             name: symbol.name.clone(),
                             kind: symbol.kind,
@@ -357,6 +358,7 @@ fn extract_document_symbols(ast: &crate::ast::Program, _uri: &Url) -> Vec<Docume
                     // Add parameters as child symbols
                     for (param, _) in parameters {
                         if let crate::token::TokenType::Identifier(param_name) = &param.token_type {
+                            #[allow(deprecated)]
                             children.push(DocumentSymbol {
                                 name: param_name.clone(),
                                 detail: Some("parameter".to_string()),
@@ -366,7 +368,6 @@ fn extract_document_symbols(ast: &crate::ast::Program, _uri: &Url) -> Vec<Docume
                                 selection_range: Range::default(),
                                 children: None,
                                 deprecated: None,
-
                             });
                         }
                     }
@@ -376,6 +377,7 @@ fn extract_document_symbols(ast: &crate::ast::Program, _uri: &Url) -> Vec<Docume
                         extract_symbols_from_statement(stmt, &mut children);
                     }
                     
+                    #[allow(deprecated)]
                     symbols.push(DocumentSymbol {
                         name: ident.clone(),
                         detail: Some(format!("function({})", parameters.len())),
@@ -390,6 +392,7 @@ fn extract_document_symbols(ast: &crate::ast::Program, _uri: &Url) -> Vec<Docume
             }
             crate::ast::Statement::VariableDeclaration { name, type_annotation, .. } => {
                 if let crate::token::TokenType::Identifier(ident) = &name.token_type {
+                    #[allow(deprecated)]
                     symbols.push(DocumentSymbol {
                         name: ident.clone(),
                         detail: type_annotation.clone(),
@@ -413,6 +416,7 @@ fn extract_symbols_from_statement(stmt: &crate::ast::Statement, symbols: &mut Ve
     match stmt {
         crate::ast::Statement::VariableDeclaration { name, type_annotation, .. } => {
             if let crate::token::TokenType::Identifier(ident) = &name.token_type {
+                #[allow(deprecated)]
                 symbols.push(DocumentSymbol {
                     name: ident.clone(),
                     detail: type_annotation.clone(),
@@ -431,6 +435,7 @@ fn extract_symbols_from_statement(stmt: &crate::ast::Statement, symbols: &mut Ve
                 
                     for (param, _) in parameters {
                         if let crate::token::TokenType::Identifier(param_name) = &param.token_type {
+                            #[allow(deprecated)]
                             children.push(DocumentSymbol {
                                 name: param_name.clone(),
                                 detail: Some("parameter".to_string()),
@@ -440,7 +445,6 @@ fn extract_symbols_from_statement(stmt: &crate::ast::Statement, symbols: &mut Ve
                                 selection_range: Range::default(),
                                 children: None,
                                 deprecated: None,
-
                             });
                         }
                     }
@@ -449,6 +453,7 @@ fn extract_symbols_from_statement(stmt: &crate::ast::Statement, symbols: &mut Ve
                     extract_symbols_from_statement(stmt, &mut children);
                 }
                 
+                #[allow(deprecated)]
                 symbols.push(DocumentSymbol {
                     name: ident.clone(),
                     detail: Some(format!("function({})", parameters.len())),

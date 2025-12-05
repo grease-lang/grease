@@ -31,7 +31,6 @@ pub struct Package {
 pub struct PackageManager {
     installed_packages: HashMap<String, Package>,
     package_paths: Vec<PathBuf>,
-    cache_directory: PathBuf,
 }
 
 /// Package resolver for handling dependencies
@@ -46,7 +45,6 @@ impl PackageManager {
         let mut pm = PackageManager {
             installed_packages: HashMap::new(),
             package_paths: Vec::new(),
-            cache_directory: PathBuf::from("./packages"),
         };
 
         // Initialize default package paths
@@ -166,7 +164,7 @@ impl PackageResolver {
         }
 
         if let Some(package) = self.package_manager.get_package(package_name) {
-            let mut resolved = vec![package.clone()];
+            let resolved = vec![package.clone()];
             
             // Resolve dependencies (simplified for now)
             for dep in &package.dependencies {
