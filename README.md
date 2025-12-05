@@ -20,6 +20,7 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 - **Module System**: Import standard library modules with `use`
 - **Standard Library**: `math` (add, multiply, sqrt, abs, pow, pi) and `string` (length, uppercase, lowercase, contains) modules
 - **Native Functions**: Call Rust functions from Grease scripts
+- **Hybrid UI System**: High-performance GUI with both VM-based and pure Rust components
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
 - **Linter**: Static analysis for unused variables and code quality
@@ -65,6 +66,25 @@ print(math.pi)             # 3.141592653589793
 use string as str
 print(str.length("hello")) # 5
 print(str.contains("hello", "ell")) # true
+
+# Hybrid UI System - High Performance GUI
+ui_window_create("My App", 800, 600, "main_window")
+
+# Traditional VM-based UI (flexible but slower)
+ui_button_add("main_window", "btn1", "VM Button", 10, 10, 120)
+ui_label_add("main_window", "lbl1", "VM Label", 10, 50)
+
+# High-performance hybrid UI (native Rust speed)
+fast_button = ui_create_button_pure("Fast Button", "handle_click")
+fast_label = ui_create_label_pure("Fast Label")
+
+# Add hybrid components to window
+ui_add_hybrid_component("main_window", fast_button)
+ui_add_hybrid_component("main_window", fast_label)
+
+# Show window and start event loop
+ui_window_show("main_window")
+ui_run()
 ```
 
 ## Installation
@@ -234,12 +254,13 @@ Grease supports standard command line options:
 Grease includes a complete LSP implementation for professional IDE support:
 
 #### Features
-- **Auto-completion**: Intelligent code completion for keywords, functions, and variables
+- **Auto-completion**: Intelligent code completion for keywords, functions, variables, and UI functions
 - **Diagnostics**: Real-time syntax and semantic error checking
 - **Go to Definition**: Navigate to symbol definitions across files
 - **Hover Information**: Documentation and type information on hover
 - **Document Symbols**: Outline view of file structure
 - **Semantic Tokens**: Enhanced syntax highlighting
+- **UI Function Support**: Complete auto-completion for all hybrid UI functions
 
 #### Quick Start
 ```bash
@@ -295,12 +316,18 @@ Written entirely in safe Rust with:
 
 ```
 Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode → VM → Execution
+                                                    ↓
+                                              Hybrid UI System
+                                                    ↓
+                                            Dioxus + eframe Rendering
 ```
 
 - **Lexer**: Tokenizes source code
 - **Parser**: Builds Abstract Syntax Tree
 - **Compiler**: Generates bytecode instructions
 - **VM**: Executes bytecode on stack machine
+- **Hybrid UI System**: Provides both VM-based and pure Rust UI components
+- **Dioxus Integration**: High-performance template caching and lazy loading
 
 ## Future Roadmap
 
@@ -310,6 +337,9 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 - [ ] Classes and object-oriented features
 - [ ] Enhanced array operations
 - [ ] Improved for loop functionality
+- [ ] Advanced UI components (tables, trees, charts)
+- [ ] UI layout managers
+- [ ] Event-driven programming patterns
 
 ### 🚀 Long-term Goals
 - [ ] Package manager
@@ -325,6 +355,10 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 - [x] Module system with imports
 - [x] Comprehensive standard library
 - [x] IDE support for major editors
+- [x] Hybrid UI system with Dioxus integration
+- [x] High-performance GUI components
+- [x] Template caching and lazy loading
+- [x] Performance benchmarking suite
 
 ## Testing
 

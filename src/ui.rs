@@ -15,6 +15,14 @@ use eframe::egui;
 use eframe::{App, Frame};
 use eframe::egui::{Context, Ui};
 
+// Import Dioxus integration for hybrid UI system
+mod dioxus_integration;
+pub use dioxus_integration::{DioxusUIManager, HybridUIComponent};
+
+// Import benchmarking module
+pub mod benchmark;
+pub use benchmark::{UIBenchmark, BenchmarkResults};
+
 static UI_STATE: Mutex<Option<Arc<Mutex<UiState>>>> = Mutex::new(None);
 
 fn get_ui_state() -> Result<Arc<Mutex<UiState>>, String> {
@@ -69,6 +77,7 @@ pub struct UiState {
     pub labels: HashMap<String, UiLabel>,
     pub inputs: HashMap<String, UiInput>,
     pub running: bool,
+    pub dioxus_manager: Option<DioxusUIManager>,
 }
 
 impl UiState {
@@ -79,6 +88,7 @@ impl UiState {
             labels: HashMap::new(),
             inputs: HashMap::new(),
             running: false,
+            dioxus_manager: Some(DioxusUIManager::new()),
         }
     }
 }
@@ -394,6 +404,7 @@ fn ui_run(_vm: &mut VM, _args: Vec<Value>) -> Result<Value, String> {
 
             impl UiApp {
                 fn render_window_content(state: &mut UiState, ui: &mut Ui, window_id: &str) {
+                    // Render traditional VM-based widgets
                     // Render labels
                     for (label_id, label) in &state.labels.clone() {
                         if label_id.starts_with(&format!("{}_", window_id)) {
@@ -419,6 +430,11 @@ fn ui_run(_vm: &mut VM, _args: Vec<Value>) -> Result<Value, String> {
                             }
                         }
                     }
+
+                    // Render high-performance hybrid components
+                    if let Some(ref mut manager) = state.dioxus_manager {
+                        manager.render_components_for_window(ui, window_id);
+                    }
                 }
             }
 
@@ -437,6 +453,129 @@ fn ui_stop(_vm: &mut VM, _args: Vec<Value>) -> Result<Value, String> {
     Ok(Value::Boolean(true))
 }
 
+// Hybrid UI functions for high-performance components
+
+// Create button using pure Rust (bypasses VM for max performance)
+fn ui_create_button_pure(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let label = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (label)".to_string()),
+    };
+    
+    let callback_name = match &args[1] {
+        Value::String(s) => s.clone(),
+        _ => return Err("Second argument must be a string (callback_name)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let mut state = state.lock().unwrap();
+    
+    if let Some(ref mut manager) = state.dioxus_manager {
+        let component_id = manager.create_button_pure(label, callback_name);
+        Ok(Value::String(component_id))
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
+// Create label using pure Rust
+fn ui_create_label_pure(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let text = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (text)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let mut state = state.lock().unwrap();
+    
+    if let Some(ref mut manager) = state.dioxus_manager {
+        let component_id = manager.create_label_pure(text);
+        Ok(Value::String(component_id))
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
+// Create input field using pure Rust
+fn ui_create_input_pure(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let placeholder = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (placeholder)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let mut state = state.lock().unwrap();
+    
+    if let Some(ref mut manager) = state.dioxus_manager {
+        let component_id = manager.create_input_pure(placeholder);
+        Ok(Value::String(component_id))
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
+// Add hybrid component to window
+fn ui_add_hybrid_component(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let window_id = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (window_id)".to_string()),
+    };
+    
+    let component_id = match &args[1] {
+        Value::String(s) => s.clone(),
+        _ => return Err("Second argument must be a string (component_id)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let mut state = state.lock().unwrap();
+    
+    if let Some(ref mut manager) = state.dioxus_manager {
+        manager.add_component_to_window(window_id, component_id);
+        Ok(Value::Boolean(true))
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
+// Get component value (for inputs)
+fn ui_get_component_value(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let component_id = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (component_id)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let state = state.lock().unwrap();
+    
+    if let Some(ref manager) = state.dioxus_manager {
+        if let Some(value) = manager.get_component_value(&component_id) {
+            Ok(Value::String(value))
+        } else {
+            Err(format!("Component '{}' not found or has no value", component_id))
+        }
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
+// Check if component was clicked (for buttons)
+fn ui_component_clicked(_vm: &mut VM, args: Vec<Value>) -> Result<Value, String> {
+    let component_id = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("First argument must be a string (component_id)".to_string()),
+    };
+
+    let state = get_ui_state()?;
+    let mut state = state.lock().unwrap();
+    
+    if let Some(ref mut manager) = state.dioxus_manager {
+        let clicked = manager.was_component_clicked(&component_id);
+        Ok(Value::Boolean(clicked))
+    } else {
+        Err("Dioxus manager not initialized".to_string())
+    }
+}
+
 /// Initialize the UI system and register all native functions
 pub fn init_ui(vm: &mut VM) {
     println!("DEBUG: Initializing UI functions");
@@ -445,14 +584,22 @@ pub fn init_ui(vm: &mut VM) {
     vm.register_native("ui_window_show", 1, ui_window_show);
     vm.register_native("ui_window_hide", 1, ui_window_hide);
 
-    // Widget creation functions
+    // Widget creation functions (traditional VM-based)
     vm.register_native("ui_button_add", 6, ui_button_add);
     vm.register_native("ui_label_add", 5, ui_label_add);
     vm.register_native("ui_input_add", 6, ui_input_add);
 
-    // Event handling functions
+    // Event handling functions (traditional VM-based)
     vm.register_native("ui_button_clicked", 2, ui_button_clicked);
     vm.register_native("ui_input_get_value", 2, ui_input_get_value);
+
+    // Hybrid UI functions (high-performance pure Rust)
+    vm.register_native("ui_create_button_pure", 2, ui_create_button_pure);
+    vm.register_native("ui_create_label_pure", 1, ui_create_label_pure);
+    vm.register_native("ui_create_input_pure", 1, ui_create_input_pure);
+    vm.register_native("ui_add_hybrid_component", 2, ui_add_hybrid_component);
+    vm.register_native("ui_get_component_value", 1, ui_get_component_value);
+    vm.register_native("ui_component_clicked", 1, ui_component_clicked);
 
     // Main UI loop functions
     vm.register_native("ui_run", 0, ui_run);

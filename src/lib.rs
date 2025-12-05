@@ -13,6 +13,7 @@ pub mod grease;
 pub mod linter;
 pub mod lsp_workspace;
 pub mod lsp_server;
+#[cfg(feature = "ui")]
 pub mod ui;
 pub mod jit;
 pub mod performance;
@@ -32,6 +33,7 @@ pub use grease::*;
 pub use linter::*;
 pub use lsp_workspace::*;
 pub use lsp_server::*;
+#[cfg(feature = "ui")]
 pub use ui::*;
 pub use jit::*;
 pub use performance::*;

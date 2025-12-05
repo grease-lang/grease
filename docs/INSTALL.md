@@ -121,6 +121,10 @@ grease lsp --help
 # Test linter
 echo 'x = 5' > test.grease
 grease --lint test.grease
+
+# Test UI functionality
+echo 'ui_window_create("Test", 400, 300, "win"); ui_run()' > test_ui.grease
+grease test_ui.grease
 ```
 
 ## System Integration
@@ -191,6 +195,27 @@ rm ~/.local/bin/grease
 sudo dpkg -r grease
 sudo dpkg -P grease  # Purge configuration files
 ```
+
+## System Requirements
+
+### Minimum Requirements
+- **Rust**: 1.91.1 or later (for building from source)
+- **OS**: Linux (x86_64, ARM64, ARM32, i686, RISC-V 64)
+- **Memory**: 64MB RAM minimum
+- **Storage**: 10MB disk space
+
+### Recommended Requirements
+- **Rust**: 1.91.1 or later
+- **OS**: Linux (x86_64) with glibc 2.17+
+- **Memory**: 256MB RAM or more
+- **Storage**: 50MB disk space for development
+
+### UI System Requirements
+For using Grease's hybrid UI system:
+- **Graphics**: OpenGL 3.3+ compatible graphics driver
+- **Display**: X11 or Wayland display server
+- **Libraries**: System graphics libraries (automatically included in binary)
+- **Memory**: Additional 50MB for UI components
 
 ## Building Packages
 

@@ -1,0 +1,37 @@
+// Test LSP integration with new UI functions
+// This file tests that the LSP server properly recognizes and provides
+// completions for the new hybrid UI functions
+
+// Test traditional UI functions (should be recognized by LSP)
+ui_window_create("Test Window", 800, 600, "test_window")
+ui_button_add("test_window", "btn1", "Test Button", 10, 10, 120)
+ui_label_add("test_window", "lbl1", "Test Label", 10, 50)
+ui_input_add("test_window", "inp1", "Test Input:", 10, 80, 200)
+
+// Test hybrid UI functions (should be recognized by LSP)
+button_id = ui_create_button_pure("Fast Button", "handle_click")
+label_id = ui_create_label_pure("Fast Label")
+input_id = ui_create_input_pure("Fast Input")
+
+// Test hybrid component management
+ui_add_hybrid_component("test_window", button_id)
+ui_add_hybrid_component("test_window", label_id)
+ui_add_hybrid_component("test_window", input_id)
+
+// Test event handling functions
+if ui_button_clicked("test_window", "btn1"):
+    print("Traditional button clicked")
+
+if ui_component_clicked(button_id):
+    print("Hybrid button clicked")
+
+value1 = ui_input_get_value("test_window", "inp1")
+value2 = ui_get_component_value(input_id)
+
+// Test UI control functions
+ui_window_show("test_window")
+ui_run()
+ui_stop()
+
+// Test that LSP provides proper completions for all these functions
+// When typing "ui_" in an editor with LSP, all these functions should appear

@@ -21,6 +21,10 @@ This Rust-native approach ensures Grease inherits the reliability, performance, 
 The compilation pipeline follows this structure:
 ```
 Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode → VM → Execution
+                                                    ↓
+                                              Hybrid UI System
+                                                    ↓
+                                            Dioxus + eframe Rendering
 ```
 
 ### Core Components (Detailed Breakdown)
@@ -40,10 +44,17 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 - **`src/compiler.rs`**: AST to bytecode compiler, local variable management, control flow compilation
 - **`src/vm.rs`**: Stack-based virtual machine, function calls, native function support, error handling
 
+#### Hybrid UI System (NEW)
+- **`src/ui.rs`**: Main UI module with hybrid VM and pure Rust components
+- **`src/ui/dioxus_integration.rs`**: Dioxus framework integration for high-performance UI
+- **`src/ui/benchmark.rs`**: Performance benchmarking suite for UI approaches
+- **`src/ui/theme.rs`**: UI theming and styling system
+- **`src/ui/mod.rs`**: UI module organization and exports
+
 #### Tooling & Language Services
 - **`src/repl.rs`**: Interactive Read-Eval-Print Loop with value display
 - **`src/linter.rs`**: Static analysis, unused variable detection, scope tracking
-- **`src/lsp_server.rs`**: Full Language Server Protocol implementation
+- **`src/lsp_server.rs`**: Full Language Server Protocol implementation with UI function support
 - **`src/lsp_workspace.rs`**: Document management, symbol extraction, LSP workspace handling
 - **`src/grease.rs`**: Main interpreter interface, module loading, verbose execution
 
@@ -62,9 +73,12 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 10. **Module System**: `use module` and `use module as alias` syntax
 11. **Standard Library**: Math and string modules in `std/` (with syntax issues)
 12. **Native Functions**: Rust function integration via `native_add` example
-13. **REPL**: Interactive mode with value display
-14. **Linter**: Static analysis for unused variables
-15. **LSP Server**: Complete IDE support with diagnostics, completion, go-to-definition
+13. **Hybrid UI System**: High-performance GUI with VM and pure Rust components
+14. **Dioxus Integration**: Template caching and lazy loading for UI
+15. **Performance Benchmarks**: Comprehensive UI performance testing
+16. **REPL**: Interactive mode with value display
+17. **Linter**: Static analysis for unused variables
+18. **LSP Server**: Complete IDE support with diagnostics, completion, go-to-definition, UI function support
 
 ### 🚧 Partially Implemented/Limited Features
 1. **Arrays**: Basic syntax exists but limited functionality
@@ -86,6 +100,10 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 - `serde` 1.0: JSON serialization
 - `dashmap` 5.5: Concurrent HashMap
 - `ropey` 1.6: Efficient text manipulation
+- `eframe` 0.27: Cross-platform GUI framework
+- `egui` 0.27: Immediate mode GUI library
+- `dioxus` 0.6: High-performance reactive UI framework
+- `dioxus-desktop` 0.6: Desktop backend for Dioxus
 
 ### Build System
 - **Primary**: `cargo build --release`
@@ -134,8 +152,13 @@ rustup default 1.91.1  # Set as default
   - `vm.rs` - Stack-based virtual machine with function calls and native functions
   - `repl.rs` - Interactive Read-Eval-Print Loop with value display
   - `linter.rs` - Static analysis for unused variables and scope tracking
-  - `lsp_server.rs` - Full Language Server Protocol implementation
+  - `lsp_server.rs` - Full Language Server Protocol implementation with UI function support
   - `lsp_workspace.rs` - Document management and symbol extraction for LSP
+  - `ui/` - Hybrid UI system with high-performance components
+    - `mod.rs` - UI module organization and exports
+    - `dioxus_integration.rs` - Dioxus framework integration for high-performance UI
+    - `benchmark.rs` - Performance benchmarking suite for UI approaches
+    - `theme.rs` - UI theming and styling system
 - `examples/` - Example Grease scripts demonstrating language features (must remain functional)
 - `std/` - Standard library modules with math and string functions (needs syntax fixes)
 - `editors/` - Editor integrations for VSCode extension and Neovim LSP configuration

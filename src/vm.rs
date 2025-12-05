@@ -53,6 +53,7 @@ impl VM {
         });
 
         // Initialize UI functions
+        #[cfg(feature = "ui")]
         crate::ui::init_ui(&mut vm);
 
         // Initialize JIT functions

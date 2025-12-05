@@ -321,6 +321,52 @@ impl Workspace {
             "and", "or", "not"
         ];
         
+        // Add UI function completions (both traditional and hybrid)
+        let ui_functions = vec![
+            // Traditional VM-based UI functions
+            ("ui_window_create", "Create a new UI window", "ui_window_create(title, width, height, window_id)"),
+            ("ui_window_show", "Show a UI window", "ui_window_show(window_id)"),
+            ("ui_window_hide", "Hide a UI window", "ui_window_hide(window_id)"),
+            ("ui_button_add", "Add a button to a window", "ui_button_add(window_id, button_id, label, x, y, width)"),
+            ("ui_label_add", "Add a label to a window", "ui_label_add(window_id, label_id, text, x, y)"),
+            ("ui_input_add", "Add an input field to a window", "ui_input_add(window_id, input_id, label, x, y, width)"),
+            ("ui_button_clicked", "Check if button was clicked", "ui_button_clicked(window_id, button_id)"),
+            ("ui_input_get_value", "Get input field value", "ui_input_get_value(window_id, input_id)"),
+            ("ui_run", "Start the UI event loop", "ui_run()"),
+            ("ui_stop", "Stop the UI event loop", "ui_stop()"),
+            
+            // Hybrid UI functions (high-performance)
+            ("ui_create_button_pure", "Create high-performance button", "ui_create_button_pure(label, callback_name)"),
+            ("ui_create_label_pure", "Create high-performance label", "ui_create_label_pure(text)"),
+            ("ui_create_input_pure", "Create high-performance input", "ui_create_input_pure(placeholder)"),
+            ("ui_add_hybrid_component", "Add hybrid component to window", "ui_add_hybrid_component(window_id, component_id)"),
+            ("ui_get_component_value", "Get hybrid component value", "ui_get_component_value(component_id)"),
+            ("ui_component_clicked", "Check if hybrid component was clicked", "ui_component_clicked(component_id)"),
+        ];
+        
+        for (func_name, detail, documentation) in ui_functions {
+            completions.push(CompletionItem {
+                label: func_name.to_string(),
+                kind: Some(CompletionItemKind::FUNCTION),
+                detail: Some(detail.to_string()),
+                documentation: Some(Documentation::String(documentation.to_string())),
+                deprecated: None,
+                preselect: None,
+                sort_text: Some(format!("0{}", func_name)), // Sort UI functions first
+                filter_text: None,
+                insert_text: Some(func_name.to_string()),
+                insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
+                insert_text_mode: None,
+                text_edit: None,
+                additional_text_edits: None,
+                command: None,
+                commit_characters: None,
+                data: None,
+                tags: None,
+                label_details: None,
+            });
+        }
+        
         for keyword in keywords {
             completions.push(CompletionItem {
                 label: keyword.to_string(),

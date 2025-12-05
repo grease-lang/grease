@@ -1,0 +1,58 @@
+// Hybrid UI Performance Example
+// Demonstrates the performance difference between VM-based and hybrid UI approaches
+
+// Traditional VM-based UI (slower startup)
+print("Creating traditional VM-based UI...")
+ui_window_create("Traditional UI", 800, 600, "vm_window")
+ui_button_add("vm_window", "btn1", "VM Button 1", 10, 10, 120)
+ui_button_add("vm_window", "btn2", "VM Button 2", 10, 50, 120)
+ui_label_add("vm_window", "lbl1", "VM Label", 10, 90)
+ui_input_add("vm_window", "inp1", "VM Input:", 10, 120, 200)
+
+// Hybrid UI - high performance components (faster startup)
+print("Creating hybrid UI components...")
+button_id1 = ui_create_button_pure("Fast Button 1", "handle_fast_click")
+button_id2 = ui_create_button_pure("Fast Button 2", "handle_fast_click")
+label_id = ui_create_label_pure("Fast Label")
+input_id = ui_create_input_pure("Fast Input")
+
+// Add hybrid components to window
+ui_add_hybrid_component("vm_window", button_id1)
+ui_add_hybrid_component("vm_window", button_id2)
+ui_add_hybrid_component("vm_window", label_id)
+ui_add_hybrid_component("vm_window", input_id)
+
+// Show the window
+ui_window_show("vm_window")
+
+// Event loop
+while true:
+    // Check VM-based button clicks
+    if ui_button_clicked("vm_window", "btn1"):
+        print("VM Button 1 clicked!")
+    
+    if ui_button_clicked("vm_window", "btn2"):
+        print("VM Button 2 clicked!")
+    
+    // Check hybrid button clicks (faster)
+    if ui_component_clicked(button_id1):
+        print("Fast Button 1 clicked!")
+    
+    if ui_component_clicked(button_id2):
+        print("Fast Button 2 clicked!")
+    
+    // Get input values
+    vm_input_value = ui_input_get_value("vm_window", "inp1")
+    fast_input_value = ui_get_component_value(input_id)
+    
+    if vm_input_value != "":
+        print("VM Input value: " + vm_input_value)
+    
+    if fast_input_value != "":
+        print("Fast Input value: " + fast_input_value)
+    
+    # Small delay to prevent busy waiting
+    # In a real app, you'd use proper event handling
+    break
+
+print("Hybrid UI example completed!")
