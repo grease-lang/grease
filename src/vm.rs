@@ -52,9 +52,7 @@ impl VM {
                 }
         });
 
-        // Initialize UI functions
-        #[cfg(feature = "ui")]
-        crate::ui::init_ui(&mut vm);
+
 
         // Initialize JIT functions
         crate::jit::init_jit(&mut vm);
@@ -68,8 +66,7 @@ impl VM {
         // Initialize package manager functions
         crate::package_manager::init_package_cli(&mut vm);
 
-        // Initialize WebAssembly functions
-        crate::webassembly::init_webassembly(&mut vm);
+
 
         vm
     }

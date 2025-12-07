@@ -13,13 +13,16 @@ pub mod grease;
 pub mod linter;
 pub mod lsp_workspace;
 pub mod lsp_server;
-#[cfg(feature = "ui")]
-pub mod ui;
+
 pub mod jit;
 pub mod performance;
 pub mod package;
 pub mod package_manager;
-pub mod webassembly;
+pub mod module_loader;
+pub mod version_compat;
+pub mod module_errors;
+pub mod module_communication;
+
 
 pub use token::*;
 pub use lexer::*;
@@ -33,13 +36,13 @@ pub use grease::*;
 pub use linter::*;
 pub use lsp_workspace::*;
 pub use lsp_server::*;
-#[cfg(feature = "ui")]
-pub use ui::*;
+
 pub use jit::*;
 pub use performance::*;
 pub use package::*;
 pub use package_manager::*;
-pub use webassembly::*;
+pub use module_communication::*;
+
 
 #[cfg(test)]
 mod tests {
@@ -333,117 +336,7 @@ print("not true = " + (not is_true))
         assert!(result.is_ok());
     }
 
-    #[test]
-    fn test_webassembly_initialization() {
-        let mut grease = Grease::new();
-        let result = grease.run("wasm_init()");
-        assert!(result.is_ok());
-    }
 
-    #[test]
-    fn test_webassembly_availability() {
-        let mut grease = Grease::new();
-        let result = grease.run("available = wasm_available()\nprint(available)");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_webassembly_statistics() {
-        let mut grease = Grease::new();
-        let result = grease.run("stats = wasm_stats()\nprint(stats)");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_webassembly_compilation() {
-        let mut grease = Grease::new();
-        let result = grease.run("result = wasm_compile(\"print(42)\")\nprint(result)");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_webassembly_compiler_creation() {
-        let compiler = WebAssemblyCompiler::new();
-        assert_eq!(compiler.wasm_code.len(), 0);
-        assert_eq!(compiler.exports.len(), 0);
-        assert_eq!(compiler.imports.len(), 0);
-    }
-
-    #[test]
-    fn test_webassembly_runtime_creation() {
-        let runtime = WebAssemblyRuntime::new();
-        assert!(!runtime.initialized);
-    }
-
-    #[test]
-    fn test_webassembly_runtime_initialization() {
-        let mut runtime = WebAssemblyRuntime::new();
-        let result = runtime.initialize();
-        assert!(result.is_ok());
-        assert!(runtime.initialized);
-    }
-
-    #[test]
-    fn test_webassembly_compiler_header() {
-        let mut compiler = WebAssemblyCompiler::new();
-        compiler.emit_header();
-        
-        // Check magic number and version
-        assert_eq!(compiler.wasm_code[0..4], [0x00, 0x61, 0x73, 0x6d]); // \0asm
-        assert_eq!(compiler.wasm_code[4..8], [0x01, 0x00, 0x00, 0x00]); // version 1
-    }
-
-    #[test]
-    fn test_webassembly_emit_i32_const() {
-        let mut compiler = WebAssemblyCompiler::new();
-        compiler.emit_i32_const(42);
-        
-        // Check i32.const opcode and value
-        assert_eq!(compiler.wasm_code[0], 0x41); // i32.const
-        assert_eq!(compiler.wasm_code[1], 42);   // value
-    }
-
-    #[test]
-    fn test_webassembly_emit_constant() {
-        let mut compiler = WebAssemblyCompiler::new();
-        
-        // Test number constant
-        compiler.emit_constant(&Value::Number(42.0));
-        assert_eq!(compiler.wasm_code[0], 0x41); // i32.const
-        assert_eq!(compiler.wasm_code[1], 42);   // value
-        
-        compiler.wasm_code.clear();
-        
-        // Test boolean constant
-        compiler.emit_constant(&Value::Boolean(true));
-        assert_eq!(compiler.wasm_code[0], 0x41); // i32.const
-        assert_eq!(compiler.wasm_code[1], 1);    // true = 1
-        
-        compiler.wasm_code.clear();
-        
-        // Test null constant
-        compiler.emit_constant(&Value::Null);
-        assert_eq!(compiler.wasm_code[0], 0x41); // i32.const
-        assert_eq!(compiler.wasm_code[1], 0);    // null = 0
-    }
-
-    #[test]
-    fn test_webassembly_js_wrapper_generation() {
-        let mut compiler = WebAssemblyCompiler::new();
-        compiler.emit_header();
-        
-        let js_wrapper = compiler.generate_js_wrapper();
-        assert!(js_wrapper.contains("GreaseWasm"));
-        assert!(js_wrapper.contains("WebAssembly"));
-        assert!(js_wrapper.contains("loadGreaseWasm"));
-    }
-
-    #[test]
-    fn test_webassembly_example_execution() {
-        let mut grease = Grease::new();
-        let result = grease.run("wasm_init()\nwasm_available()\nwasm_stats()");
-        assert!(result.is_ok());
-    }
 
 
 }

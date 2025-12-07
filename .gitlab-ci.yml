@@ -27,7 +27,7 @@ nightly:
     - sed -i "s/v$BASE_VERSION/v$NIGHTLY_VERSION/" docs/grease.1
     - cat Cargo.toml | grep version
     - cargo clean
-    - cargo build --release --features ui
+    - cargo build --release
   artifacts:
     paths:
       - target/release/grease
@@ -44,7 +44,7 @@ nightly-deb:
     - cargo --version
     - cargo test
     - chmod +x build_tools/debian/build_deb.sh
-    - ./build_tools/debian/build_deb.sh --nightly --features ui
+    - ./build_tools/debian/build_deb.sh --nightly
   artifacts:
     paths:
       - "*.deb"
@@ -66,7 +66,7 @@ nightly-arch:
       echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
       cp build_tools/arch/nightly/PKGBUILD .
       chown -R builder:builder .
-      sudo -u builder makepkg -s --noconfirm --features ui
+      sudo -u builder makepkg -s --noconfirm
   artifacts:
     paths:
       - "*.pkg.tar.zst"
@@ -84,7 +84,7 @@ nightly-rpm:
     - cargo --version
     - cargo test
     - chmod +x build_tools/rpm/build_rpm.sh
-    - ./build_tools/rpm/build_rpm.sh --nightly --features ui
+    - ./build_tools/rpm/build_rpm.sh --nightly
   artifacts:
     paths:
       - "rpmbuild/RPMS/**/*.rpm"

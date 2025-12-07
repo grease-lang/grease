@@ -6,8 +6,9 @@ use clap_complete::{generate, Shell};
 use clap_mangen::Man;
 use grease::Grease;
 use grease::repl::REPL;
-use grease::vm::InterpretResult;
+use grease::vm::{VM, InterpretResult};
 use grease::lsp_server::run_server;
+use grease::module_loader::ModuleLoader;
 use std::fs;
 use std::io;
 
@@ -146,6 +147,31 @@ fn main() {
                     }
                 }
             } else {
+                // Initialize module system
+                let mut vm = VM::new();
+                let _module_loader = match ModuleLoader::new() {
+                    Ok(loader) => {
+                        println!("🔍 Initializing Grease modules...");
+                        
+                        // Check version compatibility
+                        if let Err(e) = loader.check_platform_compatibility() {
+                            eprintln!("⚠️  Module compatibility warning: {}", e);
+                        }
+                        
+                        // Initialize detected modules
+                        if let Err(e) = loader.init_modules(&mut vm) {
+                            eprintln!("❌ Module initialization failed: {}", e);
+                            std::process::exit(1);
+                        }
+                        
+                        loader
+                    }
+                    Err(e) => {
+                        eprintln!("❌ Failed to detect modules: {}", e);
+                        std::process::exit(1);
+                    }
+                };
+                
                 // Run REPL
                 let mut repl = REPL::new();
                 repl.run();

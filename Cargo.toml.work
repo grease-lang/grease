@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    ".",
+    "grease-ui",
+    "grease-webassembly"
+]
+
+[workspace.dependencies]
+# Shared dependencies can be defined here
+libc = "0.2"

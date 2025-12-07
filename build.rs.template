@@ -1,0 +1,295 @@
+// Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
+//! Build script for Grease projects with optional modules
+//! 
+//! This build script automatically detects and compiles Grease modules
+//! when they are present in the project directory.
+
+use std::env;
+use std::fs;
+use std::path::Path;
+use std::process::Command;
+
+fn main() {
+    println!("🔧 Building Grease project with modules...");
+
+    // Always build the main Grease project
+    if let Err(e) = build_grease() {
+        eprintln!("❌ Failed to build Grease: {}", e);
+        std::process::exit(1);
+    }
+
+    // Build UI module if available
+    if ui_module_available() {
+        println!("🖼️ Building UI module...");
+        if let Err(e) = build_ui_module() {
+            eprintln!("⚠️ UI module build failed: {}", e);
+            eprintln!("💡 UI features will be disabled at runtime");
+        } else {
+            println!("✅ UI module built successfully");
+        }
+    } else {
+        println!("ℹ️ UI module not found - skipping UI build");
+    }
+
+    // Build WebAssembly module if available
+    if wasm_module_available() {
+        println!("🌐 Building WebAssembly module...");
+        if let Err(e) = build_wasm_module() {
+            eprintln!("⚠️ WebAssembly module build failed: {}", e);
+            eprintln!("💡 WebAssembly features will be disabled at runtime");
+        } else {
+            println!("✅ WebAssembly module built successfully");
+        }
+    } else {
+        println!("ℹ️ WebAssembly module not found - skipping WebAssembly build");
+    }
+
+    println!("🎉 Build completed successfully!");
+}
+
+fn build_grease() -> Result<(), String> {
+    println!("📦 Building core Grease...");
+    
+    let output = Command::new("cargo")
+        .args(&["build", "--release"])
+        .output()
+        .map_err(|e| format!("Failed to execute cargo build: {}", e))?;
+
+    if !output.status.success() {
+        return Err(format!("Cargo build failed: {}", String::from_utf8_lossy(&output.stderr)));
+    }
+
+    Ok(())
+}
+
+fn ui_module_available() -> bool {
+    // Check for UI module in standard locations
+    let ui_paths = [
+        "./grease-ui",
+        "../grease-ui", 
+        "./modules/grease-ui",
+        "./lib/grease-ui",
+    ];
+
+    // Check environment variable
+    if let Ok(custom_path) = env::var("GREASE_UI_PATH") {
+        if Path::new(&custom_path).exists() {
+            return true;
+        }
+    }
+
+    // Check standard locations
+    ui_paths.iter().any(|path| Path::new(path).exists())
+}
+
+fn wasm_module_available() -> bool {
+    // Check for WebAssembly module in standard locations
+    let wasm_paths = [
+        "./grease-webassembly",
+        "../grease-webassembly",
+        "./modules/grease-webassembly", 
+        "./lib/grease-webassembly",
+    ];
+
+    // Check environment variable
+    if let Ok(custom_path) = env::var("GREASE_WASM_PATH") {
+        if Path::new(&custom_path).exists() {
+            return true;
+        }
+    }
+
+    // Check standard locations
+    wasm_paths.iter().any(|path| Path::new(path).exists())
+}
+
+fn build_ui_module() -> Result<(), String> {
+    let ui_path = get_ui_path()?;
+    
+    println!("📂 Building UI module at: {}", ui_path.display());
+    
+    let output = Command::new("cargo")
+        .current_dir(&ui_path)
+        .args(&["build", "--release", "--features", "ui"])
+        .output()
+        .map_err(|e| format!("Failed to execute cargo build in UI module: {}", e))?;
+
+    if !output.status.success() {
+        return Err(format!("UI module build failed: {}", String::from_utf8_lossy(&output.stderr)));
+    }
+
+    // Copy built artifacts to main project
+    copy_ui_artifacts(&ui_path)?;
+
+    Ok(())
+}
+
+fn build_wasm_module() -> Result<(), String> {
+    let wasm_path = get_wasm_path()?;
+    
+    println!("📂 Building WebAssembly module at: {}", wasm_path.display());
+    
+    let output = Command::new("cargo")
+        .current_dir(&wasm_path)
+        .args(&["build", "--release", "--target", "wasm32-unknown-unknown"])
+        .output()
+        .map_err(|e| format!("Failed to execute cargo build in WebAssembly module: {}", e))?;
+
+    if !output.status.success() {
+        return Err(format!("WebAssembly module build failed: {}", String::from_utf8_lossy(&output.stderr)));
+    }
+
+    // Copy built artifacts to main project
+    copy_wasm_artifacts(&wasm_path)?;
+
+    Ok(())
+}
+
+fn get_ui_path() -> Result<std::path::PathBuf, String> {
+    // Check environment variable first
+    if let Ok(custom_path) = env::var("GREASE_UI_PATH") {
+        let path = std::path::PathBuf::from(custom_path);
+        if path.exists() {
+            return Ok(path);
+        }
+    }
+
+    // Check standard locations
+    let standard_paths = [
+        "./grease-ui",
+        "../grease-ui",
+        "./modules/grease-ui",
+        "./lib/grease-ui",
+    ];
+
+    for path in &standard_paths {
+        let path_buf = std::path::PathBuf::from(path);
+        if path_buf.exists() {
+            return Ok(path_buf);
+        }
+    }
+
+    Err("UI module not found".to_string())
+}
+
+fn get_wasm_path() -> Result<std::path::PathBuf, String> {
+    // Check environment variable first
+    if let Ok(custom_path) = env::var("GREASE_WASM_PATH") {
+        let path = std::path::PathBuf::from(custom_path);
+        if path.exists() {
+            return Ok(path);
+        }
+    }
+
+    // Check standard locations
+    let standard_paths = [
+        "./grease-webassembly",
+        "../grease-webassembly",
+        "./modules/grease-webassembly",
+        "./lib/grease-webassembly",
+    ];
+
+    for path in &standard_paths {
+        let path_buf = std::path::PathBuf::from(path);
+        if path_buf.exists() {
+            return Ok(path_buf);
+        }
+    }
+
+    Err("WebAssembly module not found".to_string())
+}
+
+fn copy_ui_artifacts(ui_path: &std::path::Path) -> Result<(), String> {
+    println!("📋 Copying UI artifacts...");
+    
+    // Create target directories in main project
+    fs::create_dir_all("target/ui")?;
+    fs::create_dir_all("target/release")?;
+
+    // Copy UI library
+    let ui_lib = ui_path.join("target/release/libgrease_ui.a");
+    let ui_lib_dest = std::path::PathBuf::from("target/release/libgrease_ui.a");
+    if ui_lib.exists() {
+        fs::copy(&ui_lib, &ui_lib_dest)
+            .map_err(|e| format!("Failed to copy UI library: {}", e))?;
+        println!("✅ Copied UI library");
+    }
+
+    // Copy UI dynamic library if available
+    let ui_so = ui_path.join("target/release/libgrease_ui.so");
+    let ui_so_dest = std::path::PathBuf::from("target/release/libgrease_ui.so");
+    if ui_so.exists() {
+        fs::copy(&ui_so, &ui_so_dest)
+            .map_err(|e| format!("Failed to copy UI dynamic library: {}", e))?;
+        println!("✅ Copied UI dynamic library");
+    }
+
+    // Copy UI DLL on Windows
+    let ui_dll = ui_path.join("target/release/grease_ui.dll");
+    let ui_dll_dest = std::path::PathBuf::from("target/release/grease_ui.dll");
+    if ui_dll.exists() {
+        fs::copy(&ui_dll, &ui_dll_dest)
+            .map_err(|e| format!("Failed to copy UI DLL: {}", e))?;
+        println!("✅ Copied UI DLL");
+    }
+
+    Ok(())
+}
+
+fn copy_wasm_artifacts(wasm_path: &std::path::Path) -> Result<(), String> {
+    println!("📋 Copying WebAssembly artifacts...");
+    
+    // Create target directories in main project
+    fs::create_dir_all("target/wasm")?;
+    fs::create_dir_all("target/wasm32-unknown-unknown/release")?;
+
+    // Copy WebAssembly files
+    let wasm_bg = wasm_path.join("target/wasm32-unknown-unknown/release/grease_webassembly_bg.wasm");
+    let wasm_bg_dest = std::path::PathBuf::from("target/wasm32-unknown-unknown/release/grease_webassembly_bg.wasm");
+    if wasm_bg.exists() {
+        fs::copy(&wasm_bg, &wasm_bg_dest)
+            .map_err(|e| format!("Failed to copy WebAssembly background: {}", e))?;
+        println!("✅ Copied WebAssembly background");
+    }
+
+    let wasm_js = wasm_path.join("target/wasm32-unknown-unknown/release/grease_webassembly.js");
+    let wasm_js_dest = std::path::PathBuf::from("target/wasm32-unknown-unknown/release/grease_webassembly.js");
+    if wasm_js.exists() {
+        fs::copy(&wasm_js, &wasm_js_dest)
+            .map_err(|e| format!("Failed to copy WebAssembly JavaScript: {}", e))?;
+        println!("✅ Copied WebAssembly JavaScript");
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ui_module_detection() {
+        // This test would need to mock file system
+        // For now, just test the logic structure
+        let _ = ui_module_available();
+    }
+
+    #[test]
+    fn test_wasm_module_detection() {
+        // This test would need to mock file system
+        // For now, just test the logic structure
+        let _ = wasm_module_available();
+    }
+
+    #[test]
+    fn test_path_resolution() {
+        // Test path resolution logic
+        env::set_var("TEST_GREASE_UI_PATH", "/test/path");
+        
+        // Should find environment variable path
+        assert!(ui_module_available());
+        
+        env::remove_var("TEST_GREASE_UI_PATH");
+    }
+}
