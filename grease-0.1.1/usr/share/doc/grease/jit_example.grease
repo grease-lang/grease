@@ -1,0 +1,54 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# JIT Compilation Example for Grease Programming Language
+# This example demonstrates basic JIT functionality
+
+print("JIT Compilation Example")
+print("=======================")
+
+# Check if JIT is available
+if jit_available():
+    print("✓ JIT compilation is available on this platform")
+else:
+    print("✗ JIT compilation is not available on this platform")
+    print("  JIT requires x86_64 architecture on Linux/macOS")
+
+# Check current JIT status
+if jit_enabled():
+    print("✓ JIT compilation is currently enabled")
+else:
+    print("✗ JIT compilation is currently disabled")
+
+# Enable JIT compilation
+print("Enabling JIT compilation...")
+jit_enable(true)
+
+if jit_enabled():
+    print("✓ JIT compilation successfully enabled")
+else:
+    print("✗ Failed to enable JIT compilation")
+
+# Show JIT statistics
+print("JIT Statistics:")
+print(jit_stats())
+
+# Simple performance test
+print("\nPerformance Test:")
+print("-----------------")
+
+# Test function that could benefit from JIT
+def fibonacci(n):
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n - 1) + fibonacci(n - 2)
+
+# Run a simple calculation
+result = fibonacci(10)
+print("fibonacci(10) = " + result)
+
+print("\nJIT Example completed!")
+print("In a full implementation, frequently executed functions")
+print("would be automatically compiled to native machine code")
+print("for significant performance improvements.")

@@ -1,8 +1,12 @@
 # Grease RPM Spec File
 # Maintainer: Nick Girga <nickgirga@gmail.com>
 
-Name:           grease
-Version: 0.1.1
+# Package name can be overridden for nightly builds
+%{!?_package_name: %global _package_name grease}
+Name:           %{_package_name}
+# Version can be overridden via environment variable or rpmbuild --define
+%{!?_version: %global _version 0.1.1}
+Version: %{_version}
 Release: 1%{?dist}
 Summary:        A modern scripting language written in pure Rust
 

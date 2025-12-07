@@ -1,0 +1,23 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Hello World test
+print("Hello, World!")
+
+# Variable assignment
+name = "Grease"
+version: Number = 0.1
+print("Language: " + name + " v" + version)
+
+# Basic arithmetic
+x = 10
+y = 20
+result = x + y * 2
+print("10 + 20 * 2 = " + result)
+
+# Boolean operations
+is_true = true
+is_false = false
+print("true and false = " + (is_true and is_false))
+print("true or false = " + (is_true or is_false))
+print("not true = " + (not is_true))

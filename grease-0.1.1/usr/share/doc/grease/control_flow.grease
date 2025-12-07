@@ -1,0 +1,22 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Control flow test
+x = 10
+
+# If statement
+if x > 5:
+    print("x is greater than 5")
+else:
+    print("x is not greater than 5")
+
+# While loop
+i = 0
+while i < 5:
+    print("Loop iteration: " + i)
+    i = i + 1
+
+# For loop (simplified)
+numbers = [1, 2, 3, 4, 5]
+for num in numbers:
+    print("Number: " + num)

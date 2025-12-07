@@ -1,0 +1,17 @@
+// Test inline Rust functionality
+rust {
+    // This is inline Rust code
+    let x = 42;
+    x * 2
+}
+
+print("Inline Rust test completed")
+
+// Test inline assembly functionality
+asm {
+    // This is inline assembly code
+    mov eax, 42
+    ret
+}
+
+print("Inline assembly test completed")

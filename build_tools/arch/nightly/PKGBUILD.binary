@@ -1,0 +1,78 @@
+# Maintainer: Nick Girga <nickgirga@gmail.com>
+pkgname=grease-nightly-bin
+# Version will be set from environment variable in CI
+pkgver=${GREASE_VERSION:-0.1.1}
+pkgrel=1
+pkgdesc="A modern scripting language written in pure Rust (binary package)"
+arch=('x86_64')
+url="https://gitlab.com/grease-lang/grease"
+license=('Apache-2.0')
+depends=()
+makedepends=()
+provides=('grease')
+conflicts=('grease' 'grease-git' 'grease-bin')
+# Binary will be provided by CI artifact, not downloaded
+
+# Function to get version from environment variable or use default
+get_version() {
+  if [ -n "$GREASE_VERSION" ]; then
+    echo "$GREASE_VERSION"
+  else
+    echo "0.1.1"
+  fi
+}
+
+# Function to get binary path from environment variable
+get_binary_path() {
+  if [ -n "$GREASE_BINARY_PATH" ]; then
+    echo "$GREASE_BINARY_PATH"
+  else
+    echo "target/release/grease"
+  fi
+}
+
+build() {
+  # No build needed for binary package
+  echo "Using pre-built binary: $(get_binary_path)"
+  
+  # Verify binary exists
+  local binary_path=$(get_binary_path)
+  if [ ! -f "$binary_path" ]; then
+    echo "Error: Binary not found at $binary_path"
+    echo "Set GREASE_BINARY_PATH environment variable to the correct binary location"
+    exit 1
+  fi
+  
+  echo "Binary found and ready for packaging"
+}
+
+package() {
+  local binary_path=$(get_binary_path)
+  local version=$(get_version)
+  
+  # Install binary
+  install -Dm755 "$binary_path" "$pkgdir/usr/bin/grease"
+  
+  # Install man page
+  install -Dm644 docs/grease.1 "$pkgdir/usr/share/man/man1/grease.1"
+  
+  # Install shell completions
+  install -Dm644 completions/grease.bash "$pkgdir/usr/share/bash-completion/completions/grease"
+  install -Dm644 completions/grease.zsh "$pkgdir/usr/share/zsh/site-functions/_grease"
+  
+  # Install documentation
+  install -Dm644 README.md "$pkgdir/usr/share/doc/grease/README.md"
+  install -Dm644 docs/LSP_README.md "$pkgdir/usr/share/doc/grease/LSP_README.md"
+  install -Dm644 docs/TODO.md "$pkgdir/usr/share/doc/grease/TODO.md"
+  
+  # Install examples
+  mkdir -p "$pkgdir/usr/share/doc/grease/examples"
+  cp -r examples/* "$pkgdir/usr/share/doc/grease/examples/"
+  
+  # Install license
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/grease/LICENSE"
+  
+  echo "Package created successfully"
+  echo "Version: $version"
+  echo "Binary source: $binary_path"
+}

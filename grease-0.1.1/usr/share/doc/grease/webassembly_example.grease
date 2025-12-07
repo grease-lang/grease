@@ -1,0 +1,59 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# WebAssembly Target Example for Grease Programming Language
+# This example demonstrates WebAssembly compilation and execution
+
+print("WebAssembly Target Example")
+print("==========================")
+
+# Initialize WebAssembly runtime
+print("Initializing WebAssembly runtime...")
+wasm_init()
+
+# Check WebAssembly availability
+if wasm_available():
+    print("✓ WebAssembly is available")
+else:
+    print("✗ WebAssembly is not available")
+
+# Show WebAssembly statistics
+print("WebAssembly Statistics:")
+print(wasm_stats())
+
+# Compile Grease code to WebAssembly
+print("\nCompiling to WebAssembly...")
+grease_code = "def fibonacci(n): if n <= 1: return n else: return fibonacci(n - 1) + fibonacci(n - 2)"
+
+wasm_result = wasm_compile(grease_code)
+print("Compilation result: " + wasm_result)
+
+# In a real implementation, this would generate:
+# 1. WebAssembly bytecode (.wasm file)
+# 2. JavaScript wrapper for browser execution
+# 3. Node.js module for server-side execution
+
+print("\nWebAssembly Features:")
+print("- Compile Grease bytecode to WebAssembly")
+print("- Run Grease code in web browsers")
+print("- JavaScript interop")
+print("- Web API integration")
+print("- Node.js support")
+print("- Performance optimization")
+
+print("\nWebAssembly Usage:")
+print("- wasm_init() - Initialize WebAssembly runtime")
+print("- wasm_compile(source) - Compile Grease source to WebAssembly")
+print("- wasm_available() - Check WebAssembly availability")
+print("- wasm_stats() - Show WebAssembly statistics")
+
+print("\nWebAssembly Target Benefits:")
+print("- Cross-platform deployment")
+print("- Browser compatibility")
+print("- Near-native performance")
+print("- Small bundle sizes")
+print("- Security sandboxing")
+
+print("\nWebAssembly Example completed!")
+print("The WebAssembly target enables Grease to run")
+print("anywhere JavaScript runs - browsers, Node.js, and more.")

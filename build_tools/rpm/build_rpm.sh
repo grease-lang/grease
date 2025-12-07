@@ -10,6 +10,8 @@ NIGHTLY=false
 VERSION=""
 RELEASE="1"
 FEATURES=""
+USE_BINARY=""
+BINARY_PATH=""
 SPEC_FILE="build_tools/rpm/grease.spec"
 BUILD_DIR="rpmbuild"
 
@@ -44,18 +46,20 @@ Grease RPM Build Script
 
 Usage: $0 [OPTIONS]
 
-OPTIONS:
-     --nightly          Build a nightly package with Git commit hash
-     --version VERSION  Override version (default: from Cargo.toml)
-     --release RELEASE  Override release number (default: 1)
-     --features FEATURES  Build with specified Cargo features (e.g., "ui")
-     --help             Show this help message
+ OPTIONS:
+      --nightly          Build a nightly package with Git commit hash
+      --version VERSION  Override version (default: from Cargo.toml)
+      --release RELEASE  Override release number (default: 1)
+      --features FEATURES  Build with specified Cargo features (e.g., "ui")
+      --use-binary PATH  Use pre-built binary at specified path instead of building
+      --help             Show this help message
 
-EXAMPLES:
-    $0                              # Build stable release package
-    $0 --nightly                    # Build nightly package
-    $0 --version 0.2.0              # Build specific version
-    $0 --nightly --release 2       # Build nightly with custom release
+ EXAMPLES:
+     $0                              # Build stable release package
+     $0 --nightly                    # Build nightly package
+     $0 --version 0.2.0              # Build specific version
+     $0 --nightly --release 2       # Build nightly with custom release
+     $0 --use-binary target/release/grease  # Package pre-built binary
 
 EOF
 }
@@ -75,19 +79,24 @@ while [[ $# -gt 0 ]]; do
             RELEASE="$2"
             shift 2
             ;;
-        --features)
-            FEATURES="$2"
-            shift 2
-            ;;
-        --help)
-            show_help
-            exit 0
-            ;;
-        *)
-            log_error "Unknown option: $1"
-            show_help
-            exit 1
-            ;;
+         --features)
+             FEATURES="$2"
+             shift 2
+             ;;
+         --use-binary)
+             USE_BINARY=true
+             BINARY_PATH="$2"
+             shift 2
+             ;;
+         --help)
+             show_help
+             exit 0
+             ;;
+         *)
+             log_error "Unknown option: $1"
+             show_help
+             exit 1
+             ;;
     esac
 done
 
@@ -101,8 +110,11 @@ check_dependencies() {
         missing_deps+=("rpm-build")
     fi
     
-    if ! command -v cargo &> /dev/null; then
-        missing_deps+=("rust cargo")
+    # Only check for cargo if we're not using a pre-built binary
+    if [ -z "$USE_BINARY" ]; then
+        if ! command -v cargo &> /dev/null; then
+            missing_deps+=("rust cargo")
+        fi
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -230,6 +242,106 @@ build_rpm() {
     log_success "RPM package built successfully"
 }
 
+# Build RPM from pre-built binary
+build_rpm_from_binary() {
+    log_info "Building RPM from pre-built binary..."
+    
+    # Setup rpmbuild directory structure
+    mkdir -p "$BUILD_DIR"/{SOURCES,SPECS,RPMS,SRPMS,BUILD}
+    
+    # Create a simple spec file for binary packaging
+    local binary_spec="grease-binary.spec"
+    
+    cat > "$binary_spec" << EOF
+# Grease RPM Spec File (Binary Package)
+# Maintainer: Nick Girga <nickgirga@gmail.com>
+
+Name:           $(if [ "$NIGHTLY" = true ]; then echo "grease-nightly"; else echo "grease"; fi)
+Version:        $VERSION
+Release:        $RELEASE%{?dist}
+Summary:        A modern scripting language written in pure Rust
+
+License:        Apache-2.0
+URL:            https://gitlab.com/grease-lang/grease
+
+# No source tarball needed for binary package
+
+%description
+Grease is a modern scripting language written in pure Rust that compiles to 
+platform-agnostic bytecode and runs on a custom virtual machine. It's designed 
+as "the high-performance oil for your Rust engine."
+
+Features:
+- Pure Rust implementation with no external dependencies
+- Fast compilation to bytecode
+- Stack-based virtual machine
+- Modern language features with familiar syntax
+- Complete Language Server Protocol support
+- Interactive REPL mode
+- Comprehensive standard library
+
+%prep
+# No preparation needed for binary package
+
+%build
+# No build needed for binary package
+
+%install
+# Create directories
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_mandir}/man1
+mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
+mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
+mkdir -p %{buildroot}%{_docdir}/%{name}
+
+# Install binary
+install -Dm755 $BINARY_PATH %{buildroot}%{_bindir}/grease
+
+# Install man page
+install -Dm644 docs/grease.1 %{buildroot}%{_mandir}/man1/grease.1
+
+# Install shell completions
+install -Dm644 completions/grease.bash %{buildroot}%{_datadir}/bash-completion/completions/grease
+install -Dm644 completions/grease.zsh %{buildroot}%{_datadir}/zsh/site-functions/_grease
+
+# Install documentation
+install -Dm644 README.md %{buildroot}%{_docdir}/%{name}/README.md
+install -Dm644 docs/LSP_README.md %{buildroot}%{_docdir}/%{name}/LSP_README.md
+install -Dm644 docs/TODO.md %{buildroot}%{_docdir}/%{name}/TODO.md
+
+# Install examples
+mkdir -p %{buildroot}%{_docdir}/%{name}/examples
+cp -r examples/* %{buildroot}%{_docdir}/%{name}/examples/
+
+%files
+%license LICENSE
+%doc README.md docs/LSP_README.md docs/TODO.md
+%doc examples/
+%{_bindir}/grease
+%{_mandir}/man1/grease.1*
+%{_datadir}/bash-completion/completions/grease
+%{_datadir}/zsh/site-functions/_grease
+
+%changelog
+* $(date '+%a %b %d %Y') Nick Girga <nickgirga@gmail.com> - $VERSION-$RELEASE
+- Binary package built from pre-compiled binary
+EOF
+    
+    # Copy spec file
+    cp "$binary_spec" "$BUILD_DIR/SPECS/"
+    
+    # Build the package
+    local spec_name=$(basename "$binary_spec")
+    
+    rpmbuild_cmd="rpmbuild -ba \
+        --define '_topdir $PWD/$BUILD_DIR' \
+        --define '_version $VERSION' \
+        --define '_release $RELEASE' \
+        '$BUILD_DIR/SPECS/$spec_name'"
+    
+    log_success "RPM package built from binary"
+}
+
 # Show results
 show_results() {
     log_info "Built packages:"
@@ -246,15 +358,30 @@ show_results() {
     fi
 }
 
+# Validate binary path if provided
+validate_binary() {
+    if [ -n "$USE_BINARY" ] && [ ! -f "$BINARY_PATH" ]; then
+        log_error "Binary file not found at $BINARY_PATH"
+        exit 1
+    fi
+}
+
 # Main execution
 main() {
     log_info "Starting Grease RPM build process..."
     
     check_dependencies
+    validate_binary
     get_version
-    prepare_source
-    update_spec
-    build_rpm
+    
+    if [ -n "$USE_BINARY" ]; then
+        build_rpm_from_binary
+    else
+        prepare_source
+        update_spec
+        build_rpm
+    fi
+    
     show_results
     
     log_success "RPM build completed successfully!"

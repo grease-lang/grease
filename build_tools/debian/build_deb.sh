@@ -4,17 +4,20 @@
 #!/bin/bash
 
 # Create Debian package for Grease
-# Usage: ./build_deb.sh [--nightly] [--features FEATURES]
-#   --nightly  Build a nightly package with commit hash in version
-#   --features  Build with specified Cargo features (e.g., "ui")
+# Usage: ./build_deb.sh [--nightly] [--features FEATURES] [--use-binary PATH]
+#   --nightly     Build a nightly package with commit hash in version
+#   --features    Build with specified Cargo features (e.g., "ui")
+#   --use-binary  Use pre-built binary at specified path instead of building
 
 set -e
 
 # Show usage if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "Usage: $0 [--nightly]"
-    echo "  --nightly  Build a nightly package with commit hash in version"
-    echo "  --help     Show this help message"
+    echo "Usage: $0 [--nightly] [--features FEATURES] [--use-binary PATH]"
+    echo "  --nightly     Build a nightly package with commit hash in version"
+    echo "  --features    Build with specified Cargo features (e.g., "ui")"
+    echo "  --use-binary  Use pre-built binary at specified path instead of building"
+    echo "  --help        Show this help message"
     exit 0
 fi
 
@@ -25,6 +28,8 @@ MAINTAINER="Nick Girga <nickgirga@gmail.com>"
 # Parse arguments
 NIGHTLY_BUILD=false
 FEATURES=""
+USE_BINARY=""
+BINARY_PATH=""
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -36,6 +41,11 @@ while [ $# -gt 0 ]; do
             FEATURES="$2"
             shift 2
             ;;
+        --use-binary)
+            USE_BINARY=true
+            BINARY_PATH="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -43,11 +53,18 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# Validate binary path if provided
+if [ -n "$USE_BINARY" ] && [ ! -f "$BINARY_PATH" ]; then
+    echo "❌ Error: Binary file not found at $BINARY_PATH"
+    exit 1
+fi
+
 # Check if this is a nightly build
 if [ "$NIGHTLY_BUILD" = true ]; then
     COMMIT_SHORT=$(git rev-parse --short HEAD)
     BASE_VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
     VERSION="${BASE_VERSION}-nightly-${COMMIT_SHORT}"
+    PACKAGE_NAME="grease-nightly"
     echo "🌙 Building nightly package: $VERSION"
 elif [ -n "$FEATURES" ]; then
     VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
@@ -67,7 +84,22 @@ fi
     echo "📝 Updated docs/grease.1 version to: $VERSION"
     
 
+# Build or use existing binary
+if [ -n "$USE_BINARY" ]; then
+    echo "📦 Using pre-built binary from: $BINARY_PATH"
     
+    # Create target directory if it doesn't exist
+    mkdir -p target/release
+    
+    # Copy the provided binary (skip if it's the same file)
+    if [ "$BINARY_PATH" != "target/release/grease" ]; then
+        cp "$BINARY_PATH" target/release/grease
+        chmod +x target/release/grease
+        echo "✅ Binary copied successfully"
+    else
+        echo "✅ Binary already in place"
+    fi
+elif [ "$NIGHTLY_BUILD" = true ]; then
     # Clean build cache to ensure version is picked up
     echo "🧹 Cleaning build cache..."
     cargo clean
