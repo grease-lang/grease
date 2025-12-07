@@ -2,7 +2,7 @@
 
 ## Overview
 
-Grease supports a modular architecture where optional UI and WebAssembly modules can be loaded dynamically. This guide explains how to set up and use these modules.
+Grease supports a modular architecture where optional UI modules can be loaded dynamically. This guide explains how to set up and use these modules.
 
 ## Quick Start
 
@@ -13,13 +13,11 @@ The simplest way to use modules is to copy them to your project:
 ```bash
 # Copy from Grease repository
 cp -r path/to/grease/grease-ui ./
-cp -r path/to/grease/grease-webassembly ./
 
 # Your project structure:
 project/
 ├── main.grease
-├── grease-ui/          # UI module
-└── grease-webassembly/ # WebAssembly module
+└── grease-ui/          # UI module
 ```
 
 ### Option 2: Use Environment Variables
@@ -28,7 +26,6 @@ Set custom paths for modules:
 
 ```bash
 export GREASE_UI_PATH=/path/to/grease-ui
-export GREASE_WASM_PATH=/path/to/grease-webassembly
 ```
 
 ### Option 3: Standard Directory Structure
@@ -38,18 +35,17 @@ Organize modules in a standard location:
 ```bash
 mkdir -p modules
 cp -r path/to/grease-ui modules/
-cp -r path/to/grease/grease-webassembly modules/
 ```
 
 ## Module Detection Priority
 
 Grease searches for modules in this order:
 
-1. **Same Directory**: `./grease-ui`, `./grease-webassembly`
-2. **Parent Directory**: `../grease-ui`, `../grease-webassembly`
-3. **Subdirectory**: `./modules/grease-ui`, `./modules/grease-webassembly`
-4. **Lib Directory**: `./lib/grease-ui`, `./lib/grease-webassembly`
-5. **Environment Variables**: `$GREASE_UI_PATH`, `$GREASE_WASM_PATH`
+1. **Same Directory**: `./grease-ui`
+2. **Parent Directory**: `../grease-ui`
+3. **Subdirectory**: `./modules/grease-ui`
+4. **Lib Directory**: `./lib/grease-ui`
+5. **Environment Variables**: `$GREASE_UI_PATH`
 
 ## Building Modules
 
@@ -94,29 +90,7 @@ export ANDROID_NDK_ROOT=/path/to/android-ndk
 export ANDROID_HOME=/path/to/android-sdk
 ```
 
-#### WebAssembly
-```bash
-# No additional dependencies needed
-# Works in any modern web browser
-```
 
-### WebAssembly Module
-
-The WebAssembly module builds for the target platform:
-
-```bash
-# Build for current platform
-cd grease-webassembly
-cargo build --release
-
-# Build for WebAssembly target
-cargo build --release --target wasm32-unknown-unknown
-
-# Build for specific targets
-cargo build --release --target x86_64-unknown-linux-gnu
-cargo build --release --target x86_64-pc-windows-msvc
-cargo build --release --target aarch64-apple-darwin
-```
 
 ## Version Compatibility
 

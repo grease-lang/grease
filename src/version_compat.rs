@@ -27,7 +27,7 @@ pub enum CompatibilityLevel {
 pub struct VersionInfo {
     pub core_version: String,
     pub ui_version: Option<String>,
-    pub wasm_version: Option<String>,
+
     pub compatibility: HashMap<String, CompatibilityLevel>,
 }
 
@@ -79,7 +79,7 @@ impl VersionInfo {
         Self {
             core_version,
             ui_version: None,
-            wasm_version: None,
+
             compatibility: HashMap::new(),
         }
     }
@@ -90,10 +90,7 @@ impl VersionInfo {
         self
     }
     
-    pub fn with_wasm_version(mut self, version: String) -> Self {
-        self.wasm_version = Some(version);
-        self
-    }
+
     
     /// Assess compatibility between core and modules
     pub fn assess_compatibility(&mut self) {
@@ -120,22 +117,7 @@ impl VersionInfo {
                 }
             }
         }
-        
-        // Assess WebAssembly module compatibility
-        if let Some(ref wasm_version) = self.wasm_version {
-            match Version::parse(wasm_version) {
-                Ok(wasm_ver) => {
-                    let _compatibility = core_version.compare(&wasm_ver);
-                    self.compatibility.insert("wasm".to_string(), CompatibilityLevel::Compatible);
-                    
 
-                }
-                Err(_) => {
-                    println!("⚠️  Warning: Could not parse WebAssembly module version '{}'", wasm_version);
-                    self.compatibility.insert("wasm".to_string(), CompatibilityLevel::WarningMajor);
-                }
-            }
-        }
     }
     
     /// Print compatibility warning with user-friendly message
@@ -196,10 +178,7 @@ impl VersionInfo {
             summary.push(format!("UI: {} ({})", ui_version, self.format_compatibility(&ui_compat)));
         }
         
-        if let Some(ref wasm_version) = self.wasm_version {
-            let wasm_compat = self.get_module_compatibility("wasm");
-            summary.push(format!("WebAssembly: {} ({})", wasm_version, self.format_compatibility(&wasm_compat)));
-        }
+
         
         if summary.is_empty() {
             "No modules loaded".to_string()
@@ -229,10 +208,7 @@ impl VersionInfo {
             println!("UI Module: {} - {}", ui_version, self.format_compatibility(&ui_compat));
         }
         
-        if let Some(ref wasm_version) = self.wasm_version {
-            let wasm_compat = self.get_module_compatibility("wasm");
-            println!("WebAssembly Module: {} - {}", wasm_version, self.format_compatibility(&wasm_compat));
-        }
+
         
         println!("\n🎯 Overall Status: {}", 
             if self.all_compatible() {
@@ -303,14 +279,13 @@ mod tests {
         let mut info = VersionInfo::new();
         assert_eq!(info.core_version, env!("CARGO_PKG_VERSION"));
         assert!(info.ui_version.is_none());
-        assert!(info.wasm_version.is_none());
+
         assert!(info.compatibility.is_empty());
         
         info = info.with_ui_version("0.1.0".to_string());
         assert_eq!(info.ui_version, Some("0.1.0".to_string()));
         
-        info = info.with_wasm_version("0.1.0".to_string());
-        assert_eq!(info.wasm_version, Some("0.1.0".to_string()));
+
     }
     
     #[test]
@@ -339,15 +314,7 @@ mod tests {
         assert!(summary.contains("UI: 0.2.0"));
         assert!(summary.contains("Major Warning"));
         
-        // Test with both modules
-        let mut info2 = VersionInfo::new();
-        info2 = info2.with_ui_version("0.1.0".to_string())
-                     .with_wasm_version("0.1.0".to_string());
-        info2.assess_compatibility();
-        
-        let summary2 = info2.get_summary();
-        assert!(summary2.contains("UI: 0.1.0"));
-        assert!(summary2.contains("WebAssembly: 0.1.0"));
+
     }
     
     #[test]

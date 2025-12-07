@@ -344,7 +344,7 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 ### 🚀 Long-term Goals
 - [ ] Package manager
 - [ ] JIT compilation
-- [ ] WebAssembly target
+
 - [ ] Enhanced standard library
 - [ ] Performance optimizations
 

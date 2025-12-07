@@ -25,10 +25,7 @@ cocoa = { version = "0.25", optional = true }
 [target.'cfg(target_os = "android")'.dependencies]
 jni = { version = "0.21", optional = true }
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = { version = "0.2", optional = true }
-web-sys = { version = "0.3", optional = true }
-js-sys = { version = "0.3", optional = true }
+
 
 # UI dependencies (require system libraries on Linux)
 dioxus = { version = "0.6", features = ["desktop"], optional = true }
@@ -43,8 +40,8 @@ linux-ui = ["gtk-sys", "glib-sys", "gobject-sys"]
 windows-ui = ["winapi"]
 macos-ui = ["objc", "cocoa"]
 android-ui = ["jni"]
-web-ui = ["wasm-bindgen", "web-sys", "js-sys"]
-full-ui = ["ui", "linux-ui", "windows-ui", "macos-ui", "android-ui", "web-ui"]
+
+full-ui = ["ui", "linux-ui", "windows-ui", "macos-ui", "android-ui"]
 
 [lib]
 name = "grease_ui"

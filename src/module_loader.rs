@@ -4,16 +4,16 @@
 //! Module Detection and Loading System
 //! 
 //! This module provides automatic detection and loading of Grease modules
-//! (UI and WebAssembly) from multiple possible locations.
+//! (UI) from multiple possible locations.
 //! 
 //! ## Search Strategy
 //! 
 //! Modules are searched in the following priority order:
-//! 1. Same directory: ./grease-ui, ./grease-webassembly
-//! 2. Parent directory: ../grease-ui, ../grease-webassembly
-//! 3. Subdirectory: ./modules/grease-ui, ./modules/grease-webassembly
-//! 4. Lib directory: ./lib/grease-ui, ./lib/grease-webassembly
-//! 5. Custom paths: GREASE_UI_PATH, GREASE_WASM_PATH environment variables
+//! 1. Same directory: ./grease-ui
+//! 2. Parent directory: ../grease-ui
+//! 3. Subdirectory: ./modules/grease-ui
+//! 4. Lib directory: ./lib/grease-ui
+//! 5. Custom paths: GREASE_UI_PATH environment variable
 
 use std::path::{Path, PathBuf};
 use std::env;
@@ -32,7 +32,7 @@ pub struct ModuleInfo {
 /// Module loader with detection and initialization capabilities
 pub struct ModuleLoader {
     pub ui_module: Option<ModuleInfo>,
-    pub wasm_module: Option<ModuleInfo>,
+
     pub platform: Platform,
     pub searched_paths: Vec<String>,
 }
@@ -44,7 +44,7 @@ pub enum Platform {
     MacOS,
     Windows,
     Android,
-    WebAssembly,
+
     Unknown,
 }
 
@@ -55,7 +55,7 @@ impl std::fmt::Display for Platform {
             Platform::MacOS => write!(f, "macOS"),
             Platform::Windows => write!(f, "Windows"),
             Platform::Android => write!(f, "Android"),
-            Platform::WebAssembly => write!(f, "WebAssembly"),
+
             Platform::Unknown => write!(f, "Unknown"),
         }
     }
@@ -77,14 +77,7 @@ impl ModuleLoader {
             &env::var("GREASE_UI_PATH").unwrap_or_default(),
         ])?;
         
-        // Search for WebAssembly module
-        let wasm_module = Self::find_module("grease-webassembly", &[
-            "./grease-webassembly",
-            "../grease-webassembly",
-            "./modules/grease-webassembly",
-            "./lib/grease-webassembly",
-            &env::var("GREASE_WASM_PATH").unwrap_or_default(),
-        ])?;
+
         
         // Report detection results
         if let Some(ref ui) = ui_module {
@@ -93,11 +86,7 @@ impl ModuleLoader {
             println!("⚠️  UI module not found");
         }
         
-        if let Some(ref wasm) = wasm_module {
-            println!("✅ Found WebAssembly module at: {}", wasm.path.display());
-        } else {
-            println!("⚠️  WebAssembly module not found");
-        }
+
         
         let searched_paths = vec![
             "./grease-ui".to_string(),
@@ -105,16 +94,12 @@ impl ModuleLoader {
             "./modules/grease-ui".to_string(),
             "./lib/grease-ui".to_string(),
             env::var("GREASE_UI_PATH").unwrap_or_default(),
-            "./grease-webassembly".to_string(),
-            "../grease-webassembly".to_string(),
-            "./modules/grease-webassembly".to_string(),
-            "./lib/grease-webassembly".to_string(),
-            env::var("GREASE_WASM_PATH").unwrap_or_default(),
+
         ];
         
         Ok(Self {
             ui_module,
-            wasm_module,
+
             platform,
             searched_paths,
         })
@@ -187,10 +172,9 @@ impl ModuleLoader {
         #[cfg(target_os = "android")]
         { return Platform::Android; }
         
-        #[cfg(target_arch = "wasm32")]
-        { return Platform::WebAssembly; }
+
         
-        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "android", target_arch = "wasm32")))]
+        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "android")))]
         { return Platform::Unknown; }
     }
     
@@ -204,11 +188,7 @@ impl ModuleLoader {
             self.init_ui_module(vm, ui_module)?;
         }
         
-        // Initialize WebAssembly module if available
-        if let Some(ref wasm_module) = self.wasm_module {
-            println!("🌐 Initializing WebAssembly module...");
-            self.init_wasm_module(vm, wasm_module)?;
-        }
+
         
         // Check platform compatibility
         self.check_platform_compatibility()?;
@@ -221,10 +201,6 @@ impl ModuleLoader {
     fn init_ui_module(&self, vm: &mut VM, _module: &ModuleInfo) -> Result<(), ModuleError> {
         // Check if UI module is compatible with current platform
         match self.platform {
-            Platform::WebAssembly => {
-                // Web platform should use web UI implementation
-                println!("🌐 Using Web-based UI implementation");
-            }
             Platform::Android => {
                 // Android should use native Android UI
                 println!("🤖 Using Android native UI implementation");
@@ -246,28 +222,7 @@ impl ModuleLoader {
         Ok(())
     }
     
-    /// Initialize WebAssembly module
-    fn init_wasm_module(&self, vm: &mut VM, _module: &ModuleInfo) -> Result<(), ModuleError> {
-        // Check if WebAssembly module is compatible with current platform
-        match self.platform {
-            Platform::WebAssembly => {
-                println!("🌐 Using WebAssembly in browser environment");
-            }
-            _ => {
-                println!("💻 Using WebAssembly compilation for {:?}", self.platform);
-            }
-        }
-        
-        // For now, we'll register a placeholder function to indicate WebAssembly is available
-        // In the full implementation, this would call grease_webassembly::init_webassembly(vm)
-        vm.register_native("wasm_available", 0, |_vm, _args| {
-            println!("WebAssembly functions are available");
-            Ok(crate::bytecode::Value::Boolean(true))
-        });
-        
-        println!("✅ WebAssembly module initialized");
-        Ok(())
-    }
+
     
     /// Check platform compatibility and warn about potential issues
     pub fn check_platform_compatibility(&self) -> Result<(), ModuleError> {
@@ -302,12 +257,7 @@ impl ModuleLoader {
                     );
                 }
             }
-            Platform::WebAssembly => {
-                // WebAssembly should work everywhere
-                if self.ui_module.is_some() {
-                    println!("🌐 Web UI will use WebAssembly backend for performance");
-                }
-            }
+
             _ => {}
         }
         
@@ -343,8 +293,8 @@ impl ModuleLoader {
     }
     
     /// Get module information for debugging
-    pub fn get_module_info(&self) -> (&Option<ModuleInfo>, &Option<ModuleInfo>) {
-        (&self.ui_module, &self.wasm_module)
+    pub fn get_module_info(&self) -> &Option<ModuleInfo> {
+        &self.ui_module
     }
     
     /// Check if specific module is available
@@ -352,9 +302,7 @@ impl ModuleLoader {
         self.ui_module.is_some()
     }
     
-    pub fn is_wasm_available(&self) -> bool {
-        self.wasm_module.is_some()
-    }
+
 }
 
 #[cfg(test)]
@@ -369,7 +317,7 @@ mod tests {
         let loader = ModuleLoader::new().unwrap();
         
         assert!(loader.platform != Platform::Unknown);
-        assert_eq!(loader.searched_paths.len(), 10); // Should search 10 locations (5 for each module)
+        assert_eq!(loader.searched_paths.len(), 5); // Should search 5 locations for UI module
     }
     
     #[test]
@@ -409,10 +357,6 @@ mod tests {
             "../grease-ui", 
             "./modules/grease-ui",
             "./lib/grease-ui",
-            "./grease-webassembly",
-            "../grease-webassembly",
-            "./modules/grease-webassembly", 
-            "./lib/grease-webassembly"
         ];
         
         for expected_path in expected_paths {
@@ -425,25 +369,21 @@ mod tests {
         let loader = ModuleLoader::new().unwrap();
         
         // These might be true if modules exist in repo
-        // Just test that the methods don't panic
+        // Just test that methods don't panic
         let _ui_available = loader.is_ui_available();
-        let _wasm_available = loader.is_wasm_available();
     }
     
     #[test]
     fn test_environment_variable_paths() {
         // Test that environment variables are included in search paths
         env::set_var("GREASE_UI_PATH", "/custom/ui/path");
-        env::set_var("GREASE_WASM_PATH", "/custom/wasm/path");
         
         let loader = ModuleLoader::new().unwrap();
         
         assert!(loader.searched_paths.contains(&"/custom/ui/path".to_string()));
-        assert!(loader.searched_paths.contains(&"/custom/wasm/path".to_string()));
         
         // Clean up
         env::remove_var("GREASE_UI_PATH");
-        env::remove_var("GREASE_WASM_PATH");
     }
     
     #[test]
@@ -451,15 +391,12 @@ mod tests {
         // Create temporary directories to test detection logic
         let temp_dir = TempDir::new().unwrap();
         let ui_path = temp_dir.path().join("grease-ui");
-        let wasm_path = temp_dir.path().join("grease-webassembly");
         
         // Create directories
         fs::create_dir(&ui_path).unwrap();
-        fs::create_dir(&wasm_path).unwrap();
         
         // Create fake Cargo.toml files
         fs::write(ui_path.join("Cargo.toml"), "[package]\nname = \"grease-ui\"\nversion = \"0.1.0\"").unwrap();
-        fs::write(wasm_path.join("Cargo.toml"), "[package]\nname = \"grease-webassembly\"\nversion = \"0.1.0\"").unwrap();
         
         // Change to temp directory for testing
         let original_dir = env::current_dir().unwrap();
@@ -470,7 +407,6 @@ mod tests {
         
         // Should search in these locations (relative to temp dir)
         assert!(loader.searched_paths.contains(&"./grease-ui".to_string()));
-        assert!(loader.searched_paths.contains(&"./grease-webassembly".to_string()));
         
         // Restore original directory
         env::set_current_dir(original_dir).unwrap();

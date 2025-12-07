@@ -9,7 +9,7 @@
 //! - macOS: Cocoa native integration  
 //! - Windows: Win32/GTK support
 //! - Android: Native Android Activities and Views
-//! - WebAssembly: DOM-based UI with WebAssembly integration
+
 
 use std::fmt;
 use crate::module_errors::UIError;
@@ -105,7 +105,7 @@ pub enum UIFeature {
     SystemTray,
     MultipleWindows,
     CustomTheming,
-    WebAssemblyIntegration,
+
     HardwareAcceleration,
 }
 
@@ -224,8 +224,7 @@ pub mod windows;
 #[cfg(target_os = "android")]
 pub mod android;
 
-#[cfg(target_arch = "wasm32")]
-pub mod web;
+
 
 /// Create a platform-specific UI implementation based on compile-time target
 pub fn create_platform() -> Box<dyn UIPlatform> {
@@ -249,12 +248,9 @@ pub fn create_platform() -> Box<dyn UIPlatform> {
         Box::new(crate::platform::android::AndroidPlatform::new())
     }
     
-    #[cfg(target_arch = "wasm32")]
-    {
-        Box::new(crate::platform::web::WebPlatform::new())
-    }
+
     
-    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "android", target_arch = "wasm32")))]
+    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "android")))]
     {
         Box::new(UnsupportedPlatform)
     }

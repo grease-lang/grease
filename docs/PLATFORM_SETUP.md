@@ -438,115 +438,7 @@ adb install app-debug.apk
 adb logcat | grep Grease
 ```
 
-## WebAssembly
 
-### System Requirements
-
-- **Browser**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
-- **Rust**: 1.70.0 or higher
-- **Memory**: 512MB available to browser
-- **Network**: For loading WebAssembly modules
-
-### Installing Dependencies
-
-#### Rust WebAssembly Target
-```bash
-# Install WebAssembly target
-rustup target add wasm32-unknown-unknown
-
-# Install wasm-bindgen CLI
-cargo install wasm-bindgen-cli
-
-# Install wasm-pack
-cargo install wasm-pack
-```
-
-#### Build Tools
-```bash
-# Install additional tools
-npm install -g webpack
-npm install -g webpack-cli
-npm install -g webpack-dev-server
-```
-
-### Building for Web
-
-```bash
-# Build WebAssembly module
-cd grease-webassembly
-cargo build --release --target wasm32-unknown-unknown
-
-# Create JavaScript bindings
-wasm-bindgen --target wasm32-unknown-unknown --out-dir bindings src/lib.rs
-
-# Package for web
-wasm-pack build --target web --out-dir pkg
-```
-
-### Web Server Setup
-
-```bash
-# Using Python
-python -m http.server 8000
-
-# Using Node.js
-npx serve .
-
-# Using webpack
-npx webpack serve
-```
-
-### Verification
-
-```bash
-# Test in browser
-# Open http://localhost:8000
-# Check browser console for WebAssembly loading
-
-# Validate WebAssembly
-file pkg/grease_webassembly_bg.wasm
-```
-
-### Troubleshooting
-
-#### WebAssembly Not Loading
-```bash
-# Check MIME types
-# Ensure .wasm files serve with application/wasm
-
-# Check CORS headers
-# Add to web server configuration
-
-# Verify browser support
-# Test in target browsers
-```
-
-#### Build Errors
-```bash
-# Check target installation
-rustup target list --installed
-
-# Reinstall tools
-cargo install --force wasm-bindgen-cli
-cargo install --force wasm-pack
-
-# Clear cache
-cargo clean
-rm -rf target/
-```
-
-#### Performance Issues
-```bash
-# Optimize build
-cargo build --release --target wasm32-unknown-unknown
-
-# Enable optimizations
-# In Cargo.toml:
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-```
 
 ## Cross-Platform Considerations
 
@@ -554,7 +446,6 @@ codegen-units = 1
 
 - **Linux/macOS**: Use forward slashes `/`
 - **Windows**: Use backslashes `\`
-- **WebAssembly**: Use relative paths
 
 ### Environment Variables
 
@@ -569,7 +460,6 @@ codegen-units = 1
 cargo test --target x86_64-unknown-linux-gnu
 cargo test --target x86_64-pc-windows-msvc
 cargo test --target aarch64-apple-darwin
-cargo test --target wasm32-unknown-unknown
 ```
 
 ### Performance Optimization

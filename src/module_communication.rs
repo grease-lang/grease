@@ -4,7 +4,7 @@
 //! Module Communication System
 //! 
 //! This module provides inter-module communication between Grease modules,
-//! enabling UI and WebAssembly modules to work together seamlessly.
+//! enabling UI modules to work together seamlessly.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -16,8 +16,7 @@ use crate::module_errors::ModuleError;
 pub enum ModuleMessage {
     /// UI event message
     UIEvent(UIEventMessage),
-    /// WebAssembly execution request
-    WasmExecute(WasmExecuteMessage),
+
     /// Data synchronization message
     DataSync(DataSyncMessage),
     /// Status update message
@@ -47,14 +46,7 @@ pub enum UIEventType {
     MouseMove,
 }
 
-/// WebAssembly execution messages
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct WasmExecuteMessage {
-    pub function_name: String,
-    pub arguments: Vec<serde_json::Value>,
-    pub callback_id: Option<String>,
-    pub timeout_ms: Option<u64>,
-}
+
 
 /// Data synchronization messages
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -281,7 +273,6 @@ impl ModuleCommunication {
                 // Find appropriate handler
                 let message_type = match message {
                     ModuleMessage::UIEvent(_) => "ui_event",
-                    ModuleMessage::WasmExecute(_) => "wasm_execute",
                     ModuleMessage::DataSync(_) => "data_sync",
                     ModuleMessage::StatusUpdate(_) => "status_update",
                     ModuleMessage::ErrorNotification(_) => "error_notification",

@@ -1,8 +1,7 @@
 [workspace]
 members = [
     ".",
-    "grease-ui",
-    "grease-webassembly"
+    "grease-ui"
 ]
 
 [workspace.dependencies]
