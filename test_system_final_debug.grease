@@ -1,0 +1,23 @@
+use system
+
+print("Testing system module...")
+
+# Test basic shell execution
+result = system.shell("echo Hello from system module!")
+print("shell() works:")
+print(result.stdout)
+print("shell() success:")
+print(result.success)
+
+# Test environment variables
+home = system.getenv("HOME")
+print("getenv() works: HOME =")
+print(home)
+
+# Test setting environment variable
+system.setenv("TEST_VAR", "test_value")
+test_val = system.getenv("TEST_VAR")
+print("setenv() works: TEST_VAR =")
+print(test_val)
+
+print("System module test completed!")

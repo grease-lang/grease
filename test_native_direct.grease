@@ -1,0 +1,17 @@
+print("Testing native system functions directly...")
+
+# Test basic system_exec with shell command (since echo might not work as expected)
+result = system_exec("echo", "Hello World!")
+if result.success:
+    print("system_exec works: " + result.stdout.trim())
+else:
+    print("system_exec failed: " + result.stderr)
+
+# Test system_getenv
+home = system_getenv("HOME")
+if home != null:
+    print("system_getenv works: " + home)
+else:
+    print("system_getenv failed")
+
+print("Direct native function test completed!")

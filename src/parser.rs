@@ -5,6 +5,7 @@ use crate::token::{Token, TokenType};
 use crate::ast::{Expression, Statement, Program};
 use std::iter::Peekable;
 use std::vec::IntoIter;
+use std::collections::HashSet;
 
 #[allow(dead_code)]
 fn parse_expr(input: &str) -> Result<Expression, String> {
@@ -25,6 +26,7 @@ fn parse_program(input: &str) -> Result<Program, String> {
 pub struct Parser {
     tokens: Peekable<IntoIter<Token>>,
     previous: Option<Token>,
+    modules: HashSet<String>,
 }
 
 impl Parser {
@@ -32,6 +34,7 @@ impl Parser {
         Parser {
             tokens: tokens.into_iter().peekable(),
             previous: None,
+            modules: HashSet::new(),
         }
     }
 
@@ -125,6 +128,10 @@ impl Parser {
             None
         };
 
+        // Track the module name for later module access detection
+        let module_name_to_track = alias.clone().unwrap_or(module.clone());
+        self.modules.insert(module_name_to_track);
+        
         Ok(Statement::Use { module, alias })
     }
 
@@ -464,6 +471,9 @@ impl Parser {
         let mut expr = self.primary()?;
 
         loop {
+            if self.check(&TokenType::EOF) {
+                break;
+            }
             if self.match_token(&TokenType::LeftParen) {
                 expr = self.finish_call(expr)?;
             } else if self.match_token(&TokenType::Dot) {
@@ -480,17 +490,75 @@ impl Parser {
                         }
                     }
                     self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
-                    expr = Expression::MethodCall {
-                        object: Box::new(expr),
-                        method: member,
-                        arguments,
-                    };
+                    
+                    // Check if this could be a module method call
+                    if let Expression::Identifier(ref ident_token) = expr {
+                        if let TokenType::Identifier(ref ident_name) = ident_token.token_type {
+                            if self.modules.contains(ident_name) {
+                                // This is module access with a call - create ModuleAccess then Call
+                                let module_access = Expression::ModuleAccess {
+                                    module: ident_token.clone(),
+                                    member: member,
+                                };
+                                expr = Expression::Call {
+                                    callee: Box::new(module_access),
+                                    arguments,
+                                };
+                            } else {
+                                // This is a regular method call
+                                expr = Expression::MethodCall {
+                                    object: Box::new(expr),
+                                    method: member,
+                                    arguments,
+                                };
+                            }
+                        } else {
+                            // This is a regular method call
+                            expr = Expression::MethodCall {
+                                object: Box::new(expr),
+                                method: member,
+                                arguments,
+                            };
+                        }
+                    } else {
+                        // This is a regular method call
+                        expr = Expression::MethodCall {
+                            object: Box::new(expr),
+                            method: member,
+                            arguments,
+                        };
+                    }
                 } else {
-                    // property access
-                    expr = Expression::PropertyAccess {
-                        object: Box::new(expr),
-                        property: member,
-                    };
+                    // Check if this could be module access
+                    if let Expression::Identifier(ref ident_token) = expr {
+                        if let TokenType::Identifier(ref ident_name) = ident_token.token_type {
+                            if self.modules.contains(ident_name) {
+                                // This is module access
+                                expr = Expression::ModuleAccess {
+                                    module: ident_token.clone(),
+                                    member: member,
+                                };
+                            } else {
+                                // This is property access
+                                expr = Expression::PropertyAccess {
+                                    object: Box::new(expr),
+                                    property: member,
+                                };
+                            }
+                        } else {
+                            // This is property access
+                            expr = Expression::PropertyAccess {
+                                object: Box::new(expr),
+                                property: member,
+                            };
+                        }
+                    } else {
+                        // This is property access
+                        expr = Expression::PropertyAccess {
+                            object: Box::new(expr),
+                            property: member,
+                        };
+                    }
                 }
             } else {
                 break;

@@ -1,0 +1,3 @@
+print("Testing system_getenv...")
+home = system_getenv("HOME")
+print("HOME = " + home)

@@ -1,0 +1,4 @@
+use system
+print("Testing function access...")
+result = system.shell
+print(result)

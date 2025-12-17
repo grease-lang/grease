@@ -1,0 +1,4 @@
+use math
+print(math)
+print("Available functions:")
+print("math.add: " + math.add)

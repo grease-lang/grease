@@ -1,0 +1,4 @@
+use system
+print("About to call system.shell")
+result = system.shell("echo test")
+print("Called system.shell")

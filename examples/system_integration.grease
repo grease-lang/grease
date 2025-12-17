@@ -1,0 +1,91 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# System Integration Example: Environment Variables and Process Management
+# This example demonstrates advanced system integration capabilities
+
+use system
+
+print("=== System Integration Example ===")
+
+# Environment variable handling
+print("\n1. Testing environment variables:")
+home = system.getenv("HOME")
+if home != null:
+    print("Home directory:")
+    print(home)
+else:
+    print("Could not access HOME directory")
+
+# Set and test custom environment variable
+system.setenv("GREASE_TEST", "System integration working!")
+test_var = system.getenv("GREASE_TEST")
+if test_var != null:
+    print("GREASE_TEST =")
+    print(test_var)
+else:
+    print("Failed to set/get GREASE_TEST")
+
+# Get all environment variables
+print("\n2. Testing environment variable enumeration:")
+all_vars = system.environ()
+print("Environment variables object loaded:")
+print(all_vars)
+
+# Process management
+print("\n3. Testing process management:")
+# Spawn a background process
+spawn_result = system.shell("sleep 1 &")
+if spawn_result.success:
+    print("Background sleep process started")
+    print("Output:")
+    print(spawn_result.stdout)
+else:
+    print("Failed to start background process")
+
+# Check process status
+print("\n4. Testing process status:")
+# Since we can't track PIDs well with shell, just test status function
+status_result = system.status("12345")  # Fake PID for testing
+print("Status check result:")
+print(status_result)
+
+# Shell command with redirection
+print("\n5. Testing output redirection:")
+redirect_result = system.shell("echo 'Hello from redirection' > /tmp/grease_test.txt")
+if redirect_result.success:
+    print("Redirection successful")
+else:
+    print("Redirection failed")
+
+# Pipeline example
+print("\n6. Testing command pipelines:")
+pipe_result = system.shell("echo 'pipeline test content' | grep 'pipeline'")
+if pipe_result.success:
+    print("Pipeline successful")
+    print("Pipeline result:")
+    print(pipe_result.stdout)
+else:
+    print("Pipeline failed:")
+    print(pipe_result.stderr)
+
+# Advanced shell operations
+print("\n7. Testing advanced shell operations:")
+# Test command chaining
+chain_result = system.shell("cd /tmp && echo 'Changed directory && echoed'")
+if chain_result.success:
+    print("Command chaining successful")
+    print("Chain result:")
+    print(chain_result.stdout)
+else:
+    print("Command chaining failed")
+
+# Test background processes with job control
+bg_result = system.shell("sleep 2 & echo 'Background started'")
+if bg_result.success:
+    print("Background process with output:")
+    print(bg_result.stdout)
+else:
+    print("Background process failed")
+
+print("\n=== System Integration Example Complete ===")

@@ -1,0 +1,3 @@
+use system
+system.setenv('TEST_VAR', 'test_value')
+test_val = system.getenv('TEST_VAR')

@@ -1,0 +1,5 @@
+use system
+
+print("Testing system module...")
+result = system.shell("echo test")
+print("Done")

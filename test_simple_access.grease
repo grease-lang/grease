@@ -1,0 +1,5 @@
+use system
+# Test if we can access a function definition
+print("Testing function access...")
+result = system.shell
+print("Function accessed: " + result)

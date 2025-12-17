@@ -1,0 +1,8 @@
+use system
+
+print("Testing string concatenation...")
+result = system.shell("echo test")
+print("Result:")
+print(result)
+print("Success:")
+print(result.success)

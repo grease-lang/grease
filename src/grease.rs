@@ -6,6 +6,7 @@ use crate::parser::Parser;
 use crate::compiler::Compiler;
 use crate::vm::{VM, InterpretResult};
 use crate::linter::{Linter, LintError};
+use crate::bytecode::Value;
 use std::fs;
 use std::path::Path;
 
@@ -215,7 +216,10 @@ impl Grease {
 
         // Make the module's globals available
         let module_key = alias.unwrap_or(&module_name.to_string()).clone();
-        self.vm.modules.insert(module_key, module_vm.globals.clone());
+        self.vm.modules.insert(module_key.clone(), module_vm.globals.clone());
+        
+        // Create a module variable in the current scope
+        self.vm.globals.insert(module_key, Value::Module(module_name.to_string()));
 
         Ok(())
     }

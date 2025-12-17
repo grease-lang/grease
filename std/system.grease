@@ -1,0 +1,66 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# System module - Terminal calls and process management
+# This module provides user-friendly wrappers around native system functions
+
+# Basic command execution
+def exec(command):
+    """Execute command synchronously and return result"""
+    return system_exec(command)
+
+def spawn(command):
+    """Spawn command asynchronously and return process ID"""
+    return system_spawn(command)
+
+def shell(command):
+    """Execute shell command string"""
+    return system_shell(command)
+
+# Process control
+def wait(pid):
+    """Wait for process to complete"""
+    return system_wait(pid)
+
+def kill(pid, signal):
+    """Send signal to process"""
+    return system_kill(pid, signal)
+
+def status(pid):
+    """Get process status"""
+    return system_status(pid)
+
+# I/O operations
+def capture(command):
+    """Capture command output"""
+    return system_capture(command)
+
+def write_input(pid, input):
+    """Write to process stdin"""
+    return system_write_input(pid, input)
+
+# Environment variables
+def getenv(name):
+    """Get environment variable"""
+    return system_getenv(name)
+
+def setenv(name, value):
+    """Set environment variable"""
+    return system_setenv(name, value)
+
+def environ():
+    """Get all environment variables"""
+    return system_environ()
+
+# Advanced utilities
+def background(command):
+    """Run command in background"""
+    return system_background(command)
+
+def redirect(command, stdout_file, stderr_file):
+    """Redirect command output to files"""
+    return system_redirect(command, stdout_file, stderr_file)
+
+def timeout(command, seconds):
+    """Execute command with timeout"""
+    return system_timeout(command, seconds)

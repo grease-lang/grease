@@ -1,0 +1,95 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Terminal Calls Example - Basic System Integration
+# This example demonstrates fundamental terminal call capabilities of Grease
+
+use system
+
+print("=== Terminal Calls Example ===")
+
+# Basic command execution
+print("\n1. Testing system.shell():")
+result = system.shell("echo 'Hello from Grease terminal calls!'")
+print("Command output:")
+print(result.stdout)
+print("Success:")
+print(result.success)
+print("Exit code:")
+print(result.exit_code)
+
+# Cross-platform command testing
+print("\n2. Testing cross-platform commands:")
+echo_result = system.shell("echo 'Cross-platform echo test'")
+print("Echo result:")
+print(echo_result.stdout)
+
+# List current directory
+print("\n3. Testing directory listing:")
+ls_result = system.shell("ls -la")
+if ls_result.success:
+    print("Directory listing:")
+    print(ls_result.stdout)
+else:
+    print("Directory listing failed:")
+    print(ls_result.stderr)
+
+# Error handling
+print("\n4. Testing error handling:")
+result = system.shell("nonexistent_command_12345")
+if result.success:
+    print("Unexpected success")
+else:
+    print("Expected error caught:")
+    print("Exit code:")
+    print(result.exit_code)
+    print("Error output:")
+    print(result.stderr)
+
+# Environment variable operations
+print("\n5. Testing environment variables:")
+home = system.getenv("HOME")
+if home != null:
+    print("HOME directory:")
+    print(home)
+else:
+    print("Could not get HOME directory")
+
+# Set and test custom environment variable
+system.setenv("GREASE_TEST", "Terminal calls working!")
+test_val = system.getenv("GREASE_TEST")
+if test_val != null:
+    print("GREASE_TEST =")
+    print(test_val)
+
+# Process management
+print("\n6. Testing process management:")
+spawn_result = system.shell("sleep 1")
+if spawn_result.success:
+    print("Sleep command executed successfully")
+    print("Process output:")
+    print(spawn_result.stdout)
+else:
+    print("Failed to execute sleep command")
+
+# Pipeline testing
+print("\n7. Testing command pipelines:")
+pipe_result = system.shell("echo 'pipeline test' | grep 'pipeline'")
+if pipe_result.success:
+    print("Pipeline result:")
+    print(pipe_result.stdout)
+else:
+    print("Pipeline failed:")
+    print(pipe_result.stderr)
+
+# File operations
+print("\n8. Testing file operations:")
+# Create a test file
+write_result = system.shell("echo 'Test content' > test_file.txt")
+if write_result.success:
+    print("Created test file successfully")
+else:
+    print("Failed to create test file:")
+    print(write_result.stderr)
+
+print("\n=== Terminal Calls Example Complete ===")

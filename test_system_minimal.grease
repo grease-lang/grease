@@ -1,0 +1,3 @@
+use system
+print("System module loaded")
+print("Available functions should include shell, getenv, setenv")

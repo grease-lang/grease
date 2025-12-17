@@ -3,6 +3,7 @@
 
 use crate::bytecode::*;
 use std::collections::HashMap;
+use std::process::Child;
 
 pub struct VM {
     pub chunk: Option<Chunk>,
@@ -12,6 +13,7 @@ pub struct VM {
     frames: Vec<CallFrame>,
     pub modules: HashMap<String, HashMap<String, Value>>,
     exception_stack: Vec<usize>,
+    tracked_processes: HashMap<String, Child>,
 }
 
 #[derive(Debug, Clone)]
@@ -39,6 +41,7 @@ impl VM {
             frames: Vec::with_capacity(16),
             modules: HashMap::new(),
             exception_stack: Vec::with_capacity(8),
+            tracked_processes: HashMap::new(),
         };
 
         // Add built-in functions
@@ -65,6 +68,24 @@ impl VM {
 
         // Initialize package manager functions
         crate::package_manager::init_package_cli(&mut vm);
+
+        // Initialize system native functions
+        vm.register_native("system_exec", 1, crate::native_system::system_exec);
+        vm.register_native("system_spawn", 1, crate::native_system::system_spawn);
+        vm.register_native("system_shell", 1, crate::native_system::system_shell);
+        vm.register_native("system_getenv", 1, crate::native_system::system_getenv);
+        vm.register_native("system_setenv", 2, crate::native_system::system_setenv);
+        vm.register_native("system_environ", 0, crate::native_system::system_environ);
+        vm.register_native("system_read_output", 1, crate::native_system::system_read_output);
+        vm.register_native("system_capture", 1, crate::native_system::system_capture);
+        vm.register_native("system_background", 1, crate::native_system::system_background);
+        vm.register_native("system_pipe", 2, crate::native_system::system_pipe);
+        vm.register_native("system_redirect", 2, crate::native_system::system_redirect);
+        vm.register_native("system_timeout", 2, crate::native_system::system_timeout);
+        vm.register_native("system_wait", 1, crate::native_system::system_wait);
+        vm.register_native("system_kill", 2, crate::native_system::system_kill);
+        vm.register_native("system_status", 1, crate::native_system::system_status);
+        vm.register_native("system_write_input", 2, crate::native_system::system_write_input);
 
 
 
@@ -93,6 +114,7 @@ impl VM {
     fn run(&mut self) -> InterpretResult {
     loop {
         let instruction = self.read_byte().expect("Unexpected end of bytecode");
+
         match OpCode::from_byte(instruction) {
             Some(OpCode::Constant) => {
                 let constant_index = self.read_byte().expect("Expected constant index") as usize;
@@ -380,7 +402,7 @@ impl VM {
             }
             Some(OpCode::Less) => {
                 let (b, a) = match (self.stack.pop(), self.stack.pop()) {
-                    (Some(b), Some(a)) => (a, b),
+                    (Some(b), Some(a)) => (b, a),  // Fixed: don't swap
                     _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
                 };
                 match (a, b) {
@@ -392,7 +414,7 @@ impl VM {
             }
             Some(OpCode::LessEqual) => {
                 let (b, a) = match (self.stack.pop(), self.stack.pop()) {
-                    (Some(b), Some(a)) => (a, b),
+                    (Some(b), Some(a)) => (b, a),  // Fixed: don't swap
                     _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
                 };
                 match (a, b) {
@@ -404,7 +426,7 @@ impl VM {
             }
             Some(OpCode::Greater) => {
                 let (b, a) = match (self.stack.pop(), self.stack.pop()) {
-                    (Some(b), Some(a)) => (a, b),
+                    (Some(b), Some(a)) => (b, a),  // Fixed: don't swap
                     _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
                 };
                 match (a, b) {
@@ -416,7 +438,7 @@ impl VM {
             }
             Some(OpCode::GreaterEqual) => {
                 let (b, a) = match (self.stack.pop(), self.stack.pop()) {
-                    (Some(b), Some(a)) => (a, b),
+                    (Some(b), Some(a)) => (b, a),  // Fixed: don't swap
                     _ => return InterpretResult::RuntimeError("Stack underflow".to_string()),
                 };
                 match (a, b) {
@@ -524,14 +546,26 @@ impl VM {
                     _ => return InterpretResult::RuntimeError("Property name must be a string".to_string()),
                 };
 
-                if let Some(Value::Object { fields, .. }) = self.stack.pop() {
-                    if let Some(value) = fields.get(&property_name) {
-                        self.stack.push(value.clone());
-                    } else {
-                        return InterpretResult::RuntimeError(format!("Undefined property '{}'", property_name));
+                if let Some(object) = self.stack.pop() {
+                    match object {
+                        Value::Object { fields, .. } => {
+                            if let Some(value) = fields.get(&property_name) {
+                                self.stack.push(value.clone());
+                            } else {
+                                return InterpretResult::RuntimeError(format!("Undefined property '{}'", property_name));
+                            }
+                        }
+                        Value::Dictionary(dict) => {
+                            if let Some(value) = dict.get(&property_name) {
+                                self.stack.push(value.clone());
+                            } else {
+                                return InterpretResult::RuntimeError(format!("Undefined key '{}'", property_name));
+                            }
+                        }
+                        _ => return InterpretResult::RuntimeError("Expected object or dictionary".to_string()),
                     }
                 } else {
-                    return InterpretResult::RuntimeError("Expected object".to_string());
+                    return InterpretResult::RuntimeError("Stack underflow".to_string());
                 }
             }
             Some(OpCode::SetProperty) => {
@@ -840,6 +874,7 @@ impl VM {
                 format!("Object of class {}", class_name)
             },
             Value::Class { name, .. } => format!("Class {:?}", name),
+            Value::Module(name) => format!("<module {}>", name),
         }
     }
 
@@ -884,6 +919,7 @@ impl VM {
             Value::Dictionary(dict) => !dict.is_empty(),
             Value::Object { .. } => true,
             Value::Class { .. } => true,
+            Value::Module(_) => true,
         }
     }
 
@@ -893,11 +929,39 @@ impl VM {
             (Value::String(a), Value::String(b)) => a == b,
             (Value::Boolean(a), Value::Boolean(b)) => a == b,
             (Value::Null, Value::Null) => true,
+            (Value::Module(a), Value::Module(b)) => a == b,
             (Value::Array(a), Value::Array(b))=> {
                 a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| self.values_equal(x, y))
                 }
             _ => false,
                 }
+    }
+
+    // Process tracking methods
+    pub fn track_process(&mut self, pid: String, child: Child) {
+        self.tracked_processes.insert(pid, child);
+    }
+
+    pub fn get_tracked_process(&self, pid: &str) -> Option<&Child> {
+        self.tracked_processes.get(pid)
+    }
+
+    pub fn get_tracked_process_mut(&mut self, pid: &str) -> Option<&mut Child> {
+        self.tracked_processes.get_mut(pid)
+    }
+
+    pub fn remove_tracked_process(&mut self, pid: &str) -> Option<Child> {
+        self.tracked_processes.remove(pid)
+    }
+}
+
+impl Drop for VM {
+    fn drop(&mut self) {
+        // Clean up any remaining tracked processes
+        for (pid, mut child) in self.tracked_processes.drain() {
+            let _ = child.kill(); // Ignore errors during cleanup
+            eprintln!("Cleaned up orphaned process with PID: {}", pid);
+        }
     }
 }
 

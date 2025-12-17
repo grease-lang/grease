@@ -1,0 +1,5 @@
+print("Testing system_shell...")
+result = system_shell("echo Hello from Grease!")
+print("Success: " + result.success)
+print("Exit code: " + result.exit_code)
+print("Output: " + result.stdout)

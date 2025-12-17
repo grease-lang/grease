@@ -1,0 +1,34 @@
+use system
+
+print("Testing system module...")
+
+# Test basic shell execution
+result = system.shell("echo Hello from system module!")
+if result.success:
+    print("shell() works: " + result.stdout.trim())
+else:
+    print("shell() failed: " + result.stderr)
+
+# Test environment variables
+home = system.getenv("HOME")
+if home != null:
+    print("getenv() works: HOME = " + home)
+else:
+    print("getenv() failed for HOME")
+
+# Test setting environment variable
+system.setenv("TEST_VAR", "test_value")
+test_val = system.getenv("TEST_VAR")
+if test_val == "test_value":
+    print("setenv() works: TEST_VAR = " + test_val)
+else:
+    print("setenv() failed")
+
+# Test exec with args using helper
+result = system.exec_with_args("echo", "Hello with args!", null, null, null)
+if result.success:
+    print("exec_with_args() works: " + result.stdout.trim())
+else:
+    print("exec_with_args() failed: " + result.stderr)
+
+print("System module test completed!")

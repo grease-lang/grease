@@ -1,0 +1,58 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Terminal Calls Example: Basic System Command Execution
+
+# Test basic command execution
+print("=== Basic Command Execution ===")
+result = system_exec("echo", "Hello from Grease!")
+print("Directory listing:")
+print(result.stdout)
+print("Success: " + result.success)
+print("Exit code: " + result.exit_code)
+
+# Cross-platform command testing
+print("\n=== Cross-platform Command Testing ===")
+print("Testing echo command:")
+echo_result = system_exec("echo", "Hello from Grease!")
+print("Echo output: " + echo_result.stdout)
+
+# Error handling - using if statement for now since try/except syntax may be different
+print("\n=== Error Handling ===")
+result = system_exec("nonexistent_command_xyz")
+if not result.success:
+    print("Command not found (expected)")
+else:
+    print("Unexpected success")
+
+# Process management
+print("\n=== Process Management ===")
+pid_result = system_spawn("sleep", "1")
+print("Sleep process PID: " + pid_result.pid)
+
+# Environment variable handling
+print("\n=== Environment Variables ===")
+home = system.getenv("HOME")
+print("Home directory: " + home)
+
+# Set custom environment
+system.setenv("GREASE_TEST", "Terminal calls working!")
+test_var = system.getenv("GREASE_TEST")
+print("GREASE_TEST = " + test_var)
+
+# Test shell command
+print("\n=== Shell Command Testing ===")
+shell_result = system_shell("echo 'Shell command works'")
+print("Shell result: " + shell_result.stdout)
+
+# Test command with no output
+print("\n=== Command with No Output ===")
+true_result = system_exec("true")
+print("True command success: " + true_result.success)
+print("True command exit code: " + true_result.exit_code)
+
+# Test command that fails
+print("\n=== Command Failure Testing ===")
+false_result = system_exec("false")
+print("False command success: " + false_result.success)
+print("False command exit code: " + false_result.exit_code)

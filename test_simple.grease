@@ -1,0 +1,2 @@
+use system
+print("Module loaded successfully")

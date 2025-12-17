@@ -359,8 +359,11 @@ impl Compiler {
             }
             Expression::PropertyAccess { object, property } => {
                 self.compile_expression(object)?;
-                let property_constant = self.chunk.add_constant(Value::String(property.lexeme.clone()));
+                let property_str = property.lexeme.clone();
+
+                let property_constant = self.chunk.add_constant(Value::String(property_str));
                 self.emit_bytes(OpCode::Constant, property_constant as u8);
+
                 self.emit_byte(OpCode::GetProperty);
             }
             Expression::MethodCall { object, method, arguments } => {

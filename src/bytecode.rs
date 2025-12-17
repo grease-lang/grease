@@ -103,6 +103,7 @@ pub enum Value {
         methods: std::collections::HashMap<String, usize>, // constant indices
         superclass: Option<String>,
     },
+    Module(String), // Store module name
 }
 
 #[derive(Debug, Clone)]

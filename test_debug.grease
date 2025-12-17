@@ -1,0 +1,4 @@
+use system
+print("Available globals:")
+for name in ["system"]:
+    print("  " + name)

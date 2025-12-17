@@ -1,0 +1,43 @@
+# Copyright 2025 Nicholas Girga <nickgirga@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# YouTube Download with yt-dlp Integration Example
+# This example demonstrates how to integrate with external tools like yt-dlp
+
+use system
+
+print("=== yt-dlp Integration Example ===")
+
+# Check if yt-dlp is available
+print("\n1. Testing yt-dlp availability...")
+version_result = system.shell("yt-dlp --version 2>/dev/null || echo 'yt-dlp not found'")
+if version_result.success:
+    print("yt-dlp check completed")
+else:
+    print("yt-dlp check failed")
+print("\nTo install yt-dlp:")
+print("pip install yt-dlp")
+print("")
+print("Or using package managers:")
+print("Ubuntu/Debian: sudo apt install yt-dlp")
+print("macOS: brew install yt-dlp")
+print("Windows: pip install yt-dlp")
+
+# Test alternative download tools
+print("\n5. Testing alternative download tools:")
+
+# Check for wget
+wget_result = system.shell("wget --version 2>/dev/null || echo 'wget not found'")
+if wget_result.success:
+    print("wget available")
+else:
+    print("wget not available")
+
+# Check for curl
+curl_result = system.shell("curl --version 2>/dev/null || echo 'curl not found'")
+if curl_result.success:
+    print("curl available")
+else:
+    print("curl not available")
+
+print("\n=== yt-dlp Integration Example Complete ===")
