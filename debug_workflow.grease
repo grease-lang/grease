@@ -1,0 +1,8 @@
+use system
+home = system.getenv("HOME")
+system.setenv("WORKFLOW_TEST", "success")
+result = system.shell("echo 'Workflow test completed'")
+if result.success:
+    print("Workflow completed successfully")
+else:
+    print("Workflow failed")

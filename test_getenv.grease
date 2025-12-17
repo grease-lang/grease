@@ -1,3 +1,3 @@
-print("Testing system_getenv...")
-home = system_getenv("HOME")
-print("HOME = " + home)
+use system
+home = system.getenv("HOME")
+print("home: " + home)

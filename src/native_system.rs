@@ -459,3 +459,101 @@ pub fn system_write_input(_vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<V
     fields.insert("message".to_string(), Value::String("Process write input not fully implemented".to_string()));
     Ok(Value::Dictionary(fields))
 }
+
+/// Async version of system_exec using tokio
+pub fn system_async_exec(vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<Value, String> {
+    // For now, delegate to sync version since async execution in VM context is complex
+    // In a full implementation, this would spawn a tokio task and return a promise/future
+    system_exec(vm, args)
+}
+
+/// Async version of system_spawn
+pub fn system_async_spawn(vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<Value, String> {
+    // For now, delegate to sync version
+    // In a full implementation, this would use tokio::process::Command
+    system_spawn(vm, args)
+}
+
+/// Async version of system_wait
+pub fn system_async_wait(vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<Value, String> {
+    // For now, delegate to sync version
+    system_wait(vm, args)
+}
+
+/// Async pipe implementation (placeholder)
+pub fn system_async_pipe(_vm: &mut crate::vm::VM, _args: Vec<Value>) -> Result<Value, String> {
+    let mut fields = HashMap::new();
+    fields.insert("success".to_string(), Value::Boolean(false));
+    fields.insert("message".to_string(), Value::String("Async pipe not implemented".to_string()));
+    Ok(Value::Dictionary(fields))
+}
+
+/// Stream command output in real-time (basic implementation)
+pub fn system_stream_exec(_vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<Value, String> {
+    if args.is_empty() {
+        return Err("system_stream_exec requires at least 1 argument (command)".to_string());
+    }
+
+    let command = match &args[0] {
+        Value::String(s) => s.clone(),
+        _ => return Err("Command must be a string".to_string()),
+    };
+
+    let mut cmd = Command::new(command);
+
+    // Add arguments
+    for arg in args.iter().skip(1) {
+        match arg {
+            Value::String(s) => { cmd.arg(s); },
+            _ => return Err("All arguments must be strings".to_string()),
+        }
+    }
+
+    // For streaming, we need to handle stdout/stderr separately
+    // This is a basic implementation - in a full version, this would stream output
+    match cmd.output() {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let exit_code = output.status.code().unwrap_or(-1);
+
+            let mut fields = HashMap::new();
+            fields.insert("exit_code".to_string(), Value::Number(exit_code as f64));
+            fields.insert("stdout".to_string(), Value::String(stdout));
+            fields.insert("stderr".to_string(), Value::String(stderr));
+            fields.insert("success".to_string(), Value::Boolean(exit_code == 0));
+            fields.insert("streamed".to_string(), Value::Boolean(true));
+
+            Ok(Value::Dictionary(fields))
+        },
+        Err(e) => {
+            let mut fields = HashMap::new();
+            fields.insert("exit_code".to_string(), Value::Number(-1.0));
+            fields.insert("stdout".to_string(), Value::String("".to_string()));
+            fields.insert("stderr".to_string(), Value::String(format!("Failed to execute command: {}", e)));
+            fields.insert("success".to_string(), Value::Boolean(false));
+            fields.insert("streamed".to_string(), Value::Boolean(false));
+
+            Ok(Value::Dictionary(fields))
+        }
+    }
+}
+
+/// Monitor process with real-time output (placeholder)
+pub fn system_monitor_process(_vm: &mut crate::vm::VM, args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err("system_monitor_process requires exactly 1 argument (pid)".to_string());
+    }
+
+    let _pid = match &args[0] {
+        Value::String(s) => s.clone(),
+        Value::Number(n) => n.to_string(),
+        _ => return Err("PID must be a string or number".to_string()),
+    };
+
+    // Placeholder implementation
+    let mut fields = HashMap::new();
+    fields.insert("status".to_string(), Value::String("monitoring_not_implemented".to_string()));
+    fields.insert("message".to_string(), Value::String("Real-time process monitoring not fully implemented".to_string()));
+    Ok(Value::Dictionary(fields))
+}

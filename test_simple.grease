@@ -1,2 +1,6 @@
 use system
-print("Module loaded successfully")
+result = system.shell("echo 'test'")
+if result.success:
+    print("success")
+else:
+    print("failed")

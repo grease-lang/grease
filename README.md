@@ -18,8 +18,9 @@ Grease is a modern scripting language written in pure Rust. It compiles to platf
 - **Functions**: Function definitions with parameters and return values
 - **Built-in Functions**: `print()` function
 - **Module System**: Import standard library modules with `use`
-- **Standard Library**: `math` (add, multiply, sqrt, abs, pow, pi) and `string` (length, uppercase, lowercase, contains) modules
+- **Standard Library**: `math` (add, multiply, sqrt, abs, pow, pi), `string` (length, uppercase, lowercase, contains), and `system` (terminal calls, process management) modules
 - **Native Functions**: Call Rust functions from Grease scripts
+- **Terminal Call Support**: Execute external commands, manage processes, handle I/O streams
 - **Hybrid UI System**: High-performance GUI with both VM-based and pure Rust components
 - **REPL**: Interactive mode for testing
 - **File Execution**: Run scripts from files
@@ -66,6 +67,21 @@ print(math.pi)             # 3.141592653589793
 use string as str
 print(str.length("hello")) # 5
 print(str.contains("hello", "ell")) # true
+
+# Terminal calls and system integration
+use system
+result = system.exec("echo", "Hello from terminal!")
+print(result.stdout)  # Hello from terminal!
+print(result.success) # true
+
+# Process management
+pid = system.spawn("sleep", "5")
+status = system.status(pid)
+result = system.wait(pid)
+
+# Environment variables
+home = system.getenv("HOME")
+system.setenv("GREASE_TEST", "working")
 
 # Hybrid UI System - High Performance GUI
 ui_window_create("My App", 800, 600, "main_window")

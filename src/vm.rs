@@ -87,6 +87,16 @@ impl VM {
         vm.register_native("system_status", 1, crate::native_system::system_status);
         vm.register_native("system_write_input", 2, crate::native_system::system_write_input);
 
+        // Async system functions
+        vm.register_native("system_async_exec", 1, crate::native_system::system_async_exec);
+        vm.register_native("system_async_spawn", 1, crate::native_system::system_async_spawn);
+        vm.register_native("system_async_wait", 1, crate::native_system::system_async_wait);
+        vm.register_native("system_async_pipe", 2, crate::native_system::system_async_pipe);
+
+        // Streaming and monitoring functions
+        vm.register_native("system_stream_exec", 1, crate::native_system::system_stream_exec);
+        vm.register_native("system_monitor_process", 1, crate::native_system::system_monitor_process);
+
 
 
         vm

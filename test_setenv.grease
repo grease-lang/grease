@@ -1,2 +1,7 @@
 use system
-system.setenv('TEST_VAR', 'test_value')
+system.setenv("TEST_VAR", "test_value")
+result = system.getenv("TEST_VAR")
+if result != null:
+    print("result: " + result)
+else:
+    print("result is null")

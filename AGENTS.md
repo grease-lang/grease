@@ -71,7 +71,7 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 8. **Functions**: Definitions with parameters, return values, recursion support
 9. **Built-in Functions**: `print()` function
 10. **Module System**: `use module` and `use module as alias` syntax
-11. **Standard Library**: Math and string modules in `std/` (with syntax issues)
+11. **Standard Library**: Math, string, and system modules in `std/` for comprehensive functionality
 12. **Native Functions**: Rust function integration via `native_add` example
 13. **Hybrid UI System**: High-performance GUI with VM and pure Rust components
 14. **Dioxus Integration**: Template caching and lazy loading for UI
@@ -87,7 +87,7 @@ Source Code → Lexer → Tokens → Parser → AST → Compiler → Bytecode �
 4. **Module System**: Works but has path resolution limitations
 
 ### ❌ Known Issues Requiring Fixes
-1. **Standard Library Syntax**: `std/math.grease` and `std/string.grease` have incorrect indentation in if statements
+1. **Standard Library Syntax**: `std/math.grease` and `std/string.grease` have been fixed
 2. **Boolean Operation Error**: Runtime error when concatenating boolean results with strings
 3. **Type Coercion**: Limited automatic type conversion in some operations
 
@@ -398,11 +398,160 @@ When adding new language features, follow this sequence:
 5. **Run specific tests**: `cargo test test_name`
 
 ### Working with Standard Library
-- Modules are in `std/` directory
-- **CRITICAL**: Fix syntax errors in existing modules first
+- Modules are in `std/` directory: `math`, `string`, `system`
 - Use `use module_name` or `use module_name as alias` syntax
 - Functions are defined as regular Grease functions
 - Available globally after import
+
+#### System Module (`std/system.grease`)
+Comprehensive terminal call and process management capabilities for system integration.
+
+**Function Categories:**
+- **Terminal Calls**: Execute external commands with `system.exec(command, arg1, arg2, arg3, arg4, arg5)`, `system.shell(command_string)`
+- **Process Management**: Spawn, wait, kill processes with `system.spawn(command, arg1, arg2, arg3, arg4, arg5)`, `system.wait(pid)`, `system.kill(pid, signal)`, `system.status(pid)`
+- **Environment Variables**: Get/set environment with `system.getenv(name)`, `system.setenv(name, value)`, `system.environ()`
+- **Advanced Operations**: Pipes, redirection, timeouts with `system.pipe(command1, command2)`, `system.redirect(command, stdout_file, stderr_file)`, `system.timeout(command, seconds)`
+- **Async Support**: Async execution with `system.async_exec(command, arg1, arg2, arg3, arg4, arg5)`, `system.async_spawn()`, `system.async_wait(pid)`, `system.async_pipe()`
+- **Streaming**: Real-time output with `system.stream_exec(command, arg1, arg2, arg3, arg4, arg5)`, `system.monitor_process(pid)`
+- **Cross-platform**: Works on Linux, macOS, and Windows with platform-aware command execution
+- **Security**: OS-level permissions, no built-in restrictions
+
+**Function Signatures:**
+```grease
+# Command Execution
+system.exec(command, arg1, arg2, arg3, arg4, arg5) -> ProcessResult
+system.shell(command_string) -> ProcessResult
+system.spawn(command, arg1, arg2, arg3, arg4, arg5) -> ProcessResult
+
+# Process Control
+system.wait(pid) -> ProcessResult
+system.kill(pid, signal) -> Boolean
+system.status(pid) -> String
+
+# Environment
+system.getenv(name) -> String|Null
+system.setenv(name, value) -> Boolean
+system.environ() -> Dictionary
+
+# Advanced Operations
+system.pipe(command1, command2) -> ProcessResult
+system.redirect(command, stdout_file, stderr_file) -> ProcessResult
+system.timeout(command, seconds) -> ProcessResult
+
+# Async Operations
+system.async_exec(command, arg1, arg2, arg3, arg4, arg5) -> ProcessResult
+system.async_spawn(command, arg1, arg2, arg3, arg4, arg5) -> ProcessResult
+system.async_wait(pid) -> ProcessResult
+system.async_pipe(command1, command2) -> ProcessResult
+
+# Streaming
+system.stream_exec(command, arg1, arg2, arg3, arg4, arg5) -> ProcessResult
+system.monitor_process(pid) -> Dictionary
+```
+
+**Return Value Structure:**
+All system functions return a `ProcessResult` dictionary:
+```grease
+{
+    exit_code: Number,    # Process exit code (0 = success)
+    stdout: String,       # Standard output
+    stderr: String,       # Standard error
+    success: Boolean,     # true if exit_code == 0
+    pid: String|Number,   # Process ID (for spawned processes)
+    signal: Number        # Signal number (if terminated by signal)
+}
+```
+
+**Usage Examples for AI Agents:**
+
+**Basic Command Execution:**
+```grease
+use system
+
+# Execute simple command
+result = system.exec("echo", "Hello from Grease")
+if result.success:
+    print("Output: " + result.stdout)
+else:
+    print("Error: " + result.stderr)
+
+# Shell command with pipes
+result = system.shell("ls -la | grep '\.grease'")
+print("Grease files: " + result.stdout)
+```
+
+**Process Management:**
+```grease
+use system
+
+# Spawn background process
+pid = system.spawn("sleep", "5")
+print("Started process: " + pid)
+
+# Wait for completion
+result = system.wait(pid)
+print("Process exited with code: " + result.exit_code)
+
+# Check status without waiting
+status = system.status(pid)
+print("Process status: " + status)  # "running", "not_found", etc.
+```
+
+**Environment Variables:**
+```grease
+use system
+
+# Get environment variable
+home = system.getenv("HOME")
+if home != null:
+    print("Home directory: " + home)
+else:
+    print("HOME not set")
+
+# Set environment variable
+success = system.setenv("GREASE_AGENT", "working")
+if success:
+    # Verify it was set
+    value = system.getenv("GREASE_AGENT")
+    print("Set GREASE_AGENT to: " + value)
+
+# Get all environment variables
+all_env = system.environ()
+print("Total environment variables: " + all_env.length())
+```
+
+**Error Handling Patterns:**
+```grease
+use system
+
+# Always check result.success before using output
+result = system.exec("nonexistent_command", "arg1")
+if result.success:
+    print("Success: " + result.stdout)
+else:
+    print("Command failed with exit code: " + result.exit_code)
+    if result.stderr != "":
+        print("Error details: " + result.stderr)
+
+# Handle process not found
+kill_result = system.kill("99999", 15)
+if not kill_result:
+    print("Could not kill process - may not exist")
+```
+
+**Cross-Platform Considerations:**
+- Use `system.shell()` for shell-specific commands (different shells on different platforms)
+- Command availability varies: `ls` on Unix vs `dir` on Windows
+- Path separators: `/` on Unix, `\` on Windows
+- Environment variables: Same API works across platforms
+- Process signals: Signal numbers may differ between platforms
+
+**Security Guidelines:**
+- Commands execute with same permissions as Grease process
+- No built-in command restrictions - use OS-level security
+- Validate command arguments to prevent injection
+- Consider timeout for long-running commands
+- Clean up spawned processes to prevent resource leaks
 
 ### Language Server Protocol
 - Full LSP implementation in `src/lsp_server.rs`

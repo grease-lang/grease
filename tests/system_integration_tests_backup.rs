@@ -101,22 +101,20 @@ mod tests {
     #[test]
     fn test_system_complex_workflow() {
         let mut grease = create_test_grease();
-
+        
         // Test a complex workflow with multiple operations
-        let workflow_code = r#"use system
-home = system.getenv("HOME")
-system.setenv("WORKFLOW_TEST", "success")
-result = system.shell("echo 'Workflow test completed'")
-if result.success:
-    print("Workflow completed successfully")
-else:
-    print("Workflow failed")
-"#;
-
+        let workflow_code = r#"
+            use system
+            home = system.getenv("HOME")
+            system.setenv("WORKFLOW_TEST", "success")
+            result = system.shell("echo 'Workflow test completed'")
+            if result.success:
+                print("Workflow completed successfully")
+            else:
+                print("Workflow failed")
+        "#;
+        
         let result = grease.run(workflow_code);
-        if result.is_err() {
-            eprintln!("Test failed with error: {:?}", result);
-        }
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), grease::vm::InterpretResult::Ok);
     }
@@ -146,11 +144,12 @@ else:
         let mut grease = create_test_grease();
         
         // Test executing multiple system commands in sequence
-        let multi_code = r#"use system
-result1 = system.shell("echo first")
-result2 = system.shell("echo second")
-result3 = system.shell("echo third")
-"#;
+        let multi_code = r#"
+            use system
+            result1 = system.shell("echo first")
+            result2 = system.shell("echo second")
+            result3 = system.shell("echo third")
+        "#;
         
         let result = grease.run(multi_code);
         assert!(result.is_ok());
@@ -162,14 +161,15 @@ result3 = system.shell("echo third")
         let mut grease = create_test_grease();
         
         // Test with real system commands that should work
-        let real_code = r#"use system
-# Test with a command that should exist on most systems
-ls_result = system.shell("ls")
-if ls_result.success:
-    print("ls command successful")
-else:
-    print("ls command failed")
-"#;
+        let real_code = r#"
+            use system
+            # Test with a command that should exist on most systems
+            ls_result = system.shell("ls")
+            if ls_result.success:
+                print("ls command successful")
+            else:
+                print("ls command failed")
+        "#;
         
         let result = grease.run(real_code);
         assert!(result.is_ok());
@@ -181,18 +181,17 @@ else:
         let mut grease = create_test_grease();
         
         // Test error recovery scenarios
-        let error_code = r#"use system
-result = system.shell("definitely_nonexistent_command")
-if not result.success:
-    print("Expected error occurred")
-else:
-    print("Unexpected success")
-"#;
+        let error_code = r#"
+            use system
+            try:
+                result = system.shell("definitely_nonexistent_command")
+                if not result.success:
+                    print("Expected error occurred")
+            except:
+                print("Unexpected error in error handling")
+        "#;
         
         let result = grease.run(error_code);
-        if result.is_err() {
-            eprintln!("Test failed with error: {:?}", result);
-        }
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), grease::vm::InterpretResult::Ok);
     }
@@ -202,11 +201,12 @@ else:
         let mut grease = create_test_grease();
         
         // Test performance with multiple rapid system calls
-        let perf_code = r#"use system
-result1 = system.shell("echo performance_test_1")
-result2 = system.shell("echo performance_test_2")
-result3 = system.shell("echo performance_test_3")
-"#;
+        let perf_code = r#"
+            use system
+            for i in 0..10:
+                result = system.shell("echo performance_test_" + i)
+                # Just execute, don't check result for performance test
+        "#;
         
         let result = grease.run(perf_code);
         assert!(result.is_ok());
@@ -219,15 +219,14 @@ result3 = system.shell("echo performance_test_3")
         
         // Test that system operations don't cause memory leaks
         // This is more of a smoke test to ensure VM stability
-        let memory_test_code = r#"use system
-# Execute multiple system operations
-result1 = system.shell("echo memory_test_1")
-result2 = system.shell("echo memory_test_2")
-result3 = system.shell("echo memory_test_3")
-# Force garbage collection by creating and dropping values
-temp = result1
-temp = result2
-"#;
+        let memory_test_code = r#"
+            use system
+            # Execute multiple system operations
+            for i in 0..5:
+                result = system.shell("echo memory_test_" + i)
+                # Force garbage collection by creating and dropping values
+                temp = result
+        "#;
         
         let result = grease.run(memory_test_code);
         assert!(result.is_ok());
@@ -239,12 +238,13 @@ temp = result2
         let mut grease = create_test_grease();
         
         // Test concurrent access to system functions (if supported)
-        let concurrent_code = r#"use system
-# This test checks if system can handle rapid successive calls
-result1 = system.shell("echo concurrent_1")
-result2 = system.shell("echo concurrent_2")
-result3 = system.shell("echo concurrent_3")
-"#;
+        let concurrent_code = r#"
+            use system
+            # This test checks if system can handle rapid successive calls
+            result1 = system.shell("echo concurrent_1")
+            result2 = system.shell("echo concurrent_2")
+            result3 = system.shell("echo concurrent_3")
+        "#;
         
         let result = grease.run(concurrent_code);
         assert!(result.is_ok());

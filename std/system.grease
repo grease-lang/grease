@@ -5,13 +5,35 @@
 # This module provides user-friendly wrappers around native system functions
 
 # Basic command execution
-def exec(command):
+def exec(command, arg1, arg2, arg3, arg4, arg5):
     """Execute command synchronously and return result"""
-    return system_exec(command)
+    if arg5 != null:
+        return system_exec(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_exec(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_exec(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_exec(command, arg1, arg2)
+    elif arg1 != null:
+        return system_exec(command, arg1)
+    else:
+        return system_exec(command)
 
-def spawn(command):
+def spawn(command, arg1, arg2, arg3, arg4, arg5):
     """Spawn command asynchronously and return process ID"""
-    return system_spawn(command)
+    if arg5 != null:
+        return system_spawn(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_spawn(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_spawn(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_spawn(command, arg1, arg2)
+    elif arg1 != null:
+        return system_spawn(command, arg1)
+    else:
+        return system_spawn(command)
 
 def shell(command):
     """Execute shell command string"""
@@ -53,9 +75,20 @@ def environ():
     return system_environ()
 
 # Advanced utilities
-def background(command):
+def background(command, arg1, arg2, arg3, arg4, arg5):
     """Run command in background"""
-    return system_background(command)
+    if arg5 != null:
+        return system_background(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_background(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_background(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_background(command, arg1, arg2)
+    elif arg1 != null:
+        return system_background(command, arg1)
+    else:
+        return system_background(command)
 
 def redirect(command, stdout_file, stderr_file):
     """Redirect command output to files"""
@@ -64,3 +97,62 @@ def redirect(command, stdout_file, stderr_file):
 def timeout(command, seconds):
     """Execute command with timeout"""
     return system_timeout(command, seconds)
+
+# Async functions
+def async_exec(command, arg1, arg2, arg3, arg4, arg5):
+    """Execute command asynchronously"""
+    if arg5 != null:
+        return system_async_exec(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_async_exec(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_async_exec(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_async_exec(command, arg1, arg2)
+    elif arg1 != null:
+        return system_async_exec(command, arg1)
+    else:
+        return system_async_exec(command)
+
+def async_spawn(command, arg1, arg2, arg3, arg4, arg5):
+    """Spawn command asynchronously"""
+    if arg5 != null:
+        return system_async_spawn(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_async_spawn(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_async_spawn(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_async_spawn(command, arg1, arg2)
+    elif arg1 != null:
+        return system_async_spawn(command, arg1)
+    else:
+        return system_async_spawn(command)
+
+def async_wait(pid):
+    """Wait for process asynchronously"""
+    return system_async_wait(pid)
+
+def async_pipe(command1, command2):
+    """Pipe commands asynchronously"""
+    return system_async_pipe(command1, command2)
+
+# Streaming and monitoring
+def stream_exec(command, arg1, arg2, arg3, arg4, arg5):
+    """Execute command with real-time output streaming"""
+    if arg5 != null:
+        return system_stream_exec(command, arg1, arg2, arg3, arg4, arg5)
+    elif arg4 != null:
+        return system_stream_exec(command, arg1, arg2, arg3, arg4)
+    elif arg3 != null:
+        return system_stream_exec(command, arg1, arg2, arg3)
+    elif arg2 != null:
+        return system_stream_exec(command, arg1, arg2)
+    elif arg1 != null:
+        return system_stream_exec(command, arg1)
+    else:
+        return system_stream_exec(command)
+
+def monitor_process(pid):
+    """Monitor process with real-time output"""
+    return system_monitor_process(pid)
